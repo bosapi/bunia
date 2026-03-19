@@ -26,6 +26,8 @@ export interface ApiRoute {
 export interface RouteManifest {
     pages: PageRoute[];
     apis: ApiRoute[];
+    /** Path to root +error.svelte if it exists, relative to src/routes/ */
+    errorPage: string | null;
 }
 
 /** Result of matching a URL against a route */

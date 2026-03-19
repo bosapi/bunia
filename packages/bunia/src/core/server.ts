@@ -5,8 +5,9 @@ import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
 import { findMatch } from "./matcher.ts";
-import { serverRoutes, apiRoutes } from "bunia:routes";
+import { serverRoutes, apiRoutes, errorPage } from "bunia:routes";
 import type { Handle, RequestEvent } from "./hooks.ts";
+import { HttpError, Redirect } from "./errors.ts";
 import App from "./client/App.svelte";
 
 // ─── Dist Manifest ───────────────────────────────────────
@@ -85,6 +86,7 @@ async function loadRouteData(url: URL, locals: Record<string, any>, req: Request
                 layoutData[ls.depth] = (await mod.load({ params, url, locals, parent, fetch })) ?? {};
             }
         } catch (err) {
+            if (err instanceof HttpError || err instanceof Redirect) throw err;
             console.error("Layout server load error:", err);
         }
     }
@@ -105,6 +107,7 @@ async function loadRouteData(url: URL, locals: Record<string, any>, req: Request
                 pageData = (await mod.load({ params, url, locals, parent, fetch })) ?? {};
             }
         } catch (err) {
+            if (err instanceof HttpError || err instanceof Redirect) throw err;
             console.error("Page server load error:", err);
         }
     }
@@ -186,15 +189,39 @@ function buildHtml(
 
 // ─── Gzip Compression ────────────────────────────────────
 
-function compress(body: string, contentType: string, req: Request): Response {
+function compress(body: string, contentType: string, req: Request, status = 200): Response {
     const headers: Record<string, string> = { "Content-Type": contentType, "Vary": "Accept-Encoding" };
     const accept = req.headers.get("accept-encoding") ?? "";
     // Skip compression in dev — the dev proxy's fetch() auto-decompresses gzip
     // responses but keeps the Content-Encoding header, causing ERR_CONTENT_DECODING_FAILED.
     if (!isDev && body.length > 1024 && accept.includes("gzip")) {
-        return new Response(Bun.gzipSync(body), { headers: { ...headers, "Content-Encoding": "gzip" } });
+        return new Response(Bun.gzipSync(body), { status, headers: { ...headers, "Content-Encoding": "gzip" } });
     }
-    return new Response(body, { headers });
+    return new Response(body, { status, headers });
+}
+
+// ─── Error Page Renderer ──────────────────────────────────
+
+async function renderErrorPage(status: number, message: string, url: URL, req: Request): Promise<Response> {
+    if (errorPage) {
+        try {
+            const mod = await errorPage();
+            const { body, head } = render(App, {
+                props: {
+                    ssrMode: true,
+                    ssrPageComponent: mod.default,
+                    ssrLayoutComponents: [],
+                    ssrPageData: { status, message },
+                    ssrLayoutData: [],
+                },
+            });
+            const html = buildHtml(body, head, { status, message }, [], false);
+            return compress(html, "text/html; charset=utf-8", req, status);
+        } catch (err) {
+            console.error("Error page render failed:", err);
+        }
+    }
+    return new Response(message, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 
 // ─── Static File Detection ────────────────────────────────
@@ -226,6 +253,12 @@ async function resolve(event: RequestEvent): Promise<Response> {
             if (!data) return compress(JSON.stringify({ pageData: {}, layoutData: [] }), "application/json", request);
             return compress(JSON.stringify(data), "application/json", request);
         } catch (err) {
+            if (err instanceof Redirect) {
+                return compress(JSON.stringify({ redirect: err.location, status: err.status }), "application/json", request);
+            }
+            if (err instanceof HttpError) {
+                return compress(JSON.stringify({ error: err.message, status: err.status }), "application/json", request, err.status);
+            }
             console.error("Data endpoint error:", err);
             return Response.json({ error: "Internal Server Error" }, { status: 500 });
         }
@@ -280,23 +313,39 @@ async function resolve(event: RequestEvent): Promise<Response> {
     try {
         const ssr = await renderSSR(url, locals, request);
         if (!ssr) {
-            return new Response("Not Found", { status: 404 });
+            return renderErrorPage(404, "Not Found", url, request);
         }
         const html = buildHtml(ssr.body, ssr.head, ssr.pageData, ssr.layoutData, ssr.csr);
         return compress(html, "text/html; charset=utf-8", request);
     } catch (err) {
+        if (err instanceof Redirect) {
+            return new Response(null, { status: err.status, headers: { Location: err.location } });
+        }
+        if (err instanceof HttpError) {
+            return renderErrorPage(err.status, err.message, url, request);
+        }
         console.error("SSR error:", err);
-        return new Response("Internal Server Error", { status: 500 });
+        return renderErrorPage(500, "Internal Server Error", url, request);
     }
 }
 
 // ─── Request Entry ────────────────────────────────────────
 
+const SECURITY_HEADERS: Record<string, string> = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+};
+
 async function handleRequest(request: Request, url: URL): Promise<Response> {
     const event: RequestEvent = { request, url, locals: {}, params: {} };
-    return userHandle
-        ? userHandle({ event, resolve })
-        : resolve(event);
+    const response = userHandle
+        ? await userHandle({ event, resolve })
+        : await resolve(event);
+
+    const headers = new Headers(response.headers);
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 // ─── Elysia App ───────────────────────────────────────────

@@ -87,7 +87,10 @@ export function scanRoutes(): RouteManifest {
     }
 
     walk("", [], [], []);
-    return { pages, apis };
+
+    const errorPage = existsSync(join(ROUTES_DIR, "+error.svelte")) ? "+error.svelte" : null;
+
+    return { pages, apis, errorPage };
 }
 
 function toUrlPath(segments: string[]): string {

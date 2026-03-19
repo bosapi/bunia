@@ -5,4 +5,6 @@
 
 export { cn } from "./utils.ts";
 export { sequence } from "../core/hooks.ts";
+export { error, redirect } from "../core/errors.ts";
+export type { HttpError, Redirect } from "../core/errors.ts";
 export type { RequestEvent, LoadEvent, Handle, ResolveFunction } from "../core/hooks.ts";

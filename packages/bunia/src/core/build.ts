@@ -193,6 +193,12 @@ function generateRoutesFile(manifest: RouteManifest): void {
     }
     lines.push("];\n");
 
+    // errorPage
+    const ep = manifest.errorPage;
+    lines.push(`export const errorPage: (() => Promise<any>) | null = ${
+        ep ? `() => import(${JSON.stringify(toImportPath(ep))})` : "null"
+    };\n`);
+
     mkdirSync(".bunia", { recursive: true });
     writeFileSync(".bunia/routes.ts", lines.join("\n"));
     console.log("✅ Routes generated: .bunia/routes.ts");
