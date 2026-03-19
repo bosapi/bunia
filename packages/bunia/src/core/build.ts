@@ -16,6 +16,10 @@ const isProduction = process.env.NODE_ENV === "production";
 
 console.log("🏗️  Starting Bunia build...\n");
 
+// 0. Clean all generated output first
+try { rmSync("./dist",   { recursive: true, force: true }); } catch { }
+try { rmSync("./.bunia", { recursive: true, force: true }); } catch { }
+
 // 1. Scan routes
 const manifest = scanRoutes();
 console.log(`📂 Found ${manifest.pages.length} page route(s):`);
@@ -47,9 +51,6 @@ if (tailwindResult.exitCode !== 0) {
     process.exit(1);
 }
 console.log("✅ Tailwind CSS built: public/bunia-tw.css");
-
-// 4. Clean dist
-try { rmSync("./dist", { recursive: true, force: true }); } catch { }
 
 // Shared Bun build plugin for both client and server
 const buniaPlugin = makeBuniaPlugin();
@@ -84,17 +85,7 @@ for (const output of clientResult.outputs) {
     if (output.path.endsWith(".css")) cssFiles.push(rel);
 }
 
-// 7. Write dist/manifest.json (maps entry → cache-busted filenames)
-mkdirSync("./dist", { recursive: true });
-const distManifest = {
-    js: jsFiles,
-    css: cssFiles,
-    entry: jsFiles.find(f => f.startsWith("hydrate")) ?? jsFiles[0] ?? "hydrate.js",
-};
-writeFileSync("./dist/manifest.json", JSON.stringify(distManifest, null, 2));
-console.log(`✅ Client bundle: ${jsFiles.join(", ")}`);
-
-// 8. Build server bundle
+// 7. Build server bundle (before writing manifest so we can record the entry)
 console.log("\n📦 Building server bundle...");
 const serverResult = await Bun.build({
     entrypoints: [join(CORE_DIR, "server.ts")],
@@ -112,7 +103,24 @@ if (!serverResult.success) {
     for (const msg of serverResult.logs) console.error(msg);
     process.exit(1);
 }
-console.log("✅ Server bundle built");
+
+// Collect the server entry filename (e.g. "server.js")
+const serverEntry = serverResult.outputs
+    .filter(o => !o.path.includes("-") || o.path.endsWith("server.js"))
+    .find(o => o.path.endsWith(".js") && !o.path.match(/-[a-z0-9]{8}\.js$/))
+    ?.path.split("/").pop() ?? "server.js";
+
+// 8. Write dist/manifest.json
+mkdirSync("./dist", { recursive: true });
+const distManifest = {
+    js: jsFiles,
+    css: cssFiles,
+    entry: jsFiles.find(f => f.startsWith("hydrate")) ?? jsFiles[0] ?? "hydrate.js",
+    serverEntry,
+};
+writeFileSync("./dist/manifest.json", JSON.stringify(distManifest, null, 2));
+console.log(`✅ Client bundle: ${jsFiles.join(", ")}`);
+console.log(`✅ Server entry:  dist/server/${serverEntry}`);
 
 console.log("\n🎉 Build complete!");
 
@@ -213,6 +221,18 @@ function makeBuniaPlugin() {
                 const base = join(process.cwd(), "src", "lib", rel);
                 return { path: await resolveWithExts(base) };
             });
+
+            // "tailwindcss" inside app.css is a Tailwind CLI directive —
+            // it's already compiled to public/bunia-tw.css by the CLI step.
+            // Return an empty CSS module so Bun's CSS bundler doesn't choke on it.
+            build.onResolve({ filter: /^tailwindcss$/ }, () => ({
+                path: "tailwindcss",
+                namespace: "bunia-empty-css",
+            }));
+            build.onLoad({ filter: /.*/, namespace: "bunia-empty-css" }, () => ({
+                contents: "",
+                loader: "css",
+            }));
         },
     };
 }

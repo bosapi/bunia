@@ -31,15 +31,26 @@
     const match = findMatch(clientRoutes, path);
     if (!match) return;
 
-    routeParams = match.params;
+    let cancelled = false;
 
-    match.route.page().then((mod: any) => {
-      PageComponent = mod.default;
+    // Load components + data in parallel, then update state atomically
+    // to avoid a flash of stale/empty data before the fetch completes.
+    Promise.all([
+      match.route.page(),
+      Promise.all(match.route.layouts.map((l: any) => l())),
+      fetch(`/__bunia/data?path=${encodeURIComponent(path)}`)
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+    ]).then(([pageMod, layoutMods, result]: [any, any[], any]) => {
+      if (cancelled) return;
+      PageComponent = pageMod.default;
+      layoutComponents = layoutMods.map((m: any) => m.default);
+      pageData = result?.pageData ?? {};
+      layoutData = result?.layoutData ?? [];
+      routeParams = result?.pageData?.params ?? match.params;
     });
 
-    Promise.all(match.route.layouts.map((l: any) => l())).then((mods: any[]) => {
-      layoutComponents = mods.map((m) => m.default);
-    });
+    return () => { cancelled = true; };
   });
 </script>
 

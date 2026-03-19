@@ -2,7 +2,7 @@ import { spawn, type Subprocess } from "bun";
 import { watch } from "fs";
 import { join } from "path";
 
-console.log("🐰 Starting Bunia dev server...\n");
+console.log("🐰 Bunia dev server starting...\n");
 
 // ─── State ────────────────────────────────────────────────
 
@@ -50,7 +50,14 @@ async function startAppServer() {
         await appProcess.exited;
     }
 
-    appProcess = spawn(["bun", "run", "dist/server/index.js"], {
+    // Read the server entry filename from the manifest written by build.ts
+    let serverEntry = "server.js";
+    try {
+        const manifest = await Bun.file("./dist/manifest.json").json();
+        serverEntry = manifest.serverEntry ?? "server.js";
+    } catch { }
+
+    appProcess = spawn(["bun", "run", `dist/server/${serverEntry}`], {
         stdout: "inherit",
         stderr: "inherit",
         cwd: process.cwd(),
@@ -152,12 +159,11 @@ Bun.serve({
     },
 });
 
-console.log(`🌐 Dev server at http://localhost:${DEV_PORT}`);
-console.log(`   App server on internal port ${APP_PORT}\n`);
-
 // ─── Initial Build ────────────────────────────────────────
 
 await buildAndRestart();
+
+console.log(`\n🌐 Open http://localhost:${DEV_PORT}\n`);
 
 // ─── File Watcher ─────────────────────────────────────────
 // Watch src/ recursively. Skip generated files to avoid loops.

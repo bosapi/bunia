@@ -18,7 +18,7 @@
     </main>
 
     <footer class="border-t py-4 text-center text-sm text-muted-foreground">
-        Powered by Bun · ElysiaJS · Svelte 5
+        Powered by Bunia
         {#if (data as any)?.requestTime}
             <span class="ml-2 opacity-40 font-mono text-xs">
                 req at {new Date((data as any).requestTime).toISOString()}

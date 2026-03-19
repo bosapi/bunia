@@ -60,18 +60,15 @@ function makeFetch(req: Request, url: URL) {
     };
 }
 
-// ─── SSR Renderer ────────────────────────────────────────
+// ─── Route Data Loader ───────────────────────────────────
+// Runs layout + page server loaders for a given URL.
+// Used by both SSR and the /__bunia/data JSON endpoint.
 
-async function renderSSR(url: URL, locals: Record<string, any>, req: Request) {
+async function loadRouteData(url: URL, locals: Record<string, any>, req: Request) {
     const match = findMatch(serverRoutes, url.pathname);
     if (!match) return null;
 
     const { route, params } = match;
-
-    // Kick off component imports in parallel with data loading
-    const pageModPromise = route.pageModule();
-    const layoutModsPromise = Promise.all(route.layoutModules.map(l => l()));
-
     const fetch = makeFetch(req, url);
     const layoutData: Record<string, any>[] = [];
 
@@ -110,8 +107,23 @@ async function renderSSR(url: URL, locals: Record<string, any>, req: Request) {
         }
     }
 
-    // params are merged into pageData so pages can read data.params
-    const fullPageData = { ...pageData, params };
+    return { pageData: { ...pageData, params }, layoutData };
+}
+
+// ─── SSR Renderer ────────────────────────────────────────
+
+async function renderSSR(url: URL, locals: Record<string, any>, req: Request) {
+    const match = findMatch(serverRoutes, url.pathname);
+    if (!match) return null;
+
+    const { route } = match;
+
+    // Kick off component imports in parallel with data loading
+    const pageModPromise = route.pageModule();
+    const layoutModsPromise = Promise.all(route.layoutModules.map(l => l()));
+
+    const data = await loadRouteData(url, locals, req);
+    if (!data) return null;
 
     const [pageMod, layoutMods] = await Promise.all([pageModPromise, layoutModsPromise]);
 
@@ -120,12 +132,12 @@ async function renderSSR(url: URL, locals: Record<string, any>, req: Request) {
             ssrMode: true,
             ssrPageComponent: pageMod.default,
             ssrLayoutComponents: layoutMods.map((m: any) => m.default),
-            ssrPageData: fullPageData,
-            ssrLayoutData: layoutData,
+            ssrPageData: data.pageData,
+            ssrLayoutData: data.layoutData,
         },
     });
 
-    return { body, head, pageData: fullPageData, layoutData };
+    return { body, head, pageData: data.pageData, layoutData: data.layoutData };
 }
 
 // ─── HTML Builder ─────────────────────────────────────────
@@ -184,6 +196,20 @@ async function resolve(event: RequestEvent): Promise<Response> {
     const { request, url, locals } = event;
     const path = url.pathname;
     const method = request.method.toUpperCase();
+
+    // Data endpoint — returns server loader data as JSON for client-side navigation
+    if (path === "/__bunia/data") {
+        const routePath = url.searchParams.get("path") ?? "/";
+        const routeUrl = new URL(routePath, url.origin);
+        try {
+            const data = await loadRouteData(routeUrl, locals, request);
+            if (!data) return Response.json({ pageData: {}, layoutData: [] });
+            return Response.json(data);
+        } catch (err) {
+            console.error("Data endpoint error:", err);
+            return Response.json({ error: "Internal Server Error" }, { status: 500 });
+        }
+    }
 
     // Static files
     if (isStaticPath(path)) {
@@ -266,7 +292,8 @@ const app = new Elysia()
     .options("*", () => new Response("Not Found", { status: 404 }));
 
 app.listen(PORT, () => {
-    console.log(`🐰 Bunia server running at http://localhost:${PORT}`);
+    // In dev mode the proxy owns port 3000 — don't print the internal port
+    if (!isDev) console.log(`🐰 Bunia server running at http://localhost:${PORT}`);
 });
 
 export { app };
