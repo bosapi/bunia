@@ -2,12 +2,20 @@
 // Svelte 5 rune-based reactive router.
 // Singleton used by App.svelte and hydrate.ts.
 
+import { findMatch } from "../matcher.ts";
+import { clientRoutes } from "bunia:routes";
+
 export const router = new class Router {
     currentRoute = $state(typeof window !== "undefined" ? window.location.pathname : "/");
     params = $state<Record<string, string>>({});
 
     navigate(path: string) {
         if (this.currentRoute === path) return;
+        // Unknown route — let the server handle it (renders +error.svelte with 404)
+        if (!findMatch(clientRoutes, path)) {
+            window.location.href = path;
+            return;
+        }
         this.currentRoute = path;
         if (typeof history !== "undefined") {
             history.pushState({}, "", path);
