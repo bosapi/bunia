@@ -8,8 +8,8 @@ import { apiRoutes } from "bunia:routes";
 import type { Handle, RequestEvent } from "./hooks.ts";
 import { HttpError, Redirect } from "./errors.ts";
 import { CookieJar } from "./cookies.ts";
-import { isDev, buildHtml, compress, isStaticPath } from "./html.ts";
-import { loadRouteData, renderSSR, renderErrorPage } from "./renderer.ts";
+import { isDev, compress, isStaticPath } from "./html.ts";
+import { loadRouteData, renderSSRStream, renderErrorPage } from "./renderer.ts";
 
 // ─── User Hooks ──────────────────────────────────────────
 // Load src/hooks.server.ts if present. Uses process.cwd() so
@@ -123,24 +123,10 @@ async function resolve(event: RequestEvent): Promise<Response> {
         }
     }
 
-    // SSR pages (+page.svelte)
-    try {
-        const ssr = await renderSSR(url, locals, request, cookies);
-        if (!ssr) {
-            return renderErrorPage(404, "Not Found", url, request);
-        }
-        const html = buildHtml(ssr.body, ssr.head, ssr.pageData, ssr.layoutData, ssr.csr);
-        return compress(html, "text/html; charset=utf-8", request);
-    } catch (err) {
-        if (err instanceof Redirect) {
-            return new Response(null, { status: err.status, headers: { Location: err.location } });
-        }
-        if (err instanceof HttpError) {
-            return renderErrorPage(err.status, err.message, url, request);
-        }
-        console.error("SSR error:", err);
-        return renderErrorPage(500, "Internal Server Error", url, request);
-    }
+    // SSR pages (+page.svelte) — streaming by default
+    const streamResponse = renderSSRStream(url, locals, request, cookies);
+    if (!streamResponse) return renderErrorPage(404, "Not Found", url, request);
+    return streamResponse;
 }
 
 // ─── Request Entry ────────────────────────────────────────

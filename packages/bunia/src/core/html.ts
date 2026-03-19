@@ -53,6 +53,55 @@ export function buildHtml(
 </html>`;
 }
 
+// ─── Streaming HTML Helpers ──────────────────────────────
+
+let _shell: string | null = null;
+
+export function buildHtmlShell(): string {
+    if (_shell) return _shell;
+    const cacheBust = isDev ? `?v=${Date.now()}` : "";
+    const cssLinks = (distManifest.css ?? [])
+        .map((f: string) => `<link rel="stylesheet" href="/dist/client/${f}">`)
+        .join("\n  ");
+    _shell = `<!DOCTYPE html>\n<html lang="en">\n<head>\n` +
+        `  <meta charset="UTF-8">\n` +
+        `  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n` +
+        `  <link rel="icon" href="data:,">\n` +
+        `  ${cssLinks}\n` +
+        `  <link rel="stylesheet" href="/bunia-tw.css${cacheBust}">\n` +
+        `  <link rel="modulepreload" href="/dist/client/${distManifest.entry}${cacheBust}">\n` +
+        `</head>\n<body>\n` +
+        `<div id="__bs__"><style>` +
+        `:root{--bunia-loading-color:#f73b27}` +
+        `#__bs__{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}` +
+        `#__bs__ i{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:var(--bunia-loading-color);` +
+        `border-radius:50%;animation:__bs__ .8s linear infinite}` +
+        `@keyframes __bs__{to{transform:rotate(360deg)}}</style><i></i></div>`;
+    return _shell;
+}
+
+export function buildHtmlTail(
+    body: string,
+    head: string,
+    pageData: any,
+    layoutData: any[],
+    csr: boolean,
+): string {
+    const cacheBust = isDev ? `?v=${Date.now()}` : "";
+    let out = `<script>document.getElementById('__bs__').remove()</script>`;
+    out += `\n<div id="app">${body}</div>`;
+    if (head) out += `\n<script>document.head.innerHTML+=${JSON.stringify(head)}</script>`;
+    if (csr) {
+        out += `\n<script>window.__BUNIA_PAGE_DATA__=${JSON.stringify(pageData)};` +
+               `window.__BUNIA_LAYOUT_DATA__=${JSON.stringify(layoutData)};</script>`;
+        out += `\n<script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`;
+    } else if (isDev) {
+        out += `\n<script>!function r(){var e=new EventSource("/__bunia/sse");e.addEventListener("reload",()=>location.reload());e.onopen=()=>r._ok||(r._ok=1);e.onerror=()=>{e.close();setTimeout(r,2000)}}()</script>`;
+    }
+    out += `\n</body>\n</html>`;
+    return out;
+}
+
 // ─── Gzip Compression ────────────────────────────────────
 
 export function compress(body: string, contentType: string, req: Request, status = 200): Response {

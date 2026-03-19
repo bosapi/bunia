@@ -5,7 +5,7 @@ import { serverRoutes, errorPage } from "bunia:routes";
 import type { Cookies } from "./hooks.ts";
 import { HttpError, Redirect } from "./errors.ts";
 import App from "./client/App.svelte";
-import { buildHtml, compress } from "./html.ts";
+import { buildHtml, buildHtmlShell, buildHtmlTail, compress } from "./html.ts";
 
 // ─── Session-Aware Fetch ─────────────────────────────────
 // Passed to load() functions so they can call internal APIs
@@ -115,6 +115,82 @@ export async function renderSSR(url: URL, locals: Record<string, any>, req: Requ
     });
 
     return { body, head, pageData: data.pageData, layoutData: data.layoutData, csr: data.csr };
+}
+
+// ─── Streaming SSR Renderer ──────────────────────────────
+
+export function renderSSRStream(
+    url: URL,
+    locals: Record<string, any>,
+    req: Request,
+    cookies: Cookies,
+): Response | null {
+    const match = findMatch(serverRoutes, url.pathname);
+    if (!match) return null;
+
+    const { route } = match;
+    const enc = new TextEncoder();
+
+    // Kick off imports immediately (parallel with data loading)
+    const pageModPromise = route.pageModule();
+    const layoutModsPromise = Promise.all(route.layoutModules.map((l: () => Promise<any>) => l()));
+
+    const stream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+            // Chunk 1: shell (cached at startup)
+            controller.enqueue(enc.encode(buildHtmlShell()));
+
+            try {
+                const [data, pageMod, layoutMods] = await Promise.all([
+                    loadRouteData(url, locals, req, cookies),
+                    pageModPromise,
+                    layoutModsPromise,
+                ]);
+
+                if (!data) {
+                    controller.enqueue(enc.encode(`</body></html>`));
+                    controller.close();
+                    return;
+                }
+
+                const { body, head } = render(App, {
+                    props: {
+                        ssrMode: true,
+                        ssrPageComponent: pageMod.default,
+                        ssrLayoutComponents: layoutMods.map((m: any) => m.default),
+                        ssrPageData: data.pageData,
+                        ssrLayoutData: data.layoutData,
+                    },
+                });
+
+                // Chunk 2: content
+                controller.enqueue(enc.encode(buildHtmlTail(body, head, data.pageData, data.layoutData, data.csr)));
+                controller.close();
+            } catch (err) {
+                if (err instanceof Redirect) {
+                    controller.enqueue(enc.encode(
+                        `<script>location.replace(${JSON.stringify(err.location)})</script></body></html>`
+                    ));
+                    controller.close();
+                    return;
+                }
+                if (err instanceof HttpError) {
+                    controller.enqueue(enc.encode(
+                        `<script>location.replace("/__bunia/error?status=${err.status}&message=${encodeURIComponent(err.message)}")</script></body></html>`
+                    ));
+                    controller.close();
+                    return;
+                }
+                console.error("SSR stream error:", err);
+                controller.enqueue(enc.encode(`<p>Internal Server Error</p></body></html>`));
+                controller.close();
+            }
+        },
+    });
+
+    return new Response(stream, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
 }
 
 // ─── Error Page Renderer ──────────────────────────────────

@@ -23,6 +23,11 @@
   let layoutData = $state<Record<string, any>[]>(ssrLayoutData ?? []);
   // Kept separate to avoid a read→write cycle inside the $effect below
   let routeParams = $state<Record<string, string>>(ssrPageData?.params ?? {});
+  let navigating = $state(false);
+  let navDone = $state(false);
+  // Skip bar on the very first effect run (initial hydration — data already present)
+  let firstNav = true;
+  let navDoneTimer: ReturnType<typeof setTimeout> | null = null;
 
   $effect(() => {
     if (ssrMode) return;
@@ -32,6 +37,14 @@
     if (!match) return;
 
     let cancelled = false;
+
+    const isFirst = firstNav;
+    firstNav = false;
+    if (!isFirst) {
+      if (navDoneTimer) { clearTimeout(navDoneTimer); navDoneTimer = null; }
+      navDone = false;
+      navigating = true;
+    }
 
     // Load components + data in parallel, then update state atomically
     // to avoid a flash of stale/empty data before the fetch completes.
@@ -45,6 +58,9 @@
       dataFetch,
     ]).then(([pageMod, layoutMods, result]: [any, any[], any]) => {
       if (cancelled) return;
+      navigating = false;
+      navDone = true;
+      navDoneTimer = setTimeout(() => { navDone = false; }, 400);
       if (result?.redirect) {
         router.navigate(result.redirect);
         return;
@@ -68,6 +84,12 @@
   Nested layout rendering:
   layouts[0] wraps layouts[1] wraps ... wraps PageComponent
 -->
+
+{#if navigating}
+  <div class="bunia-bar loading"></div>
+{:else if navDone}
+  <div class="bunia-bar done"></div>
+{/if}
 
 {#if layoutComponents.length > 0}
   {@render renderLayout(0)}
@@ -95,3 +117,31 @@
     </Layout>
   {/if}
 {/snippet}
+
+<style>
+  .bunia-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background: var(--bunia-loading-color, #f73b27);
+    z-index: 9999;
+    pointer-events: none;
+    transform-origin: left center;
+  }
+  .bunia-bar.loading {
+    animation: bunia-load 8s cubic-bezier(0.02, 0.5, 0.5, 1) forwards;
+  }
+  .bunia-bar.done {
+    animation: bunia-done 0.35s ease forwards;
+  }
+  @keyframes bunia-load {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(0.85); }
+  }
+  @keyframes bunia-done {
+    from { transform: scaleX(1); opacity: 1; }
+    to   { transform: scaleX(1); opacity: 0; }
+  }
+</style>
