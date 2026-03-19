@@ -347,6 +347,19 @@ async function resolve(event: RequestEvent): Promise<Response> {
         return new Response("Not Found", { status: 404 });
     }
 
+    // Prerendered pages — serve static HTML built at build time
+    const prerenderFile = Bun.file(
+        path === "/" ? "./dist/prerendered/index.html" : `./dist/prerendered${path}/index.html`
+    );
+    if (await prerenderFile.exists()) {
+        return new Response(prerenderFile, {
+            headers: {
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "public, max-age=3600",
+            },
+        });
+    }
+
     // API routes (+server.ts)
     const apiMatch = findMatch(apiRoutes, path);
     if (apiMatch) {
@@ -414,7 +427,7 @@ async function handleRequest(request: Request, url: URL): Promise<Response> {
 
 // ─── Elysia App ───────────────────────────────────────────
 
-const PORT = isDev ? 3001 : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (isDev ? 3001 : 3000);
 
 const app = new Elysia()
     .use(staticPlugin({ assets: "public", prefix: "/" }))
