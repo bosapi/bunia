@@ -95,7 +95,8 @@ async function resolve(event: RequestEvent): Promise<Response> {
             if (err instanceof HttpError) {
                 return compress(JSON.stringify({ error: err.message, status: err.status }), "application/json", request, err.status);
             }
-            console.error("Data endpoint error:", err);
+            if (isDev) console.error("Data endpoint error:", err);
+            else console.error("Data endpoint error:", (err as Error).message ?? err);
             return Response.json({ error: "Internal Server Error" }, { status: 500 });
         }
     }
@@ -153,7 +154,8 @@ async function resolve(event: RequestEvent): Promise<Response> {
             event.params = apiMatch.params;
             return await handler({ request, params: apiMatch.params, url, locals, cookies });
         } catch (err) {
-            console.error("API route error:", err);
+            if (isDev) console.error("API route error:", err);
+            else console.error("API route error:", (err as Error).message ?? err);
             return Response.json({ error: "Internal Server Error" }, { status: 500 });
         }
     }
@@ -173,23 +175,29 @@ const SECURITY_HEADERS: Record<string, string> = {
 };
 
 async function handleRequest(request: Request, url: URL): Promise<Response> {
-    const csrfError = checkCsrf(request, url, CSRF_CONFIG);
-    if (csrfError) {
-        console.warn(`[CSRF] Blocked request: ${csrfError}`);
-        return Response.json({ error: "Forbidden", message: csrfError }, { status: 403 });
+    try {
+        const csrfError = checkCsrf(request, url, CSRF_CONFIG);
+        if (csrfError) {
+            console.warn(`[CSRF] Blocked request: ${csrfError}`);
+            return Response.json({ error: "Forbidden", message: csrfError }, { status: 403 });
+        }
+
+        const cookieJar = new CookieJar(request.headers.get("cookie") ?? "");
+        const event: RequestEvent = { request, url, locals: {}, params: {}, cookies: cookieJar };
+        const response = userHandle
+            ? await userHandle({ event, resolve })
+            : await resolve(event);
+
+        const headers = new Headers(response.headers);
+        for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
+        // Apply any Set-Cookie headers accumulated during the request
+        for (const cookie of cookieJar.outgoing) headers.append("Set-Cookie", cookie);
+        return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    } catch (err) {
+        if (isDev) console.error("Unhandled request error:", err);
+        else console.error("Unhandled request error:", (err as Error).message ?? err);
+        return Response.json({ error: "Internal Server Error" }, { status: 500 });
     }
-
-    const cookieJar = new CookieJar(request.headers.get("cookie") ?? "");
-    const event: RequestEvent = { request, url, locals: {}, params: {}, cookies: cookieJar };
-    const response = userHandle
-        ? await userHandle({ event, resolve })
-        : await resolve(event);
-
-    const headers = new Headers(response.headers);
-    for (const [k, v] of Object.entries(SECURITY_HEADERS)) headers.set(k, v);
-    // Apply any Set-Cookie headers accumulated during the request
-    for (const cookie of cookieJar.outgoing) headers.append("Set-Cookie", cookie);
-    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 // ─── Elysia App ───────────────────────────────────────────
@@ -197,6 +205,11 @@ async function handleRequest(request: Request, url: URL): Promise<Response> {
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (isDev ? 3001 : 3000);
 
 const app = new Elysia()
+    .onError(({ error }) => {
+        if (isDev) console.error("Uncaught server error:", error);
+        else console.error("Uncaught server error:", (error as Error)?.message ?? error);
+        return Response.json({ error: "Internal Server Error" }, { status: 500 });
+    })
     .use(staticPlugin({ assets: "public", prefix: "/" }))
     // dist/client is served by our resolve() handler with proper cache headers
     // API routes must intercept all HTTP methods before the GET catch-all

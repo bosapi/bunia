@@ -5,7 +5,7 @@ import { serverRoutes, errorPage } from "bunia:routes";
 import type { Cookies } from "./hooks.ts";
 import { HttpError, Redirect } from "./errors.ts";
 import App from "./client/App.svelte";
-import { buildHtml, buildHtmlShell, buildHtmlTail, compress, safeJsonStringify } from "./html.ts";
+import { buildHtml, buildHtmlShell, buildHtmlTail, compress, safeJsonStringify, isDev } from "./html.ts";
 
 // ─── Session-Aware Fetch ─────────────────────────────────
 // Passed to load() functions so they can call internal APIs
@@ -59,7 +59,8 @@ export async function loadRouteData(
             }
         } catch (err) {
             if (err instanceof HttpError || err instanceof Redirect) throw err;
-            console.error("Layout server load error:", err);
+            if (isDev) console.error("Layout server load error:", err);
+            else console.error("Layout server load error:", (err as Error).message ?? err);
         }
     }
 
@@ -80,7 +81,8 @@ export async function loadRouteData(
             }
         } catch (err) {
             if (err instanceof HttpError || err instanceof Redirect) throw err;
-            console.error("Page server load error:", err);
+            if (isDev) console.error("Page server load error:", err);
+            else console.error("Page server load error:", (err as Error).message ?? err);
         }
     }
 
@@ -181,7 +183,8 @@ export function renderSSRStream(
                     controller.close();
                     return;
                 }
-                console.error("SSR stream error:", err);
+                if (isDev) console.error("SSR stream error:", err);
+                else console.error("SSR stream error:", (err as Error).message ?? err);
                 controller.enqueue(enc.encode(`<p>Internal Server Error</p></body></html>`));
                 controller.close();
             }
@@ -211,7 +214,8 @@ export async function renderErrorPage(status: number, message: string, url: URL,
             const html = buildHtml(body, head, { status, message }, [], false);
             return compress(html, "text/html; charset=utf-8", req, status);
         } catch (err) {
-            console.error("Error page render failed:", err);
+            if (isDev) console.error("Error page render failed:", err);
+            else console.error("Error page render failed:", (err as Error).message ?? err);
         }
     }
     return new Response(message, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });

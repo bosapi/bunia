@@ -66,7 +66,7 @@
 - [x] XSS escaping in HTML templates — sanitize `JSON.stringify()` output in `<script>` tags
 - [x] SSRF validation on `/__bunia/data` — validate `path` query param
 - [x] CSRF protection — Origin/Referer header validation for state-changing requests
-- [ ] Strip stack traces from error responses in production
+- [x] Strip stack traces from error responses in production
 - [ ] Request body size limits
 
 ### Production
