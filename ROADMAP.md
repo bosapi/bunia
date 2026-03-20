@@ -71,7 +71,7 @@
 
 ### Production
 - [x] Graceful shutdown handler (SIGTERM/SIGINT)
-- [ ] `.env` file support
+- [x] `.env` file support
 - [ ] CORS configuration (framework-level)
 
 ### Cleanup

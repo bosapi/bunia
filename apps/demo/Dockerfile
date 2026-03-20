@@ -28,6 +28,6 @@ COPY --from=builder /app/apps/demo/dist ./dist
 COPY --from=builder /app/apps/demo/public ./public
 
 ENV NODE_ENV=production
-EXPOSE 3000
+EXPOSE 9000
 
 CMD ["bun", "run", "dist/server/index.js"]

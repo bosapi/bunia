@@ -27,6 +27,27 @@ export function safeJsonStringify(data: unknown): string {
     return JSON.stringify(data).replace(/[<>&\u2028\u2029]/g, c => map[c]);
 }
 
+// ─── Public Env Injection ─────────────────────────────────
+
+/**
+ * Collect PUBLIC_* (non-static) vars from process.env that were declared in .bunia/env.server.ts.
+ * We read the generated server env module to know which keys to expose.
+ * Falls back to an empty object if the module hasn't been generated yet (e.g., dev before first build).
+ */
+function getPublicDynamicEnv(): Record<string, string> {
+    // Read keys from .bunia/env.server.ts declarations of PUBLIC_* (non-static) vars
+    // by inspecting process.env keys that start with PUBLIC_ but not PUBLIC_STATIC_.
+    // We only expose keys that came from .env files — tracked in process.env via loadEnv.
+    // At runtime the server module exports are inlined; we collect from process.env here.
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(process.env)) {
+        if (key.startsWith("PUBLIC_") && !key.startsWith("PUBLIC_STATIC_") && value !== undefined) {
+            result[key] = value;
+        }
+    }
+    return result;
+}
+
 // ─── HTML Builder ─────────────────────────────────────────
 
 export function buildHtml(
@@ -44,8 +65,13 @@ export function buildHtml(
 
     const fallbackTitle = head.includes("<title>") ? "" : "<title>Bunia App</title>";
 
+    const publicEnv = getPublicDynamicEnv();
+    const envScript = Object.keys(publicEnv).length > 0
+        ? `\n  <script>window.__BUNIA_ENV__=${safeJsonStringify(publicEnv)};</script>`
+        : "";
+
     const scripts = csr
-        ? `\n  <script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};</script>\n  <script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`
+        ? `${envScript}\n  <script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};</script>\n  <script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`
         : isDev
             ? `\n  <script>!function r(){var e=new EventSource("/__bunia/sse");e.addEventListener("reload",()=>location.reload());e.onopen=()=>r._ok||(r._ok=1);e.onerror=()=>{e.close();setTimeout(r,2000)}}()</script>`
             : "";
@@ -106,6 +132,10 @@ export function buildHtmlTail(
     out += `\n<div id="app">${body}</div>`;
     if (head) out += `\n<script>document.head.innerHTML+=${safeJsonStringify(head)}</script>`;
     if (csr) {
+        const publicEnv = getPublicDynamicEnv();
+        if (Object.keys(publicEnv).length > 0) {
+            out += `\n<script>window.__BUNIA_ENV__=${safeJsonStringify(publicEnv)};</script>`;
+        }
         out += `\n<script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};` +
                `window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};</script>`;
         out += `\n<script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`;

@@ -8,6 +8,8 @@ import { generateRoutesFile } from "./routeFile.ts";
 import { generateRouteTypes, ensureRootDirs } from "./routeTypes.ts";
 import { makeBuniaPlugin } from "./plugin.ts";
 import { prerenderStaticRoutes } from "./prerender.ts";
+import { loadEnv, classifyEnvVars } from "./env.ts";
+import { generateEnvModules } from "./envCodegen.ts";
 
 // Resolved from this file's location inside the bunia package
 const CORE_DIR = import.meta.dir;
@@ -19,7 +21,12 @@ const isProduction = process.env.NODE_ENV === "production";
 
 console.log("🏗️  Starting Bunia build...\n");
 
-// 0. Clean all generated output first
+// 0. Load .env files (before cleaning .bunia so loadEnv can set process.env early)
+const envMode = isProduction ? "production" : "development";
+const envVars = loadEnv(envMode);
+const classifiedEnv = classifyEnvVars(envVars);
+
+// 0b. Clean all generated output first
 try { rmSync("./dist",   { recursive: true, force: true }); } catch { }
 try { rmSync("./.bunia", { recursive: true, force: true }); } catch { }
 
@@ -45,6 +52,9 @@ generateRouteTypes(manifest);
 // 2c. Ensure tsconfig.json has rootDirs pointing at .bunia/types
 ensureRootDirs();
 
+// 2d. Generate .bunia/env.server.ts, .bunia/env.client.ts, .bunia/types/env.d.ts
+generateEnvModules(classifiedEnv);
+
 // 3. Build Tailwind CSS
 console.log("\n🎨 Building Tailwind CSS...");
 const tailwindBin = join(BUNIA_NODE_MODULES, ".bin", "tailwindcss");
@@ -61,8 +71,18 @@ if (tailwindResult.exitCode !== 0) {
 }
 console.log("✅ Tailwind CSS built: public/bunia-tw.css");
 
-// Shared Bun build plugin for both client and server
-const buniaPlugin = makeBuniaPlugin();
+// Separate plugin instances per build target (bunia:env resolves differently)
+const clientPlugin = makeBuniaPlugin("browser");
+const serverPlugin = makeBuniaPlugin("bun");
+
+// Build-time defines: inline PUBLIC_STATIC_* and STATIC_* vars
+const staticDefines: Record<string, string> = {};
+for (const [key, value] of Object.entries(classifiedEnv.publicStatic)) {
+    staticDefines[`import.meta.env.${key}`] = JSON.stringify(value);
+}
+for (const [key, value] of Object.entries(classifiedEnv.privateStatic)) {
+    staticDefines[`import.meta.env.${key}`] = JSON.stringify(value);
+}
 
 // 5. Build client bundle
 console.log("\n📦 Building client bundle...");
@@ -75,8 +95,9 @@ const clientResult = await Bun.build({
     minify: isProduction,
     define: {
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
+        ...staticDefines,
     },
-    plugins: [buniaPlugin, SveltePlugin()],
+    plugins: [clientPlugin, SveltePlugin()],
 });
 
 if (!clientResult.success) {
@@ -104,7 +125,7 @@ const serverResult = await Bun.build({
     naming: { entry: "index.[ext]", chunk: "[name]-[hash].[ext]" },
     minify: isProduction,
     external: ["elysia", "@elysiajs/static"],
-    plugins: [buniaPlugin, SveltePlugin()],
+    plugins: [serverPlugin, SveltePlugin()],
 });
 
 if (!serverResult.success) {

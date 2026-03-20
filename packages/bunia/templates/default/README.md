@@ -5,7 +5,7 @@ A [Bunia](https://github.com/bosapi/bunia) project — SSR · Svelte 5 · Bun ·
 ## Getting Started
 
 ```bash
-bun run dev     # start development server at http://localhost:3000
+bun run dev     # start development server at http://localhost:9000
 bun run build   # build for production
 bun run start   # run the production server
 ```

@@ -3,15 +3,25 @@ import { join } from "path";
 // ─── Bun Build Plugin ─────────────────────────────────────
 // Resolves:
 //   bunia:routes  → .bunia/routes.ts  (generated route map)
+//   bunia:env     → .bunia/env.server.ts (bun) or .bunia/env.client.ts (browser)
 //   $lib/*        → src/lib/*         (user library alias)
 
-export function makeBuniaPlugin() {
+export function makeBuniaPlugin(target: "browser" | "bun" = "bun") {
     return {
         name: "bunia-resolver",
         setup(build: import("bun").PluginBuilder) {
             // bunia:routes → .bunia/routes.ts
             build.onResolve({ filter: /^bunia:routes$/ }, () => ({
                 path: join(process.cwd(), ".bunia", "routes.ts"),
+            }));
+
+            // bunia:env → .bunia/env.client.ts (browser) or .bunia/env.server.ts (bun)
+            build.onResolve({ filter: /^bunia:env$/ }, () => ({
+                path: join(
+                    process.cwd(),
+                    ".bunia",
+                    target === "browser" ? "env.client.ts" : "env.server.ts",
+                ),
             }));
 
             // $lib/* → src/lib/* with extension probing

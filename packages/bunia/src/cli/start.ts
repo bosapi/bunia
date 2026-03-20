@@ -1,9 +1,12 @@
 import { spawn } from "bun";
 import { join } from "path";
+import { loadEnv } from "../core/env.ts";
 
 const BUNIA_NODE_MODULES = join(import.meta.dir, "..", "..", "node_modules");
 
 export async function runStart() {
+    loadEnv("production");
+
     let serverEntry = "index.js";
     try {
         const manifest = await Bun.file("./dist/manifest.json").json();

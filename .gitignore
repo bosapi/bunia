@@ -4,6 +4,7 @@ dist/
 **/public/bunia-tw.css
 .DS_Store
 *.log
+.env*.local
 backup
 .agent
 .vscode

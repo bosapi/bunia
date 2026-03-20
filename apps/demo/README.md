@@ -5,7 +5,7 @@ The official demo app for the [Bunia](../../packages/bunia/README.md) framework.
 ## Running
 
 ```bash
-bun run dev     # http://localhost:3000
+bun run dev     # http://localhost:9000
 bun run build   # production build
 bun run start   # run production server
 ```

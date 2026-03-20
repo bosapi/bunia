@@ -1,7 +1,9 @@
 import { spawn } from "bun";
 import { resolve } from "path";
+import { loadEnv } from "../core/env.ts";
 
 export async function runBuild() {
+    loadEnv("production");
     const buildScript = resolve(import.meta.dir, "../core/build.ts");
     const proc = spawn(["bun", "run", buildScript], {
         stdout: "inherit",

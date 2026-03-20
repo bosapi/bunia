@@ -228,7 +228,7 @@ if (BODY_SIZE_LIMIT === 0) {
 
 // ─── Elysia App ───────────────────────────────────────────
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (isDev ? 3001 : 3000);
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (isDev ? 9001 : 9000);
 
 const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
     .onError(({ error }) => {
@@ -257,7 +257,7 @@ const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
     .options("*", () => new Response("Not Found", { status: 404 }));
 
 app.listen(PORT, () => {
-    // In dev mode the proxy owns port 3000 — don't print the internal port
+    // In dev mode the proxy owns the user-facing port — don't print the internal port
     if (!isDev) console.log(`🐰 Bunia server running at http://localhost:${PORT}`);
 });
 

@@ -40,9 +40,10 @@ async function runBuild(): Promise<boolean> {
     return (await proc.exited) === 0;
 }
 
-// ─── App Server ───────────────────────────────────────────
+// ─── Ports ────────────────────────────────────────────────
 
-const APP_PORT = 3001;
+const DEV_PORT = Number(process.env.PORT) || 9000;
+const APP_PORT = DEV_PORT + 1; // internal, hidden from user
 
 async function startAppServer() {
     if (appProcess) {
@@ -64,6 +65,8 @@ async function startAppServer() {
         env: {
             ...process.env,
             NODE_ENV: "development",
+            // Force app server to APP_PORT — prevents PORT from .env conflicting with the dev proxy
+            PORT: String(APP_PORT),
             // Allow externalized deps (elysia, etc.) to resolve from bunia's node_modules
             NODE_PATH: BUNIA_NODE_MODULES,
         },
@@ -91,11 +94,9 @@ function scheduleBuild() {
     buildTimer = setTimeout(buildAndRestart, 300);
 }
 
-// ─── Dev Proxy (Port 3000) ────────────────────────────────
+// ─── Dev Proxy ────────────────────────────────────────────
 // Owns the SSE connection so it survives app server restarts.
 // All other requests are proxied to the app server.
-
-const DEV_PORT = 3000;
 
 Bun.serve({
     port: DEV_PORT,

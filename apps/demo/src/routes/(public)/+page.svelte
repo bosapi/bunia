@@ -1,4 +1,7 @@
 <script lang="ts">
+
+    import { PUBLIC_STATIC_BASE_URL } from "bunia:env";
+
     let count = $state(0);
 
     const features = [
@@ -20,7 +23,7 @@
 <div class="space-y-12">
     <!-- Hero -->
     <div class="space-y-3 pt-4">
-        <h1 class="text-5xl font-bold tracking-tight">🐰 Bunia</h1>
+        <h1 class="text-5xl font-bold tracking-tight">🐰 Bunia {PUBLIC_STATIC_BASE_URL}</h1>
         <p class="text-xl text-muted-foreground max-w-xl">
             A minimalist fullstack framework — SSR, Svelte 5 Runes, Bun, and ElysiaJS.
         </p>

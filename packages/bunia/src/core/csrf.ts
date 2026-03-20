@@ -31,8 +31,8 @@ export function checkCsrf(
     if (SAFE_METHODS.has(request.method.toUpperCase())) return null;
 
     // Derive the expected origin.
-    // In dev, the browser hits the proxy on port 3000 (Host: localhost:3000)
-    // while the Elysia server sees url.origin as localhost:3001.
+    // In dev, the browser hits the proxy on DEV_PORT (e.g. localhost:9000)
+    // while the Elysia server sees url.origin as localhost:9001.
     // X-Forwarded-Host / Host headers reflect the actual host the client used.
     const forwardedHost = request.headers.get("x-forwarded-host");
     const host = forwardedHost ?? request.headers.get("host");

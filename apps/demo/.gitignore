@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.bunia/
+.DS_Store
+*.log
+
+# Local env overrides — never commit secrets
+.env*.local
+.env
