@@ -58,7 +58,7 @@
 
 ---
 
-## v0.1.x — Security & Production Hardening
+## v0.0.2 — Security & Production Hardening
 
 > Industry-standard requirements. Must be done before shipping to real users.
 
