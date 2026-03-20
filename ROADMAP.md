@@ -67,7 +67,7 @@
 - [x] SSRF validation on `/__bunia/data` — validate `path` query param
 - [x] CSRF protection — Origin/Referer header validation for state-changing requests
 - [x] Strip stack traces from error responses in production
-- [ ] Request body size limits
+- [x] Request body size limits
 
 ### Production
 - [ ] Graceful shutdown handler (SIGTERM/SIGINT)

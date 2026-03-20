@@ -200,11 +200,37 @@ async function handleRequest(request: Request, url: URL): Promise<Response> {
     }
 }
 
+// ─── Body Size Limit ──────────────────────────────────────
+// Parsed once at startup from BODY_SIZE_LIMIT env var.
+// Format: "512K", "1M", "1G", plain bytes, or "Infinity".
+// Default: 512K (matches SvelteKit).
+
+function parseBodySizeLimit(value?: string): number {
+    if (!value) return 512 * 1024;
+    if (value === "Infinity") return 0; // Bun: 0 = no limit
+    const match = value.match(/^(\d+(?:\.\d+)?)\s*([KMG]?)$/i);
+    if (!match) throw new Error(`Invalid BODY_SIZE_LIMIT: "${value}"`);
+    const num = parseFloat(match[1]);
+    const unit = match[2].toUpperCase();
+    if (unit === "K") return Math.floor(num * 1024);
+    if (unit === "M") return Math.floor(num * 1024 * 1024);
+    if (unit === "G") return Math.floor(num * 1024 * 1024 * 1024);
+    return Math.floor(num);
+}
+
+const BODY_SIZE_LIMIT = parseBodySizeLimit(process.env.BODY_SIZE_LIMIT);
+
+if (BODY_SIZE_LIMIT === 0) {
+    console.log("📦 Body size limit: none");
+} else {
+    console.log(`📦 Body size limit: ${BODY_SIZE_LIMIT} bytes`);
+}
+
 // ─── Elysia App ───────────────────────────────────────────
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (isDev ? 3001 : 3000);
 
-const app = new Elysia()
+const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
     .onError(({ error }) => {
         if (isDev) console.error("Uncaught server error:", error);
         else console.error("Uncaught server error:", (error as Error)?.message ?? error);
