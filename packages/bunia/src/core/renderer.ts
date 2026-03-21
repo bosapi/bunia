@@ -196,6 +196,47 @@ export function renderSSRStream(
     });
 }
 
+// ─── Form Action Page Renderer ───────────────────────────
+// Re-runs load functions after a form action, renders with form data.
+// Uses non-streaming buildHtml so we can control the status code.
+
+export async function renderPageWithFormData(
+    url: URL,
+    locals: Record<string, any>,
+    req: Request,
+    cookies: Cookies,
+    formData: any,
+    status: number,
+): Promise<Response> {
+    const match = findMatch(serverRoutes, url.pathname);
+    if (!match) return renderErrorPage(404, "Not Found", url, req);
+
+    const { route } = match;
+
+    // Load components + data in parallel
+    const [data, pageMod, layoutMods] = await Promise.all([
+        loadRouteData(url, locals, req, cookies),
+        route.pageModule(),
+        Promise.all(route.layoutModules.map((l: () => Promise<any>) => l())),
+    ]);
+
+    if (!data) return renderErrorPage(404, "Not Found", url, req);
+
+    const { body, head } = render(App, {
+        props: {
+            ssrMode: true,
+            ssrPageComponent: pageMod.default,
+            ssrLayoutComponents: layoutMods.map((m: any) => m.default),
+            ssrPageData: data.pageData,
+            ssrLayoutData: data.layoutData,
+            ssrFormData: formData,
+        },
+    });
+
+    const html = buildHtml(body, head, data.pageData, data.layoutData, data.csr, formData);
+    return compress(html, "text/html; charset=utf-8", req, status);
+}
+
 // ─── Error Page Renderer ──────────────────────────────────
 
 export async function renderErrorPage(status: number, message: string, url: URL, req: Request): Promise<Response> {

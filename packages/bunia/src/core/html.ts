@@ -56,6 +56,7 @@ export function buildHtml(
     pageData: any,
     layoutData: any[],
     csr = true,
+    formData: any = null,
 ): string {
     const cacheBust = isDev ? `?v=${Date.now()}` : "";
 
@@ -70,8 +71,12 @@ export function buildHtml(
         ? `\n  <script>window.__BUNIA_ENV__=${safeJsonStringify(publicEnv)};</script>`
         : "";
 
+    const formScript = formData != null
+        ? `window.__BUNIA_FORM_DATA__=${safeJsonStringify(formData)};`
+        : "";
+
     const scripts = csr
-        ? `${envScript}\n  <script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};</script>\n  <script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`
+        ? `${envScript}\n  <script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};${formScript}</script>\n  <script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`
         : isDev
             ? `\n  <script>!function r(){var e=new EventSource("/__bunia/sse");e.addEventListener("reload",()=>location.reload());e.onopen=()=>r._ok||(r._ok=1);e.onerror=()=>{e.close();setTimeout(r,2000)}}()</script>`
             : "";
@@ -126,6 +131,7 @@ export function buildHtmlTail(
     pageData: any,
     layoutData: any[],
     csr: boolean,
+    formData: any = null,
 ): string {
     const cacheBust = isDev ? `?v=${Date.now()}` : "";
     let out = `<script>document.getElementById('__bs__').remove()</script>`;
@@ -136,8 +142,9 @@ export function buildHtmlTail(
         if (Object.keys(publicEnv).length > 0) {
             out += `\n<script>window.__BUNIA_ENV__=${safeJsonStringify(publicEnv)};</script>`;
         }
+        const formInject = formData != null ? `window.__BUNIA_FORM_DATA__=${safeJsonStringify(formData)};` : "";
         out += `\n<script>window.__BUNIA_PAGE_DATA__=${safeJsonStringify(pageData)};` +
-               `window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};</script>`;
+               `window.__BUNIA_LAYOUT_DATA__=${safeJsonStringify(layoutData)};${formInject}</script>`;
         out += `\n<script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`;
     } else if (isDev) {
         out += `\n<script>!function r(){var e=new EventSource("/__bunia/sse");e.addEventListener("reload",()=>location.reload());e.onopen=()=>r._ok||(r._ok=1);e.onerror=()=>{e.close();setTimeout(r,2000)}}()</script>`;
