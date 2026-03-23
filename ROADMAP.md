@@ -86,7 +86,7 @@
 ### Security
 - [x] Path traversal protection — validate static/prerendered file paths stay within allowed directories
 - [x] Cookie parsing error recovery — wrap `decodeURIComponent()` in try-catch to prevent crash on malformed cookies
-- [ ] Cookie option validation — whitelist/validate `domain`, `path`, `sameSite` values to prevent header injection
+- [x] Cookie option validation — whitelist/validate `domain`, `path`, `sameSite` values to prevent header injection
 - [x] `PUBLIC_` env scoping — only expose vars declared in `.env` files, not all `PUBLIC_*` from `process.env`
 - [ ] Trusted proxy configuration — `TRUST_PROXY` env to control when `X-Forwarded-*` headers are trusted in CSRF checks
 - [x] Streaming error safety — validate route match before creating stream; catch all errors after first chunk sent
