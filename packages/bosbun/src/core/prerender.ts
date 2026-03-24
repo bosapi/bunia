@@ -2,8 +2,9 @@ import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import type { RouteManifest } from "./types.ts";
 
+import { BOSBUN_NODE_PATH } from "./paths.ts";
+
 const CORE_DIR = import.meta.dir;
-const BOSBUN_NODE_MODULES = join(CORE_DIR, "..", "..", "node_modules");
 
 const PRERENDER_TIMEOUT = Number(process.env.PRERENDER_TIMEOUT) || 5_000; // 5s default
 
@@ -36,7 +37,7 @@ export async function prerenderStaticRoutes(manifest: RouteManifest): Promise<vo
     const child = Bun.spawn(
         ["bun", "run", "./dist/server/index.js"],
         {
-            env: { ...process.env, NODE_ENV: "production", PORT: String(port), NODE_PATH: BOSBUN_NODE_MODULES },
+            env: { ...process.env, NODE_ENV: "production", PORT: String(port), NODE_PATH: BOSBUN_NODE_PATH },
             stdout: "ignore",
             stderr: "ignore",
         },

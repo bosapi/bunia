@@ -11,7 +11,7 @@ bun add bosbun
 Or scaffold a new project:
 
 ```bash
-bunx bosbun create my-app
+bun x bosbun create my-app
 ```
 
 ## CLI

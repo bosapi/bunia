@@ -10,10 +10,10 @@ import { makeBosbunPlugin } from "./plugin.ts";
 import { prerenderStaticRoutes } from "./prerender.ts";
 import { loadEnv, classifyEnvVars } from "./env.ts";
 import { generateEnvModules } from "./envCodegen.ts";
+import { BOSBUN_NODE_PATH, resolveBosbunBin } from "./paths.ts";
 
 // Resolved from this file's location inside the bosbun package
 const CORE_DIR = import.meta.dir;
-const BOSBUN_NODE_MODULES = join(CORE_DIR, "..", "..", "node_modules");
 
 // ─── Entry Point ─────────────────────────────────────────
 
@@ -57,12 +57,12 @@ generateEnvModules(classifiedEnv);
 
 // 3. Build Tailwind CSS
 console.log("\n🎨 Building Tailwind CSS...");
-const tailwindBin = join(BOSBUN_NODE_MODULES, ".bin", "tailwindcss");
+const tailwindBin = resolveBosbunBin("tailwindcss");
 const tailwindResult = spawnSync(
     [tailwindBin, "-i", "./src/app.css", "-o", "./public/bosbun-tw.css", ...(isProduction ? ["--minify"] : [])],
     {
         cwd: process.cwd(),
-        env: { ...process.env, NODE_PATH: BOSBUN_NODE_MODULES },
+        env: { ...process.env, NODE_PATH: BOSBUN_NODE_PATH },
     },
 );
 if (tailwindResult.exitCode !== 0) {

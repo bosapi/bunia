@@ -1,8 +1,6 @@
 import { spawn } from "bun";
-import { join } from "path";
 import { loadEnv } from "../core/env.ts";
-
-const BOSBUN_NODE_MODULES = join(import.meta.dir, "..", "..", "node_modules");
+import { BOSBUN_NODE_PATH } from "../core/paths.ts";
 
 export async function runStart() {
     loadEnv("production");
@@ -20,7 +18,7 @@ export async function runStart() {
         env: {
             ...process.env,
             NODE_ENV: "production",
-            NODE_PATH: BOSBUN_NODE_MODULES,
+            NODE_PATH: BOSBUN_NODE_PATH,
         },
     });
 

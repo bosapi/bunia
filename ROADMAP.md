@@ -127,7 +127,7 @@
 - [ ] CORS preflight validation — validate requested method/headers against allowed config
 
 ### Build
-- [ ] Validate Tailwind CSS binary exists before build — clear error message if missing
+- [x] Validate Tailwind CSS binary exists before build — clear error message if missing
 - [ ] Validate `.env` variable names — reject invalid identifiers that break codegen
 - [ ] Fail build on tsconfig.json corruption — don't silently continue with degraded config
 

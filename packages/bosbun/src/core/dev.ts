@@ -27,8 +27,9 @@ function broadcastReload() {
 
 // ─── Build ────────────────────────────────────────────────
 
+import { BOSBUN_NODE_PATH } from "./paths.ts";
+
 const BUILD_SCRIPT = join(import.meta.dir, "build.ts");
-const BOSBUN_NODE_MODULES = join(import.meta.dir, "..", "..", "node_modules");
 
 async function runBuild(): Promise<boolean> {
     console.log("🏗️  Building...");
@@ -68,7 +69,7 @@ async function startAppServer() {
             // Force app server to APP_PORT — prevents PORT from .env conflicting with the dev proxy
             PORT: String(APP_PORT),
             // Allow externalized deps (elysia, etc.) to resolve from bosbun's node_modules
-            NODE_PATH: BOSBUN_NODE_MODULES,
+            NODE_PATH: BOSBUN_NODE_PATH,
         },
     });
 }

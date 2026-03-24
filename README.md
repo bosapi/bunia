@@ -29,7 +29,7 @@ bosbun/
 
 ```bash
 # Scaffold a new project
-bunx bosbun create my-app
+bun x bosbun create my-app
 cd my-app
 
 # Start development
