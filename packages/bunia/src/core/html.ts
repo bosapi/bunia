@@ -98,7 +98,7 @@ export function buildHtml(
   ${cssLinks}
   <link rel="stylesheet" href="/bunia-tw.css${cacheBust}">
 </head>
-<body>
+<body data-bunia-preload="hover">
   <div id="app">${body}</div>${scripts}
 </body>
 </html>`;
@@ -115,6 +115,7 @@ export function buildHtmlShell(): string {
     _shell = buildHtmlShellOpen() + buildMetadataChunk(null);
     return _shell;
 }
+
 
 let _shellOpen: string | null = null;
 
@@ -159,7 +160,7 @@ export function buildMetadataChunk(metadata: Metadata | null): string {
     } else {
         out += `  <title>Bunia App</title>\n`;
     }
-    out += `</head>\n<body>\n${SPINNER}`;
+    out += `</head>\n<body data-bunia-preload="hover">\n${SPINNER}`;
     return out;
 }
 

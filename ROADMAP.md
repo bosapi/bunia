@@ -110,7 +110,7 @@
 - [ ] `setHeaders()` in load functions — set response headers from loaders
 
 ### Navigation
-- [ ] Link prefetching — `data-bunia-preload` attribute for hover/viewport prefetch
+- [x] Link prefetching — `data-bunia-preload` attribute for hover/viewport prefetch
 - [ ] `beforeNavigate` / `afterNavigate` lifecycle hooks
 - [ ] Scroll restoration and snapshot support (`export const snapshot`)
 

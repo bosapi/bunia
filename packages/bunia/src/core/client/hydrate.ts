@@ -1,6 +1,7 @@
 import { hydrate } from "svelte";
 import App from "./App.svelte";
 import { router } from "./router.svelte.ts";
+import { initPrefetch } from "./prefetch.ts";
 import { findMatch } from "../matcher.ts";
 import { clientRoutes } from "bunia:routes";
 
@@ -11,6 +12,7 @@ async function main() {
 
     router.init();
     router.currentRoute = path;
+    initPrefetch();
 
     // Resolve the current route so we can pre-load the components
     // before handing off to App.svelte (avoids a flash of "Loading...")

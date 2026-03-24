@@ -2,6 +2,7 @@
   import { router } from "./router.svelte.ts";
   import { findMatch } from "../matcher.ts";
   import { clientRoutes } from "bunia:routes";
+  import { consumePrefetch, prefetchCache } from "./prefetch.ts";
 
   let {
     ssrMode = false,
@@ -52,9 +53,13 @@
 
     // Load components + data in parallel, then update state atomically
     // to avoid a flash of stale/empty data before the fetch completes.
-    const dataFetch = match.route.hasServerData
-      ? fetch(`/__bunia/data?path=${encodeURIComponent(path)}`).then(r => r.json()).catch(() => null)
-      : Promise.resolve(null);
+    const cached = match.route.hasServerData ? consumePrefetch(path) : null;
+    prefetchCache.clear(); // clear remaining entries on navigation — matches SvelteKit behavior
+    const dataFetch = cached
+      ? Promise.resolve(cached)
+      : match.route.hasServerData
+        ? fetch(`/__bunia/data?path=${encodeURIComponent(path)}`).then(r => r.json()).catch(() => null)
+        : Promise.resolve(null);
 
     Promise.all([
       match.route.page(),

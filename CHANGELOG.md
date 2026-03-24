@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.0.5] - 2026-03-24
+
+### Added
+- Link prefetching: `data-bunia-preload="hover"` prefetches on mouseenter, `data-bunia-preload="viewport"` prefetches when link scrolls into view; attribute can be placed on ancestor elements (e.g. `<nav>`) to apply to all links inside; 5s TTL cache eliminates the network request on click
+
 ## [0.0.4] - 2026-03-23
 
 ### Added
