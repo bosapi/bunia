@@ -1,6 +1,6 @@
 {
   "name": "bunia",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "type": "module",
   "description": "A minimalist fullstack framework — SSR + Svelte 5 Runes + Bun + ElysiaJS",
   "keywords": ["bun", "svelte", "ssr", "elysia", "fullstack", "framework"],
