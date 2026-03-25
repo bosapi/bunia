@@ -34,6 +34,7 @@ bosbun dev
 - Dev server runs at **http://localhost:9000**
 - File changes trigger automatic browser reload via SSE
 - Uses a proxy architecture: dev proxy on `:9000`, app server on `:9001`
+- **Auto-restart on crash** — if the app process exits unexpectedly, it restarts automatically. After 3 rapid crashes within 5 seconds, it stops retrying and waits for a file change.
 
 ## bosbun build
 
