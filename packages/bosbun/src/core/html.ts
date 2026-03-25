@@ -93,7 +93,7 @@ export function buildHtml(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   ${fallbackTitle}
-  <link rel="icon" href="data:,">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   ${head}
   ${cssLinks}
   <link rel="stylesheet" href="/bosbun-tw.css${cacheBust}">
@@ -129,7 +129,7 @@ export function buildHtmlShellOpen(): string {
     _shellOpen = `<!DOCTYPE html>\n<html lang="en">\n<head>\n` +
         `  <meta charset="UTF-8">\n` +
         `  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n` +
-        `  <link rel="icon" href="data:,">\n` +
+        `  <link rel="icon" type="image/svg+xml" href="/favicon.svg">\n` +
         `  ${cssLinks}\n` +
         `  <link rel="stylesheet" href="/bosbun-tw.css${cacheBust}">\n` +
         `  <link rel="modulepreload" href="/dist/client/${distManifest.entry}${cacheBust}">`;

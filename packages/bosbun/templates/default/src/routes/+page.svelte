@@ -4,7 +4,7 @@
 
 <main class="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
     <div class="flex flex-col items-center gap-3 text-center">
-        <p class="text-6xl">🐰</p>
+        <img src="/favicon.svg" alt="" class="size-16" />
         <h1 class="text-4xl font-bold tracking-tight">{name}</h1>
         <p class="text-muted-foreground text-lg">
             A Bosbun project — SSR + Svelte 5 + Bun + ElysiaJS

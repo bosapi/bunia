@@ -20,7 +20,7 @@
 <div class="space-y-12">
     <!-- Hero -->
     <div class="space-y-3 pt-4">
-        <h1 class="text-5xl font-bold tracking-tight">🐰 {{PROJECT_NAME}}</h1>
+        <h1 class="text-5xl font-bold tracking-tight flex items-center gap-3"><img src="/favicon.svg" alt="" class="size-10" /> {{PROJECT_NAME}}</h1>
         <p class="text-xl text-muted-foreground max-w-xl">
             A minimalist fullstack framework — SSR, Svelte 5 Runes, Bun, and ElysiaJS.
         </p>

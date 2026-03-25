@@ -398,7 +398,7 @@ const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
 
 app.listen(PORT, () => {
     // In dev mode the proxy owns the user-facing port — don't print the internal port
-    if (!isDev) console.log(`🐰 Bosbun server running at http://localhost:${PORT}`);
+    if (!isDev) console.log(`⬡ Bosbun server running at http://localhost:${PORT}`);
 });
 
 function shutdown() {

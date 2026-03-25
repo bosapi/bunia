@@ -45,7 +45,7 @@ export async function runCreate(name: string | undefined, args: string[] = []) {
         process.exit(1);
     }
 
-    console.log(`\n🐰 Creating Bosbun project: ${basename(targetDir)} (template: ${template})\n`);
+    console.log(`\n⬡ Creating Bosbun project: ${basename(targetDir)} (template: ${template})\n`);
 
     copyDir(templateDir, targetDir, name);
 

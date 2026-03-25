@@ -31,7 +31,7 @@ export async function addComponent(name: string, root = false) {
     if (installed.has(name)) return;
     installed.add(name);
 
-    console.log(root ? `🐰 Installing component: ${name}\n` : `   📦 Dependency: ${name}`);
+    console.log(root ? `⬡ Installing component: ${name}\n` : `   📦 Dependency: ${name}`);
 
     const meta = await fetchJSON<ComponentMeta>(`${REGISTRY_BASE}/components/${name}/meta.json`);
 

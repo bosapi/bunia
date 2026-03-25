@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.0.7] - 2026-03-25
 
+### Changed
+- Replaced 🐰 emoji branding with new block-style SVG logo across all UI templates, CLI output, and favicon; favicon now served as `/favicon.svg` instead of blank `data:,` URI
+
 ### Added
 - Multi-template support for `bosbun create`: interactive template picker when no `--template` flag is given; includes `default` (minimal starter) and `demo` (full-featured with hooks, API routes, blog, form actions, catch-all routes)
 

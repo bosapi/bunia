@@ -2,7 +2,7 @@ import { spawn, type Subprocess } from "bun";
 import { watch } from "fs";
 import { join } from "path";
 
-console.log("🐰 Bosbun dev server starting...\n");
+console.log("⬡ Bosbun dev server starting...\n");
 
 // ─── State ────────────────────────────────────────────────
 

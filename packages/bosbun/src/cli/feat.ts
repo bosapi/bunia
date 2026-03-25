@@ -24,7 +24,7 @@ export async function runFeat(name: string | undefined) {
         process.exit(1);
     }
 
-    console.log(`🐰 Installing feature: ${name}\n`);
+    console.log(`⬡ Installing feature: ${name}\n`);
 
     const meta = await fetchJSON<FeatureMeta>(`${REGISTRY_BASE}/features/${name}/meta.json`);
 

@@ -43,7 +43,7 @@ async function main() {
         }
         default: {
             console.log(`
-🐰 Bosbun
+⬡ Bosbun
 
 Usage:
   bosbun <command> [options]
