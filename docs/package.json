@@ -4,10 +4,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "sync-changelog": "bun sync-changelog.ts",
-    "dev": "bun sync-changelog.ts && astro dev",
+    "sync": "bun sync-docs.ts",
+    "dev": "bun sync-docs.ts && astro dev",
     "start": "astro dev",
-    "build": "bun sync-changelog.ts && astro build",
+    "build": "bun sync-docs.ts && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

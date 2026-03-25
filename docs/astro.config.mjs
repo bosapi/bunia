@@ -54,6 +54,7 @@ export default defineConfig({
               label: "SvelteKit Differences",
               slug: "reference/sveltekit-differences",
             },
+            { label: "Roadmap", slug: "reference/roadmap" },
             {
               label: "Changelog",
               slug: "reference/changelog",
