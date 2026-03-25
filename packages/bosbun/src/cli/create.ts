@@ -6,6 +6,8 @@ import * as readline from "readline";
 // ─── bosbun create <name> [--template <name>] ──────────────
 
 const TEMPLATES_DIR = resolve(import.meta.dir, "../../templates");
+const BOSBUN_PKG = JSON.parse(readFileSync(resolve(import.meta.dir, "../../package.json"), "utf-8"));
+const BOSBUN_VERSION: string = BOSBUN_PKG.version;
 
 const TEMPLATE_DESCRIPTIONS: Record<string, string> = {
     default: "Minimal starter with routing and Tailwind",
@@ -107,7 +109,9 @@ function copyDir(src: string, dest: string, projectName: string) {
         if (entry.isDirectory()) {
             copyDir(srcPath, destPath, projectName);
         } else {
-            const content = readFileSync(srcPath, "utf-8").replaceAll("{{PROJECT_NAME}}", projectName);
+            const content = readFileSync(srcPath, "utf-8")
+                .replaceAll("{{PROJECT_NAME}}", projectName)
+                .replaceAll("{{BOSBUN_VERSION}}", BOSBUN_VERSION);
             writeFileSync(destPath, content, "utf-8");
         }
     }
