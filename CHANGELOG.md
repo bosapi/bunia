@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - Tailwind CSS binary resolution: handle bun's flat dependency hoisting — `tailwindcss` binary is now found whether deps are nested (`node_modules/bosbun/node_modules/`) or hoisted (`node_modules/`); same fix applied to `NODE_PATH` in dev, build, start, and prerender
+- Client hydration crash ("Cannot read properties of undefined (reading 'call')"): when bosbun is installed via npm (not workspace symlink), `hydrate.ts` resolved `"svelte"` from the framework's location while compiled components resolved `"svelte/internal/client"` from the app's `node_modules` — two separate Svelte runtime copies with independent hydration state; fixed by forcing all `svelte` imports to resolve from the app's directory via `onResolve` in the build plugin
 
 ## [0.0.6] - 2026-03-25
 
@@ -34,8 +35,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Security: path traversal protection on all static file serving (`/public`, `/dist/client`, prerendered pages) — resolved paths are validated to stay within allowed directories
 - Cookie parsing no longer crashes on malformed percent-encoding (e.g. `%ZZ`) — falls back to raw value
 - Cookie `set()` now validates `domain` and `path` (rejects `;`, `\r`, `\n`) and whitelists `sameSite` to `Strict`/`Lax`/`None` — prevents header injection
-
-## [0.0.3] - 2026-03-23
 
 ### Changed
 - Route matching: routes are now sorted by priority at build time (exact → dynamic → catch-all, then segment depth); `findMatch()` does a single pass instead of 3 passes — O(n) best-case with early exit

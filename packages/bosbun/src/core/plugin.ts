@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join, dirname } from "path";
 
 // ─── Bun Build Plugin ─────────────────────────────────────
 // Resolves:
@@ -29,6 +29,40 @@ export function makeBosbunPlugin(target: "browser" | "bun" = "bun") {
                 const rel = args.path.slice(5); // remove "$lib/"
                 const base = join(process.cwd(), "src", "lib", rel);
                 return { path: await resolveWithExts(base) };
+            });
+
+            // Force svelte imports to resolve from the app's node_modules.
+            // Without this, when bosbun is symlinked (bun link / workspace),
+            // hydrate.ts resolves "svelte" from the framework's location while
+            // compiled components resolve "svelte/internal/client" from the app's.
+            // Two different Svelte copies = duplicate runtime state = broken hydration.
+            //
+            // require.resolve uses the "default" export condition, which for
+            // bare "svelte" returns index-server.js. For browser builds we need
+            // index-client.js, so we read the "browser" condition from package.json.
+            const appDir = process.cwd();
+            let svelteBrowserEntry: string | null = null;
+            if (target === "browser") {
+                try {
+                    const svelteDir = dirname(require.resolve("svelte/package.json", { paths: [appDir] }));
+                    const pkg = require(join(svelteDir, "package.json"));
+                    const dotExport = pkg.exports?.["."];
+                    const browserPath = typeof dotExport === "object" ? dotExport.browser : null;
+                    if (browserPath) {
+                        svelteBrowserEntry = join(svelteDir, browserPath);
+                    }
+                } catch { }
+            }
+            build.onResolve({ filter: /^svelte(\/.*)?$/ }, (args) => {
+                try {
+                    // Bare "svelte" in browser build: use the "browser" export condition
+                    if (args.path === "svelte" && svelteBrowserEntry) {
+                        return { path: svelteBrowserEntry };
+                    }
+                    return { path: require.resolve(args.path, { paths: [appDir] }) };
+                } catch {
+                    return undefined; // fall through to default resolution
+                }
             });
 
             // "tailwindcss" inside app.css is a Tailwind CLI directive —
