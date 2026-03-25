@@ -120,7 +120,7 @@
 
 ### Server Reliability
 - [ ] Graceful shutdown drain — drain in-flight requests before stopping; return 503 from health check during shutdown
-- [ ] Dev server auto-restart — restart app process when it crashes unexpectedly (not just on file change)
+- [x] Dev server auto-restart — restart app process when it crashes unexpectedly (not just on file change)
 - [ ] Stream backpressure handling — check `controller.desiredSize` to prevent memory buildup on slow/disconnected clients
 - [ ] Prerender process cleanup — proper signal handling, verified termination, use random port instead of hardcoded 13572
 - [ ] Concurrent build guard in dev — prevent overlapping builds when rapid file changes trigger `buildAndRestart()` while a build is already running

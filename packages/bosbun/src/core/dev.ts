@@ -8,6 +8,11 @@ console.log("⬡ Bosbun dev server starting...\n");
 
 let appProcess: Subprocess | null = null;
 let sseClients = new Set<ReadableStreamDefaultController>();
+let intentionalKill = false;
+let crashCount = 0;
+let lastCrashTime = 0;
+const MAX_RAPID_CRASHES = 3;
+const RAPID_CRASH_WINDOW = 5_000; // 5 seconds
 
 // ─── SSE Broadcast ────────────────────────────────────────
 
@@ -48,8 +53,10 @@ const APP_PORT = DEV_PORT + 1; // internal, hidden from user
 
 async function startAppServer() {
     if (appProcess) {
+        intentionalKill = true;
         appProcess.kill();
         await appProcess.exited;
+        intentionalKill = false;
     }
 
     // Read the server entry filename from the manifest written by build.ts
@@ -71,6 +78,30 @@ async function startAppServer() {
             // Allow externalized deps (elysia, etc.) to resolve from bosbun's node_modules
             NODE_PATH: BOSBUN_NODE_PATH,
         },
+    });
+
+    // Monitor for unexpected crashes
+    const proc = appProcess;
+    proc.exited.then((code) => {
+        if (proc !== appProcess || intentionalKill) return;
+        if (code === 0) return; // clean exit
+
+        const now = Date.now();
+        if (now - lastCrashTime < RAPID_CRASH_WINDOW) {
+            crashCount++;
+        } else {
+            crashCount = 1;
+        }
+        lastCrashTime = now;
+
+        if (crashCount >= MAX_RAPID_CRASHES) {
+            console.error(`\n💥 App crashed ${crashCount} times in ${RAPID_CRASH_WINDOW / 1000}s — waiting for file change to restart\n`);
+            crashCount = 0;
+            return;
+        }
+
+        console.warn(`\n⚠️  App crashed (exit code ${code}). Restarting...\n`);
+        startAppServer();
     });
 }
 
