@@ -6,6 +6,10 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Bosbun",
+      logo: {
+        light: "./src/assets/logo-light.svg",
+        dark: "./src/assets/logo-dark.svg",
+      },
       description:
         "Fast, batteries-included fullstack framework built on Bun + Svelte 5 + ElysiaJS",
       social: [
