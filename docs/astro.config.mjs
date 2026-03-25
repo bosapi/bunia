@@ -2,8 +2,7 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 
 export default defineConfig({
-  site: "https://bosapi.github.io",
-  base: "/bosbun",
+  site: "https://bosbun.bosapi.com",
   integrations: [
     starlight({
       title: "Bosbun",

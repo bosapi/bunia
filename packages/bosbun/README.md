@@ -1,6 +1,6 @@
 # Bosbun
 
-> Full documentation: [bosapi.github.io/bosbun](https://bosapi.github.io/bosbun)
+> Full documentation: [bosbun.bosapi.com](https://bosbun.bosapi.com)
 
 A fast, batteries-included fullstack framework — SSR · Svelte 5 Runes · Bun · ElysiaJS.
 

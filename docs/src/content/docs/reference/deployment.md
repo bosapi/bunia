@@ -102,4 +102,4 @@ CMD ["bun", "dist/server/index.js"]
 
 ## Environment Variables
 
-See [Environment Variables](/bosbun/guides/environment-variables/) for the full list of configuration options including `PORT`, `BODY_SIZE_LIMIT`, CORS, and CSRF settings.
+See [Environment Variables](/guides/environment-variables/) for the full list of configuration options including `PORT`, `BODY_SIZE_LIMIT`, CORS, and CSRF settings.

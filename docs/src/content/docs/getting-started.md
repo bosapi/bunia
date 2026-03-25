@@ -83,7 +83,7 @@ Access the data in your page:
 
 ## Next Steps
 
-- [Project Structure](/bosbun/project-structure/) — understand the file layout
-- [Routing](/bosbun/guides/routing/) — dynamic routes, groups, layouts
-- [Server Loaders](/bosbun/guides/server-loaders/) — load data, metadata, parent threading
-- [API Routes](/bosbun/guides/api-routes/) — build REST endpoints
+- [Project Structure](/project-structure/) — understand the file layout
+- [Routing](/guides/routing/) — dynamic routes, groups, layouts
+- [Server Loaders](/guides/server-loaders/) — load data, metadata, parent threading
+- [API Routes](/guides/api-routes/) — build REST endpoints

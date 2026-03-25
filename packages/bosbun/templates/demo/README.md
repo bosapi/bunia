@@ -24,6 +24,6 @@ bun x bosbun start   # run production server
 
 ## Learn More
 
-- [Bosbun documentation](https://bosapi.github.io/bosbun)
+- [Bosbun documentation](https://bosbun.bosapi.com)
 - [Svelte 5 docs](https://svelte.dev)
 - [Tailwind CSS v4](https://tailwindcss.com)

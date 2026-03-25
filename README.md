@@ -17,7 +17,7 @@ File-based routing inspired by SvelteKit, built on top of the Bun runtime and El
 
 ## Documentation
 
-Full documentation available at [bosapi.github.io/bosbun](https://bosapi.github.io/bosbun).
+Full documentation available at [bosbun.bosapi.com](https://bosbun.bosapi.com).
 
 - [Getting Started](docs/src/content/docs/getting-started.md)
 - [Project Structure](docs/src/content/docs/project-structure.md)
