@@ -1,7 +1,7 @@
 import { resolve, join, basename } from "path";
-import { existsSync, mkdirSync, readdirSync, statSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { spawn } from "bun";
-import * as readline from "readline";
+import * as p from "@clack/prompts";
 
 // ─── bosia create <name> [--template <name>] ──────────────
 
@@ -79,26 +79,21 @@ async function promptTemplate(): Promise<string> {
 
     if (templates.length === 1) return templates[0];
 
-    console.log("\n? Which template?\n");
-    templates.forEach((t, i) => {
-        const desc = TEMPLATE_DESCRIPTIONS[t] ?? "";
-        const marker = i === 0 ? "❯" : " ";
-        console.log(`  ${marker} ${t}${desc ? `  — ${desc}` : ""}`);
-    });
-    console.log();
-
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
+    const selected = await p.select({
+        message: "Which template?",
+        options: templates.map((t) => ({
+            value: t,
+            label: t,
+            hint: TEMPLATE_DESCRIPTIONS[t],
+        })),
     });
 
-    return new Promise<string>((resolvePromise) => {
-        rl.question(`  Template name (default): `, (answer) => {
-            rl.close();
-            const trimmed = answer.trim();
-            resolvePromise(trimmed || "default");
-        });
-    });
+    if (p.isCancel(selected)) {
+        p.cancel("Operation cancelled.");
+        process.exit(0);
+    }
+
+    return selected as string;
 }
 
 function copyDir(src: string, dest: string, projectName: string) {

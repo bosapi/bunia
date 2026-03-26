@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - Rename framework from `bosbun` to `bosia` — package name, CLI binary, virtual modules (`bosia:routes`), generated directory (`.bosia/`), internal endpoints (`/__bosia/`), window globals (`__BOSIA_*`), CSS classes, data attributes, documentation site, and all references
+- `bosia create` template picker now uses arrow-key selection instead of typed input (powered by `@clack/prompts`)
 
 ---
 
