@@ -1,0 +1,13 @@
+{
+  "components": [
+    "avatar",
+    "badge",
+    "button",
+    "card",
+    "data-table",
+    "dropdown-menu",
+    "icon",
+    "input",
+    "separator"
+  ]
+}

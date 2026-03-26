@@ -1,0 +1,16 @@
+{
+  "name": "data-table",
+  "description": "A fully-featured data table with sorting, filtering, and pagination.",
+  "dependencies": ["button", "input", "separator"],
+  "files": [
+    "data-table.svelte",
+    "data-table-header.svelte",
+    "data-table-filters.svelte",
+    "data-table-pagination.svelte",
+    "data-table-empty.svelte",
+    "types.ts",
+    "render.ts",
+    "index.ts"
+  ],
+  "npmDeps": {}
+}
