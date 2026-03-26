@@ -9,20 +9,20 @@
         { icon: "🔁", label: "Server loaders", desc: "+page.server.ts and +layout.server.ts with parent() threading" },
         { icon: "🪝", label: "Hooks", desc: "sequence() middleware — auth, logging, locals" },
         { icon: "📡", label: "API routes", desc: "+server.ts exports GET, POST, PUT, PATCH, DELETE" },
-        { icon: "🧩", label: "Component registry", desc: "bosbun add button — shadcn-style, code you own" },
-        { icon: "✨", label: "feat system", desc: "bosbun feat login — scaffold entire features, not just components" },
+        { icon: "🧩", label: "Component registry", desc: "bosia add button — shadcn-style, code you own" },
+        { icon: "✨", label: "feat system", desc: "bosia feat login — scaffold entire features, not just components" },
     ];
 </script>
 
 <svelte:head>
-    <title>Bosbun Demo</title>
-    <meta name="description" content="Bosbun — SSR + Svelte 5 + Bun + ElysiaJS" />
+    <title>Bosia Demo</title>
+    <meta name="description" content="Bosia — SSR + Svelte 5 + Bun + ElysiaJS" />
 </svelte:head>
 
 <div class="space-y-12">
     <!-- Hero -->
     <div class="space-y-3 pt-4">
-        <h1 class="text-5xl font-bold tracking-tight flex items-center gap-3"><img src="/favicon.svg" alt="" class="size-10" /> Bosbun</h1>
+        <h1 class="text-5xl font-bold tracking-tight flex items-center gap-3"><img src="/favicon.svg" alt="" class="size-10" /> Bosia</h1>
         <p class="text-xs text-muted-foreground">{PUBLIC_STATIC_BASE_URL}</p>
         <p class="text-xl text-muted-foreground max-w-xl">
             A minimalist fullstack framework — SSR, Svelte 5 Runes, Bun, and ElysiaJS.

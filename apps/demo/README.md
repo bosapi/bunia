@@ -1,6 +1,6 @@
-# Bosbun Demo
+# Bosia Demo
 
-The official demo app for the [Bosbun](../../packages/bosbun/README.md) framework. It demonstrates file-based routing, server loaders, API endpoints, middleware hooks, and Tailwind design tokens.
+The official demo app for the [Bosia](../../packages/bosia/README.md) framework. It demonstrates file-based routing, server loaders, API endpoints, middleware hooks, and Tailwind design tokens.
 
 ## Running
 
@@ -36,7 +36,7 @@ Root layout loader that reads `locals.requestTime` and passes it down to all lay
 
 ### `src/routes/(public)/+layout.svelte`
 
-Shared layout for all public pages. Renders a sticky nav, main content area, and a footer showing "Powered by Bosbun" with an optional `requestTime` timestamp.
+Shared layout for all public pages. Renders a sticky nav, main content area, and a footer showing "Powered by Bosia" with an optional `requestTime` timestamp.
 
 ### `src/routes/(public)/blog/[slug]/+page.server.ts`
 
