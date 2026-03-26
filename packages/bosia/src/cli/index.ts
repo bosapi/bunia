@@ -33,7 +33,9 @@ async function main() {
         }
         case "add": {
             const { runAdd } = await import("./add.ts");
-            await runAdd(args[0]);
+            const addName = args.find((a) => !a.startsWith("--"));
+            const addFlags = args.filter((a) => a.startsWith("--"));
+            await runAdd(addName, addFlags);
             break;
         }
         case "feat": {
