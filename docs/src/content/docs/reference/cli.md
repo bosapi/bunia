@@ -76,6 +76,7 @@ bosia add <component>
 - Downloads component files to `src/lib/components/ui/<component>/`
 - Supports **path-based names** — `bosia add shop/cart` installs to `src/lib/components/shop/cart/`
 - Components without a path prefix default to `ui/` — `bosia add button` → `src/lib/components/ui/button/`
+- If a component already exists, prompts to **replace** or **skip**
 - Automatically installs component dependencies (other components it depends on)
 - Installs required npm packages via `bun add`
 - Registry hosted on GitHub: `bosapi/bosia/main/registry/components/`

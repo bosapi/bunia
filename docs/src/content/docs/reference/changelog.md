@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Component registry — 12 Svelte 5 UI components (avatar, badge, button, card, chart, data-table, dropdown-menu, icon, input, navbar, separator, sidebar) in `registry/components/`
 - `bosia add --local` flag for installing components from the local registry during development
 - `bosia add` now auto-creates `src/lib/utils.ts` (cn utility) if it doesn't exist
+- Path-based component names — `bosia add shop/cart` installs to `src/lib/components/shop/cart/`; names without a path default to `ui/` prefix
+- Overwrite prompt — `bosia add` asks to replace or skip when a component already exists in the project
 - Components documentation — dedicated sidebar group with individual pages for all 12 components
 
 ---

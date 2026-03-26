@@ -1,6 +1,7 @@
 import { join, dirname } from "path";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "fs";
 import { spawn } from "bun";
+import * as p from "@clack/prompts";
 
 // ─── bosia add <component> ────────────────────────────────
 // Fetches a component from the GitHub registry (or local registry
@@ -67,8 +68,19 @@ export async function addComponent(name: string, root = false) {
         await addComponent(dep, false);
     }
 
-    // Download/copy component files into src/lib/components/<fullPath>/
+    // Check if component already exists
     const destDir = join(process.cwd(), "src", "lib", "components", fullPath);
+    if (existsSync(destDir)) {
+        const replace = await p.confirm({
+            message: `Component "${name}" already exists at src/lib/components/${fullPath}/. Replace it?`,
+        });
+        if (p.isCancel(replace) || !replace) {
+            console.log(`   ⏭️  Skipped ${name}`);
+            return;
+        }
+    }
+
+    // Download/copy component files into src/lib/components/<fullPath>/
     mkdirSync(destDir, { recursive: true });
 
     for (const file of meta.files) {

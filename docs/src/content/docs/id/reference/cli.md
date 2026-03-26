@@ -76,6 +76,7 @@ bosia add <component>
 - Mengunduh file komponen ke `src/lib/components/ui/<component>/`
 - Mendukung **nama berbasis path** — `bosia add shop/cart` menginstal ke `src/lib/components/shop/cart/`
 - Komponen tanpa prefix path default ke `ui/` — `bosia add button` → `src/lib/components/ui/button/`
+- Jika komponen sudah ada, akan bertanya apakah ingin **mengganti** atau **lewati**
 - Secara otomatis menginstal dependensi komponen (komponen lain yang menjadi dependensinya)
 - Menginstal paket npm yang diperlukan melalui `bun add`
 - Registry dihosting di GitHub: `bosapi/bosia/main/registry/components/`
