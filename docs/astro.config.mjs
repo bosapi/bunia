@@ -1,10 +1,14 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import svelte from "@astrojs/svelte";
+import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   site: "https://bosia.bosapi.com",
   integrations: [
     starlight({
+      customCss: ["./src/styles/component-tokens.css"],
       title: "Bosia",
       logo: {
         light: "./src/assets/logo-light.svg",
@@ -190,5 +194,17 @@ export default defineConfig({
         },
       ],
     }),
+    svelte(),
   ],
+  vite: {
+    plugins: [tailwindcss()],
+    resolve: {
+      alias: {
+        $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
+        $registry: fileURLToPath(
+          new URL("../registry/components/ui", import.meta.url),
+        ),
+      },
+    },
+  },
 });

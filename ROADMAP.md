@@ -93,6 +93,7 @@
 - [x] GitHub Actions for auto-publishing to npm and deploying docs
 - [x] Dev server auto-restart on crash
 - [x] Components documentation page with usage examples and prop tables
+- [x] Interactive component previews in docs — live Svelte demos (button, badge, input, separator, avatar, card, dropdown-menu)
 
 ### v0.1.0
 - [x] Rename framework from `bosbun` to `bosia`

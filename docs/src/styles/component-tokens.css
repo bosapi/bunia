@@ -1,0 +1,299 @@
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+
+@source "../../../registry/components/ui";
+@source "../components/demos";
+
+/*
+ * Register semantic color names so Tailwind generates utility classes.
+ * Values are placeholders (invalid at :root) — resolved on .bosia-preview.
+ */
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ─── Scoped Preflight ──────────────────────────────────────
+ * Full Tailwind preflight, scoped to .bosia-preview.
+ * Wrapped in @layer base so it's lower priority than
+ * @layer utilities in the CSS cascade.
+ * Also uses :where() for zero specificity as extra safety.
+ */
+
+@layer base {
+  :where(.bosia-preview) *,
+  :where(.bosia-preview) *::before,
+  :where(.bosia-preview) *::after,
+  :where(.bosia-preview) *::backdrop,
+  :where(.bosia-preview) *::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+
+  :where(.bosia-preview) {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: ui-sans-serif, system-ui, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(.bosia-preview) hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  :where(.bosia-preview) h1,
+  :where(.bosia-preview) h2,
+  :where(.bosia-preview) h3,
+  :where(.bosia-preview) h4,
+  :where(.bosia-preview) h5,
+  :where(.bosia-preview) h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where(.bosia-preview) a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :where(.bosia-preview) b,
+  :where(.bosia-preview) strong {
+    font-weight: bolder;
+  }
+
+  :where(.bosia-preview) code,
+  :where(.bosia-preview) kbd,
+  :where(.bosia-preview) samp,
+  :where(.bosia-preview) pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    font-size: 1em;
+  }
+
+  :where(.bosia-preview) small {
+    font-size: 80%;
+  }
+
+  :where(.bosia-preview) sub,
+  :where(.bosia-preview) sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  :where(.bosia-preview) sub {
+    bottom: -0.25em;
+  }
+
+  :where(.bosia-preview) sup {
+    top: -0.5em;
+  }
+
+  :where(.bosia-preview) table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  :where(.bosia-preview) ol,
+  :where(.bosia-preview) ul,
+  :where(.bosia-preview) menu {
+    list-style: none;
+  }
+
+  :where(.bosia-preview) img,
+  :where(.bosia-preview) svg,
+  :where(.bosia-preview) video,
+  :where(.bosia-preview) canvas,
+  :where(.bosia-preview) audio,
+  :where(.bosia-preview) iframe,
+  :where(.bosia-preview) embed,
+  :where(.bosia-preview) object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  :where(.bosia-preview) img,
+  :where(.bosia-preview) video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :where(.bosia-preview) button,
+  :where(.bosia-preview) input,
+  :where(.bosia-preview) select,
+  :where(.bosia-preview) optgroup,
+  :where(.bosia-preview) textarea,
+  :where(.bosia-preview) ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+
+  :where(.bosia-preview) ::placeholder {
+    opacity: 1;
+  }
+
+  @supports (not (-webkit-appearance: -apple-pay-button)) or
+    (contain-intrinsic-size: 1px) {
+    :where(.bosia-preview) ::placeholder {
+      color: color-mix(in oklab, currentcolor 50%, transparent);
+    }
+  }
+
+  :where(.bosia-preview) textarea {
+    resize: vertical;
+  }
+
+  :where(.bosia-preview) summary {
+    display: list-item;
+  }
+
+  :where(.bosia-preview) button,
+  :where(.bosia-preview) input:where([type="button"], [type="reset"], [type="submit"]),
+  :where(.bosia-preview) ::file-selector-button {
+    appearance: button;
+  }
+
+  :where(.bosia-preview) [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+
+/* ─── Design Tokens (Light) ───────────────────────────────── */
+.bosia-preview {
+  --radius: 0.5rem;
+  --radius-sm: calc(0.5rem - 4px);
+  --radius-md: calc(0.5rem - 2px);
+  --radius-lg: 0.5rem;
+  --radius-xl: calc(0.5rem + 4px);
+
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(222.2 84% 4.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222.2 84% 4.9%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(222.2 84% 4.9%);
+  --color-primary: hsl(222.2 47.4% 11.2%);
+  --color-primary-foreground: hsl(210 40% 98%);
+  --color-secondary: hsl(210 40% 96.1%);
+  --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
+  --color-muted: hsl(210 40% 96.1%);
+  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
+  --color-accent: hsl(210 40% 96.1%);
+  --color-accent-foreground: hsl(222.2 47.4% 11.2%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  --color-border: hsl(214.3 31.8% 91.4%);
+  --color-input: hsl(214.3 31.8% 91.4%);
+  --color-ring: hsl(222.2 84% 4.9%);
+
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+}
+
+/* Default border color — mirrors myapp's @layer base { * { border-color } } */
+@layer base {
+  :where(.bosia-preview) *,
+  :where(.bosia-preview) *::before,
+  :where(.bosia-preview) *::after {
+    border-color: var(--color-border);
+  }
+}
+
+/* ─── Design Tokens (Dark) ──────────────────────────────── */
+:root[data-theme="dark"] .bosia-preview,
+.dark .bosia-preview {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+
+  --color-background: hsl(222.2 84% 4.9%);
+  --color-foreground: hsl(210 40% 98%);
+  --color-card: hsl(222.2 84% 4.9%);
+  --color-card-foreground: hsl(210 40% 98%);
+  --color-popover: hsl(222.2 84% 4.9%);
+  --color-popover-foreground: hsl(210 40% 98%);
+  --color-primary: hsl(210 40% 98%);
+  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
+  --color-secondary: hsl(217.2 32.6% 17.5%);
+  --color-secondary-foreground: hsl(210 40% 98%);
+  --color-muted: hsl(217.2 32.6% 17.5%);
+  --color-muted-foreground: hsl(215 20.2% 65.1%);
+  --color-accent: hsl(217.2 32.6% 17.5%);
+  --color-accent-foreground: hsl(210 40% 98%);
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  --color-border: hsl(217.2 32.6% 17.5%);
+  --color-input: hsl(217.2 32.6% 17.5%);
+  --color-ring: hsl(212.7 26.8% 83.9%);
+}

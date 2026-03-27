@@ -3,11 +3,20 @@ title: Card
 description: A card component with header, content, and footer slots.
 ---
 
+import ComponentPreview from "../../../components/ComponentPreview.astro";
+import CardDemo from "../../../components/demos/CardDemo.svelte";
+
 ```bash
 bosia add card
 ```
 
 A card with composable sub-components: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, and `CardFooter`.
+
+## Preview
+
+<ComponentPreview>
+  <CardDemo client:load />
+</ComponentPreview>
 
 ## Usage
 

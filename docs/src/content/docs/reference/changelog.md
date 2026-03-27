@@ -9,10 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [0.1.1] - 2026-03-26
+## [0.1.1] - 2026-03-27
 
 ### Added
 - Component registry — 12 Svelte 5 UI components (avatar, badge, button, card, chart, data-table, dropdown-menu, icon, input, navbar, separator, sidebar) in `registry/components/`
+- Interactive component previews in docs — live, clickable demos on 7 component pages (button, badge, input, separator, avatar, card, dropdown-menu) using hydrated Svelte components via `@astrojs/svelte`
 - `bosia add --local` flag for installing components from the local registry during development
 - `bosia add` now auto-creates `src/lib/utils.ts` (cn utility) if it doesn't exist
 - Path-based component names — `bosia add shop/cart` installs to `src/lib/components/shop/cart/`; names without a path default to `ui/` prefix

@@ -1,0 +1,27 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<div class:list={["bosia-preview not-content", className]}>
+  <div class="preview-container">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    min-height: 80px;
+  }
+</style>

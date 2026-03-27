@@ -13,7 +13,13 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.34",
+    "@astrojs/svelte": "^8.0.4",
+    "@tailwindcss/vite": "^4.2.2",
     "astro": "^5.7",
-    "sharp": "^0.33.0"
+    "clsx": "^2.1.1",
+    "sharp": "^0.33.0",
+    "svelte": "^5.55.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2"
   }
 }

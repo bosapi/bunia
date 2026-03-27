@@ -3,11 +3,20 @@ title: Avatar
 description: An avatar component with image and fallback slots.
 ---
 
+import ComponentPreview from "../../../components/ComponentPreview.astro";
+import AvatarDemo from "../../../components/demos/AvatarDemo.svelte";
+
 ```bash
 bosia add avatar
 ```
 
 An avatar with image and fallback support. Shows fallback content when the image fails to load.
+
+## Preview
+
+<ComponentPreview>
+  <AvatarDemo client:load />
+</ComponentPreview>
 
 ## Usage
 
