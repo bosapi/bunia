@@ -26,7 +26,12 @@ export async function loadDoc(slug: string): Promise<DocPage | null> {
     // Prevent path traversal
     if (slug.includes("..")) return null;
 
-    const filePath = join(contentDir, `${slug}.md`);
+    let filePath = join(contentDir, `${slug}.md`);
+
+    // Fallback: treat slug as a directory and look for its index
+    if (!existsSync(filePath)) {
+        filePath = join(contentDir, `${slug}/index.md`);
+    }
 
     if (!existsSync(filePath)) return null;
 
