@@ -205,7 +205,32 @@
   overflow-x: auto;
   font-size: 0.875rem;
   line-height: 1.6;
-  background-color: hsl(222.2 84% 4.9%) !important;
+  background-color: hsl(var(--muted));
+}
+
+/* ─── Shiki Dual-Theme ────────────────────────────────────── */
+/* Specificity note:
+   .prose pre (0,1,1) > .shiki (0,1,0)  → .prose pre bg wins in light mode
+   .dark .shiki (0,2,0) > .prose pre (0,1,1) → Shiki dark-bg wins in dark mode */
+
+/* Light mode token colours (background comes from .prose pre) */
+.shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+  text-decoration: var(--shiki-light-text-decoration);
+}
+
+/* Dark mode: override both background and token colours */
+.dark .shiki {
+  background-color: var(--shiki-dark-bg);
+}
+
+.dark .shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+  text-decoration: var(--shiki-dark-text-decoration);
 }
 
 .prose pre code {

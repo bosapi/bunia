@@ -7,7 +7,7 @@ async function getHighlighter() {
     if (highlighter) return highlighter;
     const { createHighlighter } = await import("shiki");
     highlighter = await createHighlighter({
-        themes: ["github-dark"],
+        themes: ["github-light", "github-dark"],
         langs: ["svelte", "typescript", "bash", "json", "css", "html"],
     });
     return highlighter;
@@ -47,9 +47,13 @@ export async function parseMarkdown(raw: string): Promise<DocPage> {
                     const supported = ["svelte", "typescript", "ts", "bash", "json", "css", "html", "sh"];
                     if (supported.includes(language)) {
                         const mapped = language === "ts" ? "typescript" : language === "sh" ? "bash" : language;
-                        return hl.codeToHtml(text, { lang: mapped, theme: "github-dark" });
+                        return hl.codeToHtml(text, {
+                            lang: mapped,
+                            themes: { light: "github-light", dark: "github-dark" },
+                            defaultColor: false,
+                        });
                     }
-                } catch {}
+                } catch { }
                 return `<pre><code class="language-${language}">${escapeHtml(text)}</code></pre>`;
             },
         },
