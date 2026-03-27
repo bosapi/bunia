@@ -88,6 +88,24 @@ export function scanRoutes(): RouteManifest {
 
     walk("", [], [], []);
 
+    // Warn when a catch-all exists but no exact route covers its prefix.
+    // e.g. "/[...slug]" matches everything EXCEPT "/" (which needs its own +page.svelte).
+    const exactPatterns = new Set(
+        pages.filter(p => !p.pattern.includes("[")).map(p => p.pattern),
+    );
+    for (const p of pages) {
+        const m = p.pattern.match(/^(.*?)\/\[\.\.\.(\w+)\]$/);
+        if (m) {
+            const exactEquivalent = m[1] || "/";
+            if (!exactPatterns.has(exactEquivalent)) {
+                console.warn(
+                    `⚠️  No exact route for "${exactEquivalent}" — the catch-all "${p.pattern}" will NOT match it.\n` +
+                    `   Add a +page.svelte at the "${exactEquivalent}" level to serve that URL.`,
+                );
+            }
+        }
+    }
+
     const errorPage = existsSync(join(ROUTES_DIR, "+error.svelte")) ? "+error.svelte" : null;
 
     return { pages, apis, errorPage };

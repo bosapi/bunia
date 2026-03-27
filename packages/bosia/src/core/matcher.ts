@@ -32,6 +32,9 @@ function matchPattern(
         const paramName = catchallMatch[2]!;
         if (prefix === "" || pathname.startsWith(prefix + "/") || pathname === prefix) {
             const rest = prefix ? pathname.slice(prefix.length + 1) : pathname.slice(1);
+            // Don't let a root catch-all match "/" with an empty slug.
+            // If you want the catch-all to also serve "/", add an explicit +page.svelte at the root.
+            if (!prefix && rest === "") return null;
             return { [paramName]: rest };
         }
         return null;

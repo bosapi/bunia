@@ -101,7 +101,9 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 
     mkdirSync(".bosia", { recursive: true });
     writeFileSync(".bosia/routes.ts", lines.join("\n"));
-    console.log("✅ Routes generated: .bosia/routes.ts");
+    const pagePatterns = pages.map(p => p.pattern).join(", ") || "(none)";
+    console.log(`✅ Routes generated: .bosia/routes.ts`);
+    console.log(`   Found ${pages.length} page route(s): ${pagePatterns}`);
 }
 
 // Import path from .bosia/routes.ts to src/routes/<routePath>
