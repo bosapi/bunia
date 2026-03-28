@@ -10,6 +10,10 @@
     import AvatarDemo from "$lib/components/demos/AvatarDemo.svelte";
     import SeparatorDemo from "$lib/components/demos/SeparatorDemo.svelte";
     import DropdownMenuDemo from "$lib/components/demos/DropdownMenuDemo.svelte";
+    import ChartDemo from "$lib/components/demos/ChartDemo.svelte";
+    import DataTableDemo from "$lib/components/demos/DataTableDemo.svelte";
+    import NavbarDemo from "$lib/components/demos/NavbarDemo.svelte";
+    import SidebarDemo from "$lib/components/demos/SidebarDemo.svelte";
     import IconGrid from "$lib/components/IconGrid.svelte";
 
     const demos: Record<string, any> = {
@@ -20,6 +24,10 @@
         AvatarDemo,
         SeparatorDemo,
         DropdownMenuDemo,
+        ChartDemo,
+        DataTableDemo,
+        NavbarDemo,
+        SidebarDemo,
         IconGrid,
     };
 

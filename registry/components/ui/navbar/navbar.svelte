@@ -20,7 +20,7 @@
         version = "",
         links = [] as { label: string; href: string }[],
         currentPath = "/",
-        user = undefined as { name: string; email: string; initials: string } | undefined,
+        user = undefined as { name: string; email: string; initials: string; avatar?: string } | undefined,
         children,
         ...restProps
     }: {
@@ -29,7 +29,7 @@
         version?: string;
         links?: { label: string; href: string }[];
         currentPath?: string;
-        user?: { name: string; email: string; initials: string };
+        user?: { name: string; email: string; initials: string; avatar?: string };
         children?: Snippet;
         [key: string]: any;
     } = $props();
@@ -57,7 +57,9 @@
         <NavbarMobileMenu {links} {currentPath} />
 
         <a href="/" class="flex items-center gap-2">
-            <span class="text-xl font-bold">⬡ {brand}</span>
+            <img src="/logo-dark.svg" alt={brand} class="hidden h-5 w-5 dark:block" />
+            <img src="/logo-light.svg" alt={brand} class="block h-5 w-5 dark:hidden" />
+            <span class="text-xl font-bold">{brand}</span>
             {#if version}
                 <span
                     class="hidden sm:inline text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded"
@@ -95,14 +97,14 @@
         {#if user}
             <DropdownMenu>
                 <DropdownMenuTrigger aria-label="User menu">
-                    <Avatar class="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+                    <Avatar src={user.avatar} class="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
                         <AvatarFallback class="text-xs">{user.initials}</AvatarFallback>
                     </Avatar>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" class="w-56">
                     <div class="flex items-center gap-2 p-2">
-                        <Avatar class="h-8 w-8">
+                        <Avatar src={user.avatar} class="h-8 w-8">
                             <AvatarFallback class="text-xs">{user.initials}</AvatarFallback>
                         </Avatar>
                         <div class="flex flex-col space-y-0.5">

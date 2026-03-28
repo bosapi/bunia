@@ -24,15 +24,19 @@ A composable sidebar with header, scrollable content, grouped menus, collapsible
 <div class="flex h-screen">
   <Sidebar>
     <SidebarHeader>
-      <span class="text-lg font-bold">⬡ Bosia</span>
+      <div class="flex items-center gap-2">
+        <img src="/logo-dark.svg" alt="Bosia" class="hidden h-5 w-5 dark:block" />
+        <img src="/logo-light.svg" alt="Bosia" class="block h-5 w-5 dark:hidden" />
+        <span class="text-lg font-bold">Bosia</span>
+      </div>
     </SidebarHeader>
 
     <SidebarContent>
       <SidebarGroup label="Navigation">
         <SidebarMenu>
-          <SidebarMenuItem href="/" label="Home" icon="🏠" active />
-          <SidebarMenuItem href="/dashboard" label="Dashboard" icon="📊" />
-          <SidebarMenuItem href="/settings" label="Settings" icon="⚙️" />
+          <SidebarMenuItem href="/" label="Home" active />
+          <SidebarMenuItem href="/dashboard" label="Dashboard" />
+          <SidebarMenuItem href="/settings" label="Settings" />
         </SidebarMenu>
       </SidebarGroup>
     </SidebarContent>
@@ -58,7 +62,7 @@ A composable sidebar with header, scrollable content, grouped menus, collapsible
 | `SidebarFooter`     | Bottom section with border-top                   |
 | `SidebarGroup`      | Groups items under an optional uppercase label   |
 | `SidebarMenu`       | `<ul>` wrapper for menu items                    |
-| `SidebarMenuItem`   | Link, button, or static text item with icon      |
+| `SidebarMenuItem`   | Link, button, or static text item with optional icon snippet |
 
 ## Sidebar Props
 
@@ -73,9 +77,21 @@ A composable sidebar with header, scrollable content, grouped menus, collapsible
 `SidebarMenuItem` supports nested children for collapsible sub-menus:
 
 ```svelte
-<SidebarMenuItem label="Analytics" icon="📈">
+<SidebarMenuItem label="Analytics">
   <SidebarMenuItem href="/analytics/overview" label="Overview" />
   <SidebarMenuItem href="/analytics/reports" label="Reports" />
+</SidebarMenuItem>
+```
+
+### Icon Snippet
+
+The `icon` prop accepts a Svelte snippet:
+
+```svelte
+<SidebarMenuItem href="/" label="Home" active>
+  {#snippet icon()}
+    <Icon name="home" size={16} />
+  {/snippet}
 </SidebarMenuItem>
 ```
 

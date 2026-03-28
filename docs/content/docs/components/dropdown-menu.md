@@ -12,6 +12,15 @@ A context-managed dropdown with trigger, content, items, and separator. Handles 
 
 ## Preview
 
+## Props
+
+### DropdownMenuContent
+
+| Prop    | Type                                    | Default |
+| ------- | --------------------------------------- | ------- |
+| `align` | `"start"` \| `"end"` \| `"center"`     | `"end"` |
+| `class` | `string`                                | `""`    |
+
 ## Sub-components
 
 - `DropdownMenu` — root wrapper, manages open state

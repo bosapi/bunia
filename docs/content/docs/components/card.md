@@ -12,6 +12,14 @@ A card with composable sub-components: `Card`, `CardHeader`, `CardTitle`, `CardD
 
 ## Preview
 
+## Props
+
+| Prop    | Type     | Default |
+| ------- | -------- | ------- |
+| `class` | `string` | `""`    |
+
+All sub-components (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`) accept `class` and are optional.
+
 ## Usage
 
 ```svelte

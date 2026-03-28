@@ -34,7 +34,7 @@ A responsive navigation bar with desktop link row, mobile hamburger menu, dark m
 | `version`     | `string`                                              | `""`        |
 | `links`       | `{ label: string; href: string }[]`                   | `[]`        |
 | `currentPath` | `string`                                              | `"/"`       |
-| `user`        | `{ name: string; email: string; initials: string }`   | `undefined` |
+| `user`        | `{ name: string; email: string; initials: string; avatar?: string }` | `undefined` |
 
 ## With User Avatar
 
@@ -44,7 +44,7 @@ When `user` is provided, a dropdown menu appears with Profile, Settings, and Log
 <Navbar
   {links}
   currentPath="/"
-  user={{ name: "Alice", email: "alice@bosia.dev", initials: "A" }}
+  user={{ name: "Alice", email: "alice@bosia.dev", initials: "A", avatar: "/favicon.svg" }}
 />
 ```
 

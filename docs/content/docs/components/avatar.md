@@ -12,6 +12,14 @@ An avatar with image and fallback support. Shows fallback content when the image
 
 ## Preview
 
+## Props
+
+| Prop    | Type     | Default |
+| ------- | -------- | ------- |
+| `src`   | `string` | —       |
+| `alt`   | `string` | `""`    |
+| `class` | `string` | `""`    |
+
 ## Usage
 
 ```svelte
@@ -20,7 +28,7 @@ An avatar with image and fallback support. Shows fallback content when the image
 </script>
 
 <!-- With image -->
-<Avatar src="/photo.jpg" alt="John Doe">
+<Avatar src="/favicon.svg" alt="John Doe">
   <AvatarFallback>JD</AvatarFallback>
 </Avatar>
 
@@ -33,7 +41,7 @@ An avatar with image and fallback support. Shows fallback content when the image
 ## Custom Size
 
 ```svelte
-<Avatar src="/photo.jpg" alt="User" class="h-16 w-16">
+<Avatar src="/favicon.svg" alt="User" class="h-16 w-16">
   <AvatarFallback>U</AvatarFallback>
 </Avatar>
 ```
