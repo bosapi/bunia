@@ -124,7 +124,7 @@ export async function loadRouteData(
 
 // ─── Metadata Loader ─────────────────────────────────────
 
-async function loadMetadata(
+export async function loadMetadata(
     route: any,
     params: Record<string, string>,
     url: URL,

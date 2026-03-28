@@ -84,6 +84,20 @@
       pageData = result?.pageData ?? {};
       layoutData = result?.layoutData ?? [];
       routeParams = result?.pageData?.params ?? match.params;
+
+      // Update document title and meta description from server metadata
+      if (result?.metadata) {
+        if (result.metadata.title) document.title = result.metadata.title;
+        if (result.metadata.description) {
+          let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+          if (!meta) {
+            meta = document.createElement("meta");
+            meta.name = "description";
+            document.head.appendChild(meta);
+          }
+          meta.content = result.metadata.description;
+        }
+      }
     });
 
     return () => { cancelled = true; };

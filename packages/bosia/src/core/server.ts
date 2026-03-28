@@ -13,7 +13,7 @@ import type { CsrfConfig } from "./csrf.ts";
 import { getCorsHeaders, handlePreflight } from "./cors.ts";
 import type { CorsConfig } from "./cors.ts";
 import { isDev, compress, isStaticPath } from "./html.ts";
-import { loadRouteData, renderSSRStream, renderErrorPage, renderPageWithFormData } from "./renderer.ts";
+import { loadRouteData, loadMetadata, renderSSRStream, renderErrorPage, renderPageWithFormData } from "./renderer.ts";
 import { getServerTime } from "../lib/utils.ts";
 
 // ─── User Hooks ──────────────────────────────────────────
@@ -122,9 +122,20 @@ async function resolve(event: RequestEvent): Promise<Response> {
         // Rewrite event.url so logging middleware sees the real page path, not /__bosia/data
         event.url = routeUrl;
         try {
+            const pageMatch = findMatch(serverRoutes, routeUrl.pathname);
             const data = await loadRouteData(routeUrl, locals, request, cookies);
             if (!data) return compress(JSON.stringify({ pageData: {}, layoutData: [] }), "application/json", request);
-            return compress(JSON.stringify(data), "application/json", request);
+
+            // Include metadata for client-side title/description updates
+            let metadata = null;
+            if (pageMatch) {
+                try {
+                    const meta = await loadMetadata(pageMatch.route, pageMatch.params, routeUrl, locals, cookies, request);
+                    if (meta) metadata = { title: meta.title, description: meta.description };
+                } catch { /* non-fatal */ }
+            }
+
+            return compress(JSON.stringify({ ...data, metadata }), "application/json", request);
         } catch (err) {
             if (err instanceof Redirect) {
                 return compress(JSON.stringify({ redirect: err.location, status: err.status }), "application/json", request);
