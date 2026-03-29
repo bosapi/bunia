@@ -1,0 +1,28 @@
+{
+  "name": "{{PROJECT_NAME}}",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bosia dev",
+    "build": "bosia build",
+    "start": "bosia start",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "bun run src/features/drizzle/seeds/runner.ts"
+  },
+  "dependencies": {
+    "bosia": "^{{BOSIA_VERSION}}",
+    "svelte": "^5.20.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0",
+    "drizzle-orm": "^0.44.0",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5",
+    "drizzle-kit": "^0.31.0"
+  }
+}
