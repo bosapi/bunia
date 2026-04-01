@@ -108,17 +108,32 @@ async function startAppServer() {
 // ─── Build & Restart ──────────────────────────────────────
 
 let buildTimer: ReturnType<typeof setTimeout> | null = null;
+let building = false;
+let buildPending = false;
 
 async function buildAndRestart() {
-    const ok = await runBuild();
-    if (!ok) {
-        console.error("❌ Build failed — fix errors and save again");
+    if (building) {
+        buildPending = true;
         return;
     }
-    await startAppServer();
-    // Give the app server a moment to bind its port
-    await Bun.sleep(200);
-    broadcastReload();
+    building = true;
+    try {
+        const ok = await runBuild();
+        if (!ok) {
+            console.error("❌ Build failed — fix errors and save again");
+            return;
+        }
+        await startAppServer();
+        // Give the app server a moment to bind its port
+        await Bun.sleep(200);
+        broadcastReload();
+    } finally {
+        building = false;
+    }
+    if (buildPending) {
+        buildPending = false;
+        buildAndRestart();
+    }
 }
 
 function scheduleBuild() {

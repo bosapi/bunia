@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.5] - 2026-04-01
+
+### Fixed
+- Concurrent build guard in dev — prevent overlapping `buildAndRestart()` when rapid file changes fire during an active build; queues one follow-up build instead of running builds in parallel
+
 ## [0.1.4] - 2026-03-30
 
 ### Added
