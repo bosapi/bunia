@@ -108,6 +108,9 @@ async function resolve(event: RequestEvent): Promise<Response> {
 
     // Health check endpoint — for load balancers and orchestrators
     if (path === "/_health") {
+        if (shuttingDown) {
+            return Response.json({ status: "shutting_down" }, { status: 503 });
+        }
         const { timestamp, timezone } = getServerTime();
         return Response.json({ status: "ok", timestamp, timezone });
     }
@@ -303,6 +306,15 @@ const SECURITY_HEADERS: Record<string, string> = {
 };
 
 async function handleRequest(request: Request, url: URL): Promise<Response> {
+    // Reject new non-health requests during shutdown
+    if (shuttingDown && url.pathname !== "/_health") {
+        return new Response("Service Unavailable", {
+            status: 503,
+            headers: { "Retry-After": "5" },
+        });
+    }
+
+    inFlight++;
     try {
         // Handle CORS preflight before CSRF check (OPTIONS is CSRF-exempt)
         if (CORS_CONFIG && request.method === "OPTIONS") {
@@ -338,6 +350,11 @@ async function handleRequest(request: Request, url: URL): Promise<Response> {
         if (isDev) console.error("Unhandled request error:", err);
         else console.error("Unhandled request error:", (err as Error).message ?? err);
         return Response.json({ error: "Internal Server Error" }, { status: 500 });
+    } finally {
+        inFlight--;
+        if (shuttingDown && inFlight === 0 && drainResolve) {
+            drainResolve();
+        }
     }
 }
 
@@ -366,6 +383,12 @@ if (BODY_SIZE_LIMIT === 0) {
 } else {
     console.log(`📦 Body size limit: ${BODY_SIZE_LIMIT} bytes`);
 }
+
+// ─── Graceful Shutdown State ──────────────────────────────
+
+let shuttingDown = false;
+let inFlight = 0;
+let drainResolve: (() => void) | null = null;
 
 // ─── Elysia App ───────────────────────────────────────────
 
@@ -416,11 +439,26 @@ app.listen(PORT, () => {
     if (!isDev) console.log(`⬡ Bosia server running at http://localhost:${PORT}`);
 });
 
-function shutdown() {
-    console.log("Shutting down...");
+async function shutdown() {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log("⏳ Shutting down — draining in-flight requests...");
+
+    if (inFlight > 0) {
+        await Promise.race([
+            new Promise<void>(r => { drainResolve = r; }),
+            Bun.sleep(10_000),
+        ]);
+    }
+
+    if (inFlight > 0) {
+        console.warn(`⚠️  Force shutdown with ${inFlight} request(s) still in flight`);
+    } else {
+        console.log("✅ All requests drained");
+    }
+
     app.stop().then(() => process.exit(0));
-    // Force exit if stop hangs
-    setTimeout(() => process.exit(1), 10_000);
+    setTimeout(() => process.exit(1), 5_000);
 }
 
 process.on("SIGTERM", shutdown);

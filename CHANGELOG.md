@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.1.5] - 2026-04-01
 
+### Added
+- Graceful shutdown drain — on SIGTERM/SIGINT, in-flight requests are allowed up to 10s to complete before the server stops; new requests receive `503 Service Unavailable` with `Retry-After: 5`; `/_health` returns `503 { status: "shutting_down" }` so load balancers stop routing; idempotent shutdown prevents duplicate signal handling
+
 ### Fixed
 - Concurrent build guard in dev — prevent overlapping `buildAndRestart()` when rapid file changes fire during an active build; queues one follow-up build instead of running builds in parallel
 
