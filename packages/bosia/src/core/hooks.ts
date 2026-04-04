@@ -70,6 +70,8 @@ export type Metadata = {
     title?: string;
     description?: string;
     meta?: Array<{ name?: string; property?: string; content: string }>;
+    lang?: string;
+    link?: Array<{ rel: string; href: string; hreflang?: string }>;
     data?: Record<string, any>;
 };
 

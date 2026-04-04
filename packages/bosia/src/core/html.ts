@@ -64,6 +64,7 @@ export function buildHtml(
     layoutData: any[],
     csr = true,
     formData: any = null,
+    lang?: string,
 ): string {
     const cssLinks = (distManifest.css ?? [])
         .map((f: string) => `<link rel="stylesheet" href="/dist/client/${f}">`)
@@ -87,7 +88,7 @@ export function buildHtml(
             : "";
 
     return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${lang || "en"}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -108,15 +109,17 @@ export function buildHtml(
 
 import type { Metadata } from "./hooks.ts";
 
-let _shellOpen: string | null = null;
+const _shellOpenCache = new Map<string, string>();
 
 /** Chunk 1: everything from <!DOCTYPE> through CSS/modulepreload links (head still open) */
-export function buildHtmlShellOpen(): string {
-    if (_shellOpen) return _shellOpen;
+export function buildHtmlShellOpen(lang?: string): string {
+    const key = lang || "en";
+    const cached = _shellOpenCache.get(key);
+    if (cached) return cached;
     const cssLinks = (distManifest.css ?? [])
         .map((f: string) => `<link rel="stylesheet" href="/dist/client/${f}">`)
         .join("\n  ");
-    _shellOpen = `<!DOCTYPE html>\n<html lang="en">\n<head>\n` +
+    const result = `<!DOCTYPE html>\n<html lang="${key}">\n<head>\n` +
         `  <meta charset="UTF-8">\n` +
         `  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n` +
         `  <link rel="icon" type="image/svg+xml" href="/favicon.svg">\n` +
@@ -124,7 +127,8 @@ export function buildHtmlShellOpen(): string {
         `  <link rel="stylesheet" href="/bosia-tw.css${cacheBust}">\n` +
         `  <script>try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark')}catch(_){}</script>\n` +
         `  <link rel="modulepreload" href="/dist/client/${distManifest.entry}${cacheBust}">`;
-    return _shellOpen;
+    _shellOpenCache.set(key, result);
+    return result;
 }
 
 const SPINNER = `<div id="__bs__"><style>` +
@@ -146,6 +150,13 @@ export function buildMetadataChunk(metadata: Metadata | null): string {
             for (const m of metadata.meta) {
                 const attrs = m.name ? `name="${escapeAttr(m.name)}"` : `property="${escapeAttr(m.property ?? "")}"`;
                 out += `  <meta ${attrs} content="${escapeAttr(m.content)}">\n`;
+            }
+        }
+        if (metadata.link) {
+            for (const l of metadata.link) {
+                let attrs = `rel="${escapeAttr(l.rel)}" href="${escapeAttr(l.href)}"`;
+                if (l.hreflang) attrs += ` hreflang="${escapeAttr(l.hreflang)}"`;
+                out += `  <link ${attrs}>\n`;
             }
         }
     } else {

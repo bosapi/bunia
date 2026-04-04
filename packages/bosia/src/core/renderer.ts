@@ -203,8 +203,8 @@ export async function renderSSRStream(
 
     const stream = new ReadableStream<Uint8Array>({
         async start(controller) {
-            // Chunk 1: head opening (CSS, modulepreload — cached)
-            controller.enqueue(enc.encode(buildHtmlShellOpen()));
+            // Chunk 1: head opening (CSS, modulepreload — cached per lang)
+            controller.enqueue(enc.encode(buildHtmlShellOpen(metadata?.lang)));
 
             // Chunk 2: metadata tags, close </head>, open <body> + spinner
             controller.enqueue(enc.encode(buildMetadataChunk(metadata)));
