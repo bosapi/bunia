@@ -1,10 +1,10 @@
 import { join, dirname } from "path";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "fs";
 import * as p from "@clack/prompts";
-import type { InstallOptions } from "./feat.ts";
 import {
+    type InstallOptions,
     REGISTRY_URL,
-    resolveLocalRegistry,
+    resolveLocalRegistryOrExit,
     readRegistryJSON,
     readRegistryFile,
     mergePkgJson,
@@ -52,12 +52,7 @@ export async function runAdd(name: string | undefined, flags: string[] = []) {
     }
 
     if (flags.includes("--local")) {
-        try {
-            registryRoot = resolveLocalRegistry();
-        } catch {
-            console.error("❌ Could not find local registry/ directory.");
-            process.exit(1);
-        }
+        registryRoot = resolveLocalRegistryOrExit();
         console.log(`⬡ Using local registry: ${registryRoot}\n`);
     }
 

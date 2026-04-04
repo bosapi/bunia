@@ -6,6 +6,12 @@ import { spawn } from "bun";
 
 export const REGISTRY_URL = "https://raw.githubusercontent.com/bosapi/bosia/main/registry";
 
+export interface InstallOptions {
+    skipInstall?: boolean;  // write deps to package.json instead of `bun add`
+    skipPrompts?: boolean;  // auto-overwrite, no interactive prompts
+    cwd?: string;           // override process.cwd() for file operations
+}
+
 // ─── Local registry resolution ────────────────────────────
 
 export function resolveLocalRegistry(): string {
@@ -18,6 +24,16 @@ export function resolveLocalRegistry(): string {
         dir = parent;
     }
     throw new Error("Could not find local registry/ directory.");
+}
+
+/** Resolve local registry, exiting with error message on failure. For CLI entry points. */
+export function resolveLocalRegistryOrExit(): string {
+    try {
+        return resolveLocalRegistry();
+    } catch {
+        console.error("❌ Could not find local registry/ directory.");
+        process.exit(1);
+    }
 }
 
 // ─── Registry file readers ────────────────────────────────
@@ -117,18 +133,23 @@ export function mergePkgJson(cwd: string, changes: PkgDeps): { addedDeps: string
     return { addedDeps, addedScripts };
 }
 
-/** Run `bun add` for a list of packages. */
-export async function bunAdd(cwd: string, deps: Record<string, string>): Promise<void> {
+/** Run `bun add` for deps and optionally `bun add --dev` for devDeps. */
+export async function bunAdd(cwd: string, deps: Record<string, string>, devDeps?: Record<string, string>): Promise<void> {
     const packages = Object.entries(deps).map(([pkg, ver]) => (ver ? `${pkg}@${ver}` : pkg));
-    if (packages.length === 0) return;
-    console.log(`\n📥 npm: ${packages.join(", ")}`);
-    const proc = spawn(["bun", "add", ...packages], {
-        stdout: "inherit",
-        stderr: "inherit",
-        cwd,
-    });
-    if ((await proc.exited) !== 0) {
-        console.warn(`⚠️  bun add failed for: ${packages.join(", ")}`);
+    if (packages.length > 0) {
+        console.log(`\n📥 npm: ${packages.join(", ")}`);
+        const proc = spawn(["bun", "add", ...packages], { stdout: "inherit", stderr: "inherit", cwd });
+        if ((await proc.exited) !== 0) {
+            console.warn(`⚠️  bun add failed for: ${packages.join(", ")}`);
+        }
+    }
+    const devPackages = Object.entries(devDeps ?? {}).map(([pkg, ver]) => (ver ? `${pkg}@${ver}` : pkg));
+    if (devPackages.length > 0) {
+        console.log(`\n📥 npm (dev): ${devPackages.join(", ")}`);
+        const proc = spawn(["bun", "add", "--dev", ...devPackages], { stdout: "inherit", stderr: "inherit", cwd });
+        if ((await proc.exited) !== 0) {
+            console.warn(`⚠️  bun add --dev failed for: ${devPackages.join(", ")}`);
+        }
     }
 }
 

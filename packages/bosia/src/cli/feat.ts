@@ -3,7 +3,8 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from "fs";
 import * as p from "@clack/prompts";
 import { addComponent, initAddRegistry } from "./add.ts";
 import {
-    resolveLocalRegistry,
+    type InstallOptions,
+    resolveLocalRegistryOrExit,
     readRegistryJSON,
     readRegistryFile,
     mergePkgJson,
@@ -23,14 +24,9 @@ interface FeatureMeta {
     files: string[];                   // source filenames in the registry feature dir
     targets: string[];                 // destination paths relative to project root
     npmDeps: Record<string, string>;
+    npmDevDeps?: Record<string, string>;
     scripts?: Record<string, string>;  // package.json scripts to add
     envVars?: Record<string, string>;  // env vars to append to .env if missing
-}
-
-export interface InstallOptions {
-    skipInstall?: boolean;  // write deps to package.json instead of `bun add`
-    skipPrompts?: boolean;  // auto-overwrite, no interactive prompts
-    cwd?: string;           // override process.cwd() for file operations
 }
 
 let registryRoot: string | null = null;
@@ -45,12 +41,7 @@ export async function runFeat(name: string | undefined, flags: string[] = []) {
     }
 
     if (flags.includes("--local")) {
-        try {
-            registryRoot = resolveLocalRegistry();
-        } catch {
-            console.error("❌ Could not find local registry/ directory.");
-            process.exit(1);
-        }
+        registryRoot = resolveLocalRegistryOrExit();
         console.log(`⬡ Using local registry: ${registryRoot}\n`);
     }
 
@@ -120,29 +111,27 @@ export async function installFeature(name: string, isRoot: boolean, options?: In
     }
 
     // Install npm dependencies
-    if (Object.keys(meta.npmDeps).length > 0) {
+    const hasDeps = Object.keys(meta.npmDeps).length > 0;
+    const hasDevDeps = Object.keys(meta.npmDevDeps ?? {}).length > 0;
+    const hasScripts = Object.keys(meta.scripts ?? {}).length > 0;
+
+    if (hasDeps || hasDevDeps) {
         if (options?.skipInstall) {
-            // Separate deps vs devDeps (drizzle-kit is a devDep)
-            const deps: Record<string, string> = {};
-            const devDeps: Record<string, string> = {};
-            for (const [name, ver] of Object.entries(meta.npmDeps)) {
-                if (name === "drizzle-kit") {
-                    devDeps[name] = ver;
-                } else {
-                    deps[name] = ver;
-                }
-            }
-            const { addedDeps, addedScripts } = mergePkgJson(cwd, { deps, devDeps, scripts: meta.scripts });
+            const { addedDeps, addedScripts } = mergePkgJson(cwd, {
+                deps: meta.npmDeps,
+                devDeps: meta.npmDevDeps,
+                scripts: meta.scripts,
+            });
             if (addedDeps.length > 0) console.log(`\n📥 Added to package.json: ${addedDeps.join(", ")}`);
             if (addedScripts.length > 0) console.log(`\n📜 Added scripts: ${addedScripts.join(", ")}`);
         } else {
-            await bunAdd(cwd, meta.npmDeps);
-            if (meta.scripts && Object.keys(meta.scripts).length > 0) {
+            await bunAdd(cwd, meta.npmDeps, meta.npmDevDeps);
+            if (hasScripts) {
                 const { addedScripts } = mergePkgJson(cwd, { scripts: meta.scripts });
                 if (addedScripts.length > 0) console.log(`\n📜 Added scripts: ${addedScripts.join(", ")}`);
             }
         }
-    } else if (meta.scripts && Object.keys(meta.scripts).length > 0) {
+    } else if (hasScripts) {
         const { addedScripts } = mergePkgJson(cwd, { scripts: meta.scripts });
         if (addedScripts.length > 0) console.log(`\n📜 Added scripts: ${addedScripts.join(", ")}`);
     }
@@ -173,5 +162,5 @@ export async function installFeature(name: string, isRoot: boolean, options?: In
     }
 }
 
-// Re-export for create.ts
-export { resolveLocalRegistry } from "./registry.ts";
+// Re-exports for create.ts
+export { resolveLocalRegistry, type InstallOptions } from "./registry.ts";

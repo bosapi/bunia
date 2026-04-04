@@ -18,7 +18,9 @@
   ],
   "npmDeps": {
     "drizzle-orm": "^0.44.0",
-    "postgres": "^3.4.5",
+    "postgres": "^3.4.5"
+  },
+  "npmDevDeps": {
     "drizzle-kit": "^0.31.0"
   },
   "scripts": {
