@@ -192,6 +192,11 @@ async function resolve(event: RequestEvent): Promise<Response> {
             const dist = Bun.file(distPath);
             if (await dist.exists()) return new Response(dist);
         }
+        const staticPath = safePath("./dist/static", path);
+        if (staticPath) {
+            const staticFile = Bun.file(staticPath);
+            if (await staticFile.exists()) return new Response(staticFile);
+        }
         return new Response("Not Found", { status: 404 });
     }
 

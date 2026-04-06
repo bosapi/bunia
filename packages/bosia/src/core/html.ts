@@ -216,7 +216,7 @@ export function compress(body: string, contentType: string, req: Request, status
 
 // ─── Static File Detection ────────────────────────────────
 
-const STATIC_EXTS = new Set([".ico", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".css", ".js", ".woff", ".woff2", ".ttf"]);
+const STATIC_EXTS = new Set([".ico", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".css", ".js", ".woff", ".woff2", ".ttf", ".xml", ".txt"]);
 
 export function isStaticPath(path: string): boolean {
     if (path.startsWith("/dist/") || path.startsWith("/__bosia/")) return true;
