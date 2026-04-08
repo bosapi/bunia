@@ -10,9 +10,11 @@
     "ui/card",
     "ui/chart",
     "ui/data-table",
+    "ui/dialog",
     "ui/dropdown-menu",
     "ui/icon",
     "ui/input",
+    "ui/label",
     "ui/navbar",
     "ui/separator",
     "ui/sidebar"
