@@ -17,6 +17,7 @@
     "ui/input",
     "ui/label",
     "ui/navbar",
+    "ui/radio-group",
     "ui/separator",
     "ui/sidebar"
   ],

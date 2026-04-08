@@ -17,6 +17,7 @@
     import CheckboxDemo from "$lib/components/demos/CheckboxDemo.svelte";
     import DialogDemo from "$lib/components/demos/DialogDemo.svelte";
     import LabelDemo from "$lib/components/demos/LabelDemo.svelte";
+    import RadioGroupDemo from "$lib/components/demos/RadioGroupDemo.svelte";
     import IconGrid from "$lib/components/IconGrid.svelte";
 
     const demos: Record<string, any> = {
@@ -34,6 +35,7 @@
         NavbarDemo,
         SidebarDemo,
         LabelDemo,
+        RadioGroupDemo,
         IconGrid,
     };
 
