@@ -20,6 +20,7 @@
     "ui/radio-group",
     "ui/select",
     "ui/separator",
+    "ui/switch",
     "ui/sidebar"
   ],
   "features": [
