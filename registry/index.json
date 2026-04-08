@@ -21,6 +21,7 @@
     "ui/select",
     "ui/separator",
     "ui/switch",
+    "ui/textarea",
     "ui/sidebar"
   ],
   "features": [

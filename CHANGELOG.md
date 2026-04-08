@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.1.13] - 2026-04-09
 
 ### Added
+- `textarea` UI component — multi-line text input with bindable `value`, `field-sizing-content` for auto-growing height, `min-h-16` minimum, placeholder and disabled states, and `cn()` class merging
 - `switch` UI component — toggle switch with `role="switch"` and `aria-checked`, pill-shaped track with sliding thumb, hidden `<input type="checkbox">` for form submission, focus-visible ring, disabled state, and `data-state` attribute
 
 ## [0.1.12] - 2026-04-08
