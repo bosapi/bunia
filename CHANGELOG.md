@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.1.12] - 2026-04-08
 
 ### Added
+- `select` UI component — compound dropdown select with `Select` (root), `SelectTrigger` (`role="combobox"`), `SelectValue` (placeholder/display), `SelectContent` (`role="listbox"`), `SelectItem` (`role="option"` with checkmark), `SelectGroup`, `SelectLabel`, and `SelectSeparator`; keyboard navigation (Arrow keys, Enter/Space, Escape), hidden `<input>` for form submission, disabled state, and click-outside close
 - `radio-group` UI component — compound radio group with `RadioGroup` (root) and `RadioGroupItem` (button); `role="radiogroup"` / `role="radio"` with `aria-checked`, `data-state`, roving tabindex, arrow key navigation, filled circle SVG indicator, hidden `<input type="radio">` for form submission, group-level and per-item disabled states
 - `label` UI component — accessible `<label>` with `for` prop, `peer-disabled` opacity handling, and `cn()` class merging
 - `dialog` UI component — modal overlay with focus trap, body scroll lock, backdrop click/Escape to close, CSS animations, and full ARIA attributes (`role="dialog"`, `aria-modal`, `aria-labelledby`, `aria-describedby`); includes Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription, and DialogFooter sub-components

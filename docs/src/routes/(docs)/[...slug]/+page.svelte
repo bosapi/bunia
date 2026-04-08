@@ -18,6 +18,7 @@
     import DialogDemo from "$lib/components/demos/DialogDemo.svelte";
     import LabelDemo from "$lib/components/demos/LabelDemo.svelte";
     import RadioGroupDemo from "$lib/components/demos/RadioGroupDemo.svelte";
+    import SelectDemo from "$lib/components/demos/SelectDemo.svelte";
     import IconGrid from "$lib/components/IconGrid.svelte";
 
     const demos: Record<string, any> = {
@@ -36,6 +37,7 @@
         SidebarDemo,
         LabelDemo,
         RadioGroupDemo,
+        SelectDemo,
         IconGrid,
     };
 

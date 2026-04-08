@@ -18,6 +18,7 @@
     "ui/label",
     "ui/navbar",
     "ui/radio-group",
+    "ui/select",
     "ui/separator",
     "ui/sidebar"
   ],
