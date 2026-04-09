@@ -13,6 +13,7 @@
     "ui/data-table",
     "ui/dialog",
     "ui/dropdown-menu",
+    "ui/field",
     "ui/icon",
     "ui/input",
     "ui/label",

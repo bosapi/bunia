@@ -21,6 +21,7 @@
     import SelectDemo from "$lib/components/demos/SelectDemo.svelte";
     import SwitchDemo from "$lib/components/demos/SwitchDemo.svelte";
     import TextareaDemo from "$lib/components/demos/TextareaDemo.svelte";
+    import FieldDemo from "$lib/components/demos/FieldDemo.svelte";
     import IconGrid from "$lib/components/IconGrid.svelte";
 
     const demos: Record<string, any> = {
@@ -35,6 +36,7 @@
         ChartDemo,
         DialogDemo,
         DataTableDemo,
+        FieldDemo,
         NavbarDemo,
         SidebarDemo,
         LabelDemo,
