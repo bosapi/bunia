@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `sonner` UI component — zero-dependency toast notifications; `Toaster` component with configurable `position`, shadcn-compatible theming, dismiss button, and auto-dismiss after 4s; `toast()` function with `.success()`, `.error()`, `.info()`, `.warning()` variants and optional `description`; `toast.dismiss(id)` for programmatic dismissal; uses `SvelteMap` for reactive state
 - `tooltip` UI component — compound tooltip with `Tooltip` (root, context provider, configurable `delayDuration`, Escape-to-dismiss), `TooltipTrigger` (button with hover/focus/blur handlers, `aria-describedby` when open), and `TooltipContent` (`role="tooltip"`, four sides `top`/`right`/`bottom`/`left`, three alignments `start`/`center`/`end`, `sideOffset`, fade-in animation); supports `$bindable()` `open` and keyboard accessibility via focus events
 - `spinner` UI component — animated loading indicator with inlined Loader2 SVG path, `role="status"` and `aria-label="Loading"` defaults, `size-4 animate-spin` base classes customizable via Tailwind `size-*` and `text-*` utilities, additional attributes forwarded to the root `<svg>`, zero dependencies
+- `skeleton` UI component — loading-state placeholder with `animate-pulse rounded-md bg-accent` base classes, fully customizable via Tailwind utility classes through the `class` prop, single `<div>` element, zero dependencies
 
 ## [0.1.13] - 2026-04-09
 

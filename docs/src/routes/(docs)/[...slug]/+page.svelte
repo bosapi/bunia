@@ -27,6 +27,7 @@
     import ToggleGroupDemo from "$lib/components/demos/ToggleGroupDemo.svelte";
     import SliderDemo from "$lib/components/demos/SliderDemo.svelte";
     import FieldDemo from "$lib/components/demos/FieldDemo.svelte";
+    import SkeletonDemo from "$lib/components/demos/SkeletonDemo.svelte";
     import SonnerDemo from "$lib/components/demos/SonnerDemo.svelte";
     import SpinnerDemo from "$lib/components/demos/SpinnerDemo.svelte";
     import TooltipDemo from "$lib/components/demos/TooltipDemo.svelte";
@@ -57,6 +58,7 @@
         ToggleDemo,
         ToggleGroupDemo,
         SliderDemo,
+        SkeletonDemo,
         SonnerDemo,
         SpinnerDemo,
         TooltipDemo,

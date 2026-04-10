@@ -23,6 +23,7 @@
     "ui/radio-group",
     "ui/select",
     "ui/separator",
+    "ui/skeleton",
     "ui/sonner",
     "ui/spinner",
     "ui/switch",
