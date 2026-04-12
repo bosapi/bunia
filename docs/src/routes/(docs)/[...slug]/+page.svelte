@@ -13,6 +13,7 @@
     import CommandDemo from "$lib/components/demos/CommandDemo.svelte";
     import ComboboxDemo from "$lib/components/demos/ComboboxDemo.svelte";
     import InputDemo from "$lib/components/demos/InputDemo.svelte";
+    import InputGroupDemo from "$lib/components/demos/InputGroupDemo.svelte";
     import AvatarDemo from "$lib/components/demos/AvatarDemo.svelte";
     import SeparatorDemo from "$lib/components/demos/SeparatorDemo.svelte";
     import DropdownMenuDemo from "$lib/components/demos/DropdownMenuDemo.svelte";
@@ -55,6 +56,7 @@
         CommandDemo,
         ComboboxDemo,
         InputDemo,
+        InputGroupDemo,
         AvatarDemo,
         SeparatorDemo,
         DropdownMenuDemo,

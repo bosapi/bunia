@@ -63,6 +63,7 @@ export const sidebar: NavGroup[] = [
                     { label: "Hover Card", slug: "components/ui/hover-card" },
                     { label: "Icon", slug: "components/ui/icon" },
                     { label: "Input", slug: "components/ui/input" },
+                    { label: "Input Group", slug: "components/ui/input-group" },
                     { label: "Label", slug: "components/ui/label" },
                     { label: "Navbar", slug: "components/ui/navbar" },
                     { label: "Navigation Menu", slug: "components/ui/navigation-menu" },

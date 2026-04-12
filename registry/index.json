@@ -23,6 +23,7 @@
     "ui/hover-card",
     "ui/icon",
     "ui/input",
+    "ui/input-group",
     "ui/label",
     "ui/navbar",
     "ui/navigation-menu",
