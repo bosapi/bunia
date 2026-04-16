@@ -25,6 +25,7 @@
     "ui/icon",
     "ui/input",
     "ui/input-group",
+    "ui/input-otp",
     "ui/label",
     "ui/navbar",
     "ui/native-select",
