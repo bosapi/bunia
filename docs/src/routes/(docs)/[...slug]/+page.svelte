@@ -21,6 +21,7 @@
     import ChartDemo from "$lib/components/demos/ChartDemo.svelte";
     import DataTableDemo from "$lib/components/demos/DataTableDemo.svelte";
     import NavbarDemo from "$lib/components/demos/NavbarDemo.svelte";
+    import NativeSelectDemo from "$lib/components/demos/NativeSelectDemo.svelte";
     import NavigationMenuDemo from "$lib/components/demos/NavigationMenuDemo.svelte";
     import PaginationDemo from "$lib/components/demos/PaginationDemo.svelte";
     import SidebarDemo from "$lib/components/demos/SidebarDemo.svelte";
@@ -66,6 +67,7 @@
         DialogDemo,
         DataTableDemo,
         FieldDemo,
+        NativeSelectDemo,
         NavbarDemo,
         NavigationMenuDemo,
         PaginationDemo,

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.18] - 2026-04-16
+
+### Added
+- `native-select` UI component — styled wrapper around native HTML `<select>` with `appearance-none` and custom chevron SVG via CSS `background-image`; `NativeSelect` (`<select>` with `$bindable()` `value`, Input-matching border/focus/disabled styles, `h-8` height), `NativeSelectOption` (thin `<option>` wrapper with `value` and `disabled`), and `NativeSelectOptGroup` (`<optgroup>` wrapper with `label` and `disabled`); mobile-friendly, form-compatible, zero dependencies
+
 ## [0.1.17] - 2026-04-14
 
 ### Added
