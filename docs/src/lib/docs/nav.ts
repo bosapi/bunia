@@ -63,6 +63,7 @@ export const sidebar: NavGroup[] = [
                     { label: "Date Picker", slug: "components/ui/date-picker" },
                     { label: "Dialog", slug: "components/ui/dialog" },
                     { label: "Dropdown Menu", slug: "components/ui/dropdown-menu" },
+                    { label: "Empty", slug: "components/ui/empty" },
                     { label: "Field", slug: "components/ui/field" },
                     { label: "Form", slug: "components/ui/form" },
                     { label: "Hover Card", slug: "components/ui/hover-card" },

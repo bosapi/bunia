@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.22] - 2026-04-20
+
+### Added
+
+- `empty` UI component — empty state compound component for placeholder UI when no data; `Empty` (dashed border container, centered layout), `EmptyHeader` (groups media + text), `EmptyMedia` with `variant` (`"default"` | `"icon"`), `EmptyTitle` (`<h3>`), `EmptyDescription` (with link styling), `EmptyContent` (action area); all sub-components support `cn()` class merging, `data-slot` attributes, and `...restProps`; zero dependencies
+
 ## [0.1.21] - 2026-04-19
 
 ### Added
