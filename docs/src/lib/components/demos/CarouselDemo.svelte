@@ -10,7 +10,7 @@
 </script>
 
 <div class="mx-auto w-full max-w-xs">
-    <Carousel>
+    <Carousel autoplay={5000}>
         <CarouselContent>
             {#each Array.from({ length: 5 }, (_, i) => i + 1) as num}
                 <CarouselItem>

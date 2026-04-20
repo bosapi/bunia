@@ -29,6 +29,7 @@ A carousel built with CSS scroll-snap. Supports horizontal and vertical orientat
 | Prop | Type | Default |
 | --- | --- | --- |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` |
+| `autoplay` | `boolean \| number` | `false` |
 | `class` | `string` | `""` |
 
 ### CarouselItem
@@ -79,6 +80,15 @@ Show multiple items per view by adjusting `basis`:
 
 ```svelte
 <CarouselItem class="basis-1/3">...</CarouselItem>
+```
+
+## Autoplay
+
+Pass `autoplay` to auto-advance slides. `true` uses a 4000ms interval, or pass a number for custom ms. Pauses on hover and focus.
+
+```svelte
+<Carousel autoplay>...</Carousel>
+<Carousel autoplay={2000}>...</Carousel>
 ```
 
 ## Keyboard
