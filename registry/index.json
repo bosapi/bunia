@@ -14,6 +14,7 @@
     "ui/button-group",
     "ui/calendar",
     "ui/card",
+    "ui/carousel",
     "ui/checkbox",
     "ui/chart",
     "ui/collapsible",

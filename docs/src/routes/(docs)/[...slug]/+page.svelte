@@ -13,6 +13,7 @@
     import BadgeDemo from "$lib/components/demos/BadgeDemo.svelte";
     import BreadcrumbDemo from "$lib/components/demos/BreadcrumbDemo.svelte";
     import CardDemo from "$lib/components/demos/CardDemo.svelte";
+    import CarouselDemo from "$lib/components/demos/CarouselDemo.svelte";
     import CommandDemo from "$lib/components/demos/CommandDemo.svelte";
     import ComboboxDemo from "$lib/components/demos/ComboboxDemo.svelte";
     import InputDemo from "$lib/components/demos/InputDemo.svelte";
@@ -64,6 +65,7 @@
         BadgeDemo,
         BreadcrumbDemo,
         CardDemo,
+        CarouselDemo,
         CheckboxDemo,
         CollapsibleDemo,
         CommandDemo,
