@@ -37,6 +37,7 @@
     import DialogDemo from "$lib/components/demos/DialogDemo.svelte";
     import LabelDemo from "$lib/components/demos/LabelDemo.svelte";
     import RadioGroupDemo from "$lib/components/demos/RadioGroupDemo.svelte";
+    import RangeCalendarDemo from "$lib/components/demos/RangeCalendarDemo.svelte";
     import SelectDemo from "$lib/components/demos/SelectDemo.svelte";
     import SwitchDemo from "$lib/components/demos/SwitchDemo.svelte";
     import TableDemo from "$lib/components/demos/TableDemo.svelte";
@@ -94,6 +95,7 @@
         SidebarDemo,
         LabelDemo,
         RadioGroupDemo,
+        RangeCalendarDemo,
         SelectDemo,
         SwitchDemo,
         TableDemo,

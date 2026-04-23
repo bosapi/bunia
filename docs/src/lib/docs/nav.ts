@@ -82,6 +82,7 @@ export const sidebar: NavGroup[] = [
                     { label: "Popover", slug: "components/ui/popover" },
                     { label: "Progress", slug: "components/ui/progress" },
                     { label: "Radio Group", slug: "components/ui/radio-group" },
+                    { label: "Range Calendar", slug: "components/ui/range-calendar" },
                     { label: "Select", slug: "components/ui/select" },
                     { label: "Separator", slug: "components/ui/separator" },
                     { label: "Sidebar", slug: "components/ui/sidebar" },

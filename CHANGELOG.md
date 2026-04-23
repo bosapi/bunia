@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - `aspect-ratio` UI component — displays content within a desired ratio using CSS padding-bottom technique; configurable `ratio` prop (default `16/9`); supports `cn()` class merging and `...restProps`; zero dependencies
+- `range-calendar` UI component — date range selection with start/end click flow, hover preview styling, and keyboard navigation; reuses `CalendarHeader` via dual context architecture; depends on `calendar` component
 
 ### Fixed
 

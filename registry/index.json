@@ -42,6 +42,7 @@
     "ui/popover",
     "ui/progress",
     "ui/radio-group",
+    "ui/range-calendar",
     "ui/select",
     "ui/separator",
     "ui/skeleton",
