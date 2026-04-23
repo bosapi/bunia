@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.25] - 2026-04-23
+
+### Added
+
+- `aspect-ratio` UI component — displays content within a desired ratio using CSS padding-bottom technique; configurable `ratio` prop (default `16/9`); supports `cn()` class merging and `...restProps`; zero dependencies
+
+---
+
 ## [0.1.24] - 2026-04-22
 
 ### Added

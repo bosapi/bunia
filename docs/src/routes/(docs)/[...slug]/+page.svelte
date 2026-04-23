@@ -3,6 +3,7 @@
     import ComponentPreview from "$lib/components/ComponentPreview.svelte";
 
     // Demo component map
+    import AspectRatioDemo from "$lib/components/demos/AspectRatioDemo.svelte";
     import AccordionDemo from "$lib/components/demos/AccordionDemo.svelte";
     import AlertDemo from "$lib/components/demos/AlertDemo.svelte";
     import AlertDialogDemo from "$lib/components/demos/AlertDialogDemo.svelte";
@@ -57,6 +58,7 @@
     import IconGrid from "$lib/components/IconGrid.svelte";
 
     const demos: Record<string, any> = {
+        AspectRatioDemo,
         AccordionDemo,
         AlertDemo,
         AlertDialogDemo,
