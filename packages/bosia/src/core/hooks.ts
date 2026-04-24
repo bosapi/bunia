@@ -85,10 +85,12 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export function sequence(...handlers: Handle[]): Handle {
     return ({ event, resolve }) => {
-        function apply(i: number, e: RequestEvent): MaybePromise<Response> {
-            if (i >= handlers.length) return resolve(e);
-            return handlers[i]!({ event: e, resolve: (next) => apply(i + 1, next) });
+        let next = resolve;
+        for (let i = handlers.length - 1; i >= 0; i--) {
+            const handler = handlers[i]!;
+            const prev = next;
+            next = (e: RequestEvent) => handler({ event: e, resolve: prev });
         }
-        return apply(0, event);
+        return next(event);
     };
 }
