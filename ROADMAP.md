@@ -1,7 +1,7 @@
 # Bosia — Roadmap
 
 > Track what's done, what's next, and where we're headed.
-> Current version: **0.1.26**
+> Current version: **0.2.0**
 
 ---
 
@@ -9,7 +9,7 @@
 
 ---
 
-## Completed (v0.0.1 – v0.1.6)
+## Completed (v0.0.1 – v0.1.26)
 
 <details>
 <summary>Click to expand completed items</summary>
@@ -134,29 +134,35 @@
 
 ---
 
-## v0.1.7 — Production Hardening
+## v0.2.0 — Production Hardening
 
-> Stability and security improvements for production workloads.
+> Stability, security, and performance improvements for production workloads.
 
 ### Security
-- [ ] 🟠 Trusted proxy configuration — `TRUST_PROXY` env to control when `X-Forwarded-*` headers are trusted in CSRF checks
-- [ ] 🟡 CORS preflight validation — validate requested method/headers against allowed config
 - [x] Cookie secure defaults — default `HttpOnly; Secure; SameSite=Lax` on `cookies.set()` with opt-out
 - [x] Auto-detect `Cache-Control` on `/__bosia/data/` — `private, no-cache` when cookies accessed; `public, max-age=0, must-revalidate` otherwise
-- [ ] 🟡 CORS `Vary: Origin` on all responses when CORS is configured — prevent CDN caching bugs on non-matching origins
-- [ ] ⚪ Validate `CORS_MAX_AGE` env — reject non-numeric values instead of producing `NaN` header
+- [ ] 🟠 Trusted proxy configuration — `TRUST_PROXY` env to control when `X-Forwarded-*` headers are trusted in CSRF checks
 - [ ] 🟠 `allowExternal` redirect validation — still validate against `javascript:`, `data:`, `vbscript:` schemes even when `allowExternal: true`
 - [ ] 🟠 CSP nonce infrastructure — per-request nonce generation, inject into all framework `<script>` tags, expose nonce in hooks for user scripts
+- [ ] 🟡 CORS preflight validation — validate requested method/headers against allowed config
+- [ ] 🟡 CORS `Vary: Origin` on all responses when CORS is configured — prevent CDN caching bugs on non-matching origins
 - [ ] 🟡 Validate prerender `entries()` return values — sanitize path segments before URL substitution
+- [ ] ⚪ Validate `CORS_MAX_AGE` env — reject non-numeric values instead of producing `NaN` header
+
+### Performance
+- [x] 🟠 Parallelize client + server builds — run both `Bun.build()` calls with `Promise.all()` instead of sequentially (~500-1000ms savings)
+- [ ] 🟠 Parallelize Tailwind CSS with builds — run Tailwind CLI concurrently with client+server builds (~500-800ms savings); ensure output exists before manifest step
+- [ ] 🟡 Convert `sequence()` middleware recursion to loop — `apply(i+1, e)` pattern risks stack overflow with many handlers; use iterative approach
 
 ### Server Reliability
 - [ ] 🟠 Stream backpressure handling — check `controller.desiredSize` to prevent memory buildup on slow/disconnected clients
-- [ ] 🟡 Prerender process cleanup — proper signal handling, verified termination, use random port instead of hardcoded 13572
 - [ ] 🟠 Streaming SSR error recovery — render proper error page instead of bare `<p>Internal Server Error</p>` when `render()` throws mid-stream
+- [ ] 🟡 Prerender process cleanup — proper signal handling, verified termination, use random port instead of hardcoded 13572
 - [ ] 🟡 Fix `buildAndRestart` recursive tail call — replace recursion with `while` loop to prevent stack growth under rapid file changes
 
 ### Client
-- [ ] ⚪ Bound prefetch cache size — `prefetchCache` grows unbounded between navigations
+- [ ] 🟡 Bound prefetch cache size — `prefetchCache` grows unbounded between navigations; add LRU eviction (max ~50 entries)
+- [ ] 🟡 Prefetch cache TTL — stale prefetch data served after long idle; discard entries older than 30s on `consumePrefetch()`
 
 ### Build
 - [ ] 🟡 Fail build on tsconfig.json corruption — don't silently continue with degraded config
@@ -168,7 +174,7 @@
 
 ---
 
-## v0.1.8 — Features & DX
+## v0.2.1 — Features & DX
 
 > New capabilities and developer experience improvements.
 
@@ -181,32 +187,42 @@
 - [ ] 🟠 Scroll restoration and snapshot support (`export const snapshot`)
 
 ### Routing
-- [ ] 🟡 Page option: `ssr` toggle (`export const ssr = false`)
-- [ ] 🟡 Page option: `trailingSlash` configuration
 - [ ] 🟠 Layout reset (`+layout@.svelte` or `+page@.svelte`)
 - [ ] 🟠 Route-level `+error.svelte` — per-layout error boundaries instead of global-only
-
-### Server
-- [ ] 🟡 Structured logging with request correlation IDs
+- [ ] 🟡 Page option: `ssr` toggle (`export const ssr = false`)
+- [ ] 🟡 Page option: `trailingSlash` configuration
 
 ### Forms
 - [ ] 🟠 `use:enhance` progressive enhancement — client-side fetch submission with automatic form state management (like SvelteKit)
 
 ### Types
-- [ ] 🟡 Error page types in generated `$types.d.ts`
 - [ ] 🟠 Typed route params — generate `{ slug: string }` from `[slug]` instead of `Record<string, string>`
+- [ ] 🟡 Error page types in generated `$types.d.ts`
+
+### Server
+- [ ] 🟡 Structured logging with request correlation IDs
+
+### DX
+- [ ] 🟡 Cache route scanning in dev mode — skip `fs.readdirSync()` re-scan when changed file is not a route file (`+page`/`+layout`/`+server`/`+error`)
+- [ ] 🟡 Remove hardcoded 200ms SSE delay — poll `/_health` instead of `Bun.sleep(200)` before broadcasting reload
+- [ ] 🟡 Smarter dev rebuild triggers — filter watcher by extension; skip rebuilds for `.md`, test files, and non-source changes
 
 ---
 
-## v0.1.9 — Ecosystem & Observability
+## v0.2.2 — Ecosystem, Observability & Scale
 
-> Nice-to-haves for a growing framework.
+> Nice-to-haves for a growing framework and performance at scale.
 
 - [ ] 🟡 Production sourcemaps — external source maps for debuggable production errors
 
+### Performance (at scale)
+- [ ] 🟠 Request deduplication — deduplicate concurrent identical GET requests to same route; share in-flight loader promise instead of running twice. Scope dedup key by route+params (exclude user-specific loaders)
+- [ ] 🟡 Trie-based route matcher — replace linear O(n) route scan with radix trie for O(k) matching (k = URL segments). Matters when route count exceeds ~100
+- [ ] 🟡 Compiled route regex — pre-compile route patterns to `RegExp` at startup instead of parsing on every match
+
 ---
 
-## v0.2.0 — Test Integration (Phase 1 + 2)
+## v0.3.0 — Test Integration (Phase 1 + 2)
 
 > Built-in testing powered by `bun test`. See [TEST_PLAN.md](backup/TEST_PLAN.md) for full details.
 
@@ -226,7 +242,7 @@
 
 ---
 
-## v0.2.1 — Route & API Integration Testing (Phase 3)
+## v0.3.1 — Route & API Integration Testing (Phase 3)
 
 > Test routes end-to-end without starting a real server.
 
@@ -237,7 +253,7 @@
 
 ---
 
-## v0.2.2 — Component Testing (Phase 4)
+## v0.3.2 — Component Testing (Phase 4)
 
 > Render and assert on Svelte 5 components in tests.
 
@@ -248,7 +264,7 @@
 
 ---
 
-## v0.3.0 — E2E Testing & Docs (Phase 5 + 6)
+## v0.4.0 — E2E Testing & Docs (Phase 5 + 6)
 
 > Full browser testing with Playwright + comprehensive test docs.
 

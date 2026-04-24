@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.2.0] - 2026-04-25
+
+### Changed
+- Parallelize client and server `Bun.build()` calls for ~500-1000ms faster builds
+
+---
+
 ## [0.1.26] - 2026-04-24
 
 ### Added

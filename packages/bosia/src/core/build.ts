@@ -84,9 +84,9 @@ for (const [key, value] of Object.entries(classifiedEnv.privateStatic)) {
     staticDefines[`import.meta.env.${key}`] = JSON.stringify(value);
 }
 
-// 5. Build client bundle
-console.log("\n📦 Building client bundle...");
-const clientResult = await Bun.build({
+// 5. Build client + server bundles in parallel
+console.log("\n📦 Building client + server bundles...");
+const clientPromise = Bun.build({
     entrypoints: [join(CORE_DIR, "client", "hydrate.ts")],
     outdir: "./dist/client",
     target: "browser",
@@ -100,24 +100,7 @@ const clientResult = await Bun.build({
     plugins: [clientPlugin, SveltePlugin()],
 });
 
-if (!clientResult.success) {
-    console.error("❌ Client build failed:");
-    for (const msg of clientResult.logs) console.error(msg);
-    process.exit(1);
-}
-
-// 6. Collect output files for dist/manifest.json
-const jsFiles: string[] = [];
-const cssFiles: string[] = [];
-for (const output of clientResult.outputs) {
-    const rel = relative("./dist/client", output.path);
-    if (output.path.endsWith(".js")) jsFiles.push(rel);
-    if (output.path.endsWith(".css")) cssFiles.push(rel);
-}
-
-// 7. Build server bundle (before writing manifest so we can record the entry)
-console.log("\n📦 Building server bundle...");
-const serverResult = await Bun.build({
+const serverPromise = Bun.build({
     entrypoints: [join(CORE_DIR, "server.ts")],
     outdir: "./dist/server",
     target: "bun",
@@ -128,10 +111,27 @@ const serverResult = await Bun.build({
     plugins: [serverPlugin, SveltePlugin()],
 });
 
+const [clientResult, serverResult] = await Promise.all([clientPromise, serverPromise]);
+
+if (!clientResult.success) {
+    console.error("❌ Client build failed:");
+    for (const msg of clientResult.logs) console.error(msg);
+    process.exit(1);
+}
+
 if (!serverResult.success) {
     console.error("❌ Server build failed:");
     for (const msg of serverResult.logs) console.error(msg);
     process.exit(1);
+}
+
+// 6. Collect output files for dist/manifest.json
+const jsFiles: string[] = [];
+const cssFiles: string[] = [];
+for (const output of clientResult.outputs) {
+    const rel = relative("./dist/client", output.path);
+    if (output.path.endsWith(".js")) jsFiles.push(rel);
+    if (output.path.endsWith(".css")) cssFiles.push(rel);
 }
 
 // Entry is always "index.js" due to naming: { entry: "index.[ext]" }
