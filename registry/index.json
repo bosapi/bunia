@@ -37,6 +37,7 @@
     "ui/item",
     "ui/kbd",
     "ui/label",
+    "ui/menubar",
     "ui/navbar",
     "ui/native-select",
     "ui/navigation-menu",

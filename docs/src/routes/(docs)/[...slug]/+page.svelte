@@ -38,6 +38,7 @@
     import CheckboxDemo from "$lib/components/demos/CheckboxDemo.svelte";
     import DialogDemo from "$lib/components/demos/DialogDemo.svelte";
     import LabelDemo from "$lib/components/demos/LabelDemo.svelte";
+    import MenubarDemo from "$lib/components/demos/MenubarDemo.svelte";
     import RadioGroupDemo from "$lib/components/demos/RadioGroupDemo.svelte";
     import RangeCalendarDemo from "$lib/components/demos/RangeCalendarDemo.svelte";
     import ResizableDemo from "$lib/components/demos/ResizableDemo.svelte";
@@ -100,6 +101,7 @@
         PaginationDemo,
         SidebarDemo,
         LabelDemo,
+        MenubarDemo,
         RadioGroupDemo,
         RangeCalendarDemo,
         ResizableDemo,

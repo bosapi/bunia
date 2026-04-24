@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `kbd` UI component — keyboard shortcut display with keycap styling; `KbdGroup` renders key combinations with "+" separators; zero dependencies
 - `scroll-area` component — scrollable container with custom styled scrollbar, supports `vertical`, `horizontal`, and `both` orientations
 - `resizable` component — drag-to-resize panel groups with pointer-based resize, horizontal/vertical layouts, nested group support, and optional grip handle; zero external dependencies
+- `menubar` UI component — horizontal menu bar with multiple dropdown menus; click-to-open, hover-switch between open menus, Escape/click-outside to close; compound component with `MenubarMenu`, `MenubarTrigger`, `MenubarContent`, `MenubarItem`, `MenubarSeparator`, `MenubarLabel`, `MenubarShortcut`; zero dependencies
 
 ### Changed
 
