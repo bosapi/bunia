@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `direction` UI component — RTL/LTR context provider; wraps content with `dir` attribute and exposes `useDirection()` for descendant components to read text direction; zero dependencies
 - `kbd` UI component — keyboard shortcut display with keycap styling; `KbdGroup` renders key combinations with "+" separators; zero dependencies
 
+### Changed
+
+- `kbd` — `Kbd` and `KbdGroup` now support `onPress` callback to bind actual keyboard shortcuts; keys are inferred from rendered content, modifier keys detected automatically; `preventDefault` prop controls default behavior suppression
+
 ---
 
 ## [0.1.25] - 2026-04-23
