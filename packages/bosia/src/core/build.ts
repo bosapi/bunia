@@ -1,7 +1,6 @@
 import { SveltePlugin } from "bun-plugin-svelte";
 import { writeFileSync, rmSync, mkdirSync } from "fs";
 import { join, relative } from "path";
-import { spawnSync } from "bun";
 
 import { scanRoutes } from "./scanner.ts";
 import { generateRoutesFile } from "./routeFile.ts";
@@ -19,6 +18,7 @@ const CORE_DIR = import.meta.dir;
 
 const isProduction = process.env.NODE_ENV === "production";
 
+const buildStart = performance.now();
 console.log("🏗️  Starting Bosia build...\n");
 
 // 0. Load .env files (before cleaning .bosia so loadEnv can set process.env early)
@@ -55,21 +55,17 @@ ensureRootDirs();
 // 2d. Generate .bosia/env.server.ts, .bosia/env.client.ts, .bosia/types/env.d.ts
 generateEnvModules(classifiedEnv);
 
-// 3. Build Tailwind CSS
-console.log("\n🎨 Building Tailwind CSS...");
+// 3. Start Tailwind CSS (async — runs concurrently with client+server builds)
 const tailwindBin = resolveBosiaBin("tailwindcss");
-const tailwindResult = spawnSync(
+const tailwindProc = Bun.spawn(
     [tailwindBin, "-i", "./src/app.css", "-o", "./public/bosia-tw.css", ...(isProduction ? ["--minify"] : [])],
     {
         cwd: process.cwd(),
         env: { ...process.env, NODE_PATH: BOSIA_NODE_PATH },
+        stderr: "pipe",
     },
 );
-if (tailwindResult.exitCode !== 0) {
-    console.error("❌ Tailwind CSS build failed:\n" + tailwindResult.stderr.toString());
-    process.exit(1);
-}
-console.log("✅ Tailwind CSS built: public/bosia-tw.css");
+const tailwindPromise = tailwindProc.exited;
 
 // Separate plugin instances per build target ($env resolves differently)
 const clientPlugin = makeBosiaPlugin("browser");
@@ -84,8 +80,8 @@ for (const [key, value] of Object.entries(classifiedEnv.privateStatic)) {
     staticDefines[`import.meta.env.${key}`] = JSON.stringify(value);
 }
 
-// 5. Build client + server bundles in parallel
-console.log("\n📦 Building client + server bundles...");
+// 5. Build Tailwind + client + server bundles in parallel
+console.log("\n📦 Building Tailwind + client + server...");
 const clientPromise = Bun.build({
     entrypoints: [join(CORE_DIR, "client", "hydrate.ts")],
     outdir: "./dist/client",
@@ -111,7 +107,18 @@ const serverPromise = Bun.build({
     plugins: [serverPlugin, SveltePlugin()],
 });
 
-const [clientResult, serverResult] = await Promise.all([clientPromise, serverPromise]);
+const [tailwindExitCode, clientResult, serverResult] = await Promise.all([
+    tailwindPromise,
+    clientPromise,
+    serverPromise,
+]);
+
+if (tailwindExitCode !== 0) {
+    const stderr = await new Response(tailwindProc.stderr).text();
+    console.error("❌ Tailwind CSS build failed:\n" + stderr);
+    process.exit(1);
+}
+console.log("✅ Tailwind CSS built: public/bosia-tw.css");
 
 if (!clientResult.success) {
     console.error("❌ Client build failed:");
@@ -157,4 +164,4 @@ await prerenderStaticRoutes(manifest);
 // 10. Generate static site output (HTML + client assets + public → dist/static/)
 generateStaticSite();
 
-console.log("\n🎉 Build complete!");
+console.log(`\n🎉 Build complete in ${Math.round(performance.now() - buildStart)}ms!`);
