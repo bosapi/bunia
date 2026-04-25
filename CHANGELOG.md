@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.2.0] - 2026-04-25
 
+### Added
+- Request deduplication for `/__bosia/data/` endpoint — concurrent identical GET requests share a single in-flight loader promise instead of running the loader multiple times; auto-cleans on settle, no TTL needed
+
 ### Changed
 - Parallelize client and server `Bun.build()` calls for ~500-1000ms faster builds
 - Parallelize Tailwind CSS build with client+server bundles for ~500-800ms faster builds

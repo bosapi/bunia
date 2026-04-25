@@ -15,6 +15,7 @@ import type { CorsConfig } from "./cors.ts";
 import { isDev, compress, isStaticPath } from "./html.ts";
 import { loadRouteData, loadMetadata, renderSSRStream, renderErrorPage, renderPageWithFormData } from "./renderer.ts";
 import { getServerTime } from "../lib/utils.ts";
+import { dedup, dedupKey } from "./dedup.ts";
 
 // ─── User Hooks ──────────────────────────────────────────
 // Load src/hooks.server.ts if present. Uses process.cwd() so
@@ -128,29 +129,30 @@ async function resolve(event: RequestEvent): Promise<Response> {
         }
         // Rewrite event.url so logging middleware sees the real page path, not /__bosia/data
         event.url = routeUrl;
+        const dedupKeyStr = dedupKey(routeUrl, request);
         try {
-            const pageMatch = findMatch(serverRoutes, routeUrl.pathname);
-            const data = await loadRouteData(routeUrl, locals, request, cookies);
-            if (!data) {
-                const cc = (cookies as CookieJar).accessed ? "private, no-cache" : "public, max-age=0, must-revalidate";
+            const result = await dedup(dedupKeyStr, async () => {
+                const pageMatch = findMatch(serverRoutes, routeUrl.pathname);
+                const data = await loadRouteData(routeUrl, locals, request, cookies);
+
+                let metadata = null;
+                if (pageMatch) {
+                    try {
+                        const meta = await loadMetadata(pageMatch.route, pageMatch.params, routeUrl, locals, cookies, request);
+                        if (meta) metadata = { title: meta.title, description: meta.description };
+                    } catch { /* non-fatal */ }
+                }
+
+                return { data, metadata, cookiesAccessed: (cookies as CookieJar).accessed };
+            });
+
+            const cookiesWereAccessed = (cookies as CookieJar).accessed || result.cookiesAccessed;
+            const cc = cookiesWereAccessed ? "private, no-cache" : "public, max-age=0, must-revalidate";
+
+            if (!result.data) {
                 return compress(JSON.stringify({ pageData: {}, layoutData: [] }), "application/json", request, 200, { "Cache-Control": cc });
             }
-
-            // Include metadata for client-side title/description updates
-            let metadata = null;
-            if (pageMatch) {
-                try {
-                    const meta = await loadMetadata(pageMatch.route, pageMatch.params, routeUrl, locals, cookies, request);
-                    if (meta) metadata = { title: meta.title, description: meta.description };
-                } catch { /* non-fatal */ }
-            }
-
-            const cacheControl = (cookies as CookieJar).accessed
-                ? "private, no-cache"
-                : "public, max-age=0, must-revalidate";
-            const cacheHeaders = { "Cache-Control": cacheControl };
-
-            return compress(JSON.stringify({ ...data, metadata }), "application/json", request, 200, cacheHeaders);
+            return compress(JSON.stringify({ ...result.data, metadata: result.metadata }), "application/json", request, 200, { "Cache-Control": cc });
         } catch (err) {
             if (err instanceof Redirect) {
                 return compress(JSON.stringify({ redirect: err.location, status: err.status }), "application/json", request);
