@@ -2,8 +2,11 @@ import { hydrate } from "svelte";
 import App from "./App.svelte";
 import { router } from "./router.svelte.ts";
 import { initPrefetch } from "./prefetch.ts";
-import { findMatch } from "../matcher.ts";
+import { findMatch, compileRoutes } from "../matcher.ts";
 import { clientRoutes } from "bosia:routes";
+
+// Pre-compile route patterns into RegExp at startup (shared by App.svelte and router via module reference)
+compileRoutes(clientRoutes);
 
 // ─── Hydration ────────────────────────────────────────────
 

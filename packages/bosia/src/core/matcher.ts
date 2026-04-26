@@ -9,6 +9,78 @@ import type { RouteMatch } from "./types.ts";
 //   2. Dynamic match      — "/blog/[slug]" matches "/blog/hello"
 //   3. Catch-all match    — "/[...rest]" matches anything
 
+// ─── Compiled Route Types ────────────────────────────────
+
+interface CompiledRoute {
+    regex: RegExp;
+    paramNames: string[];
+    isExact: boolean;
+}
+
+// ─── Pattern Compiler ────────────────────────────────────
+
+/** Escape regex special chars in a literal string segment. */
+function escapeRegex(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Pre-compile a route pattern into a RegExp for fast matching.
+ */
+function compilePattern(pattern: string): CompiledRoute {
+    // No dynamic segments — exact match via ===
+    if (!pattern.includes("[")) {
+        return { regex: null!, paramNames: [], isExact: true };
+    }
+
+    const paramNames: string[] = [];
+
+    // Catch-all: /prefix/[...name]
+    const catchallMatch = pattern.match(/^(.*?)\/\[\.\.\.(\w+)\]$/);
+    if (catchallMatch) {
+        const prefix = catchallMatch[1] || "";
+        paramNames.push(catchallMatch[2]!);
+        const escaped = prefix ? escapeRegex(prefix) : "";
+        // Root catch-all /[...rest] must have at least one char after /
+        const regex = prefix
+            ? new RegExp(`^${escaped}\\/(.+)$`)
+            : new RegExp(`^\\/(.+)$`);
+        return { regex, paramNames, isExact: false };
+    }
+
+    // Dynamic segments: /blog/[slug]/comments → ^\/blog\/([^/]+)\/comments$
+    const segments = pattern.split("/").filter(Boolean);
+    let regexStr = "^";
+    for (const seg of segments) {
+        regexStr += "\\/";
+        if (seg.startsWith("[") && seg.endsWith("]")) {
+            paramNames.push(seg.slice(1, -1));
+            regexStr += "([^/]+)";
+        } else {
+            regexStr += escapeRegex(seg);
+        }
+    }
+    regexStr += "$";
+
+    return { regex: new RegExp(regexStr), paramNames, isExact: false };
+}
+
+/**
+ * Pre-compile all route patterns in-place.
+ * Mutates each route by adding a `_compiled` property.
+ * Call once at startup — all modules sharing the same route array see the result.
+ */
+export function compileRoutes<T extends { pattern: string }>(
+    routes: T[],
+): (T & { _compiled: CompiledRoute })[] {
+    for (const route of routes) {
+        (route as any)._compiled = compilePattern(route.pattern);
+    }
+    return routes as (T & { _compiled: CompiledRoute })[];
+}
+
+// ─── Legacy Pattern Matcher (fallback for uncompiled routes) ─
+
 /**
  * Match a URL pathname against a single route pattern.
  * Returns extracted params if matched, null otherwise.
@@ -60,6 +132,31 @@ function matchPattern(
     return params;
 }
 
+// ─── Route Matching ──────────────────────────────────────
+
+/**
+ * Match a compiled route against a pathname using regex.
+ * Returns extracted params if matched, null otherwise.
+ */
+function matchCompiled(
+    compiled: CompiledRoute,
+    pattern: string,
+    pathname: string,
+): Record<string, string> | null {
+    if (compiled.isExact) {
+        return pattern === pathname ? {} : null;
+    }
+
+    const m = compiled.regex.exec(pathname);
+    if (!m) return null;
+
+    const params: Record<string, string> = {};
+    for (let i = 0; i < compiled.paramNames.length; i++) {
+        params[compiled.paramNames[i]!] = m[i + 1]!;
+    }
+    return params;
+}
+
 /**
  * Find the first matching route from a list.
  * Routes must be pre-sorted by priority (exact → dynamic → catch-all).
@@ -75,7 +172,10 @@ export function findMatch<T extends { pattern: string }>(
     }
 
     for (const route of routes) {
-        const params = matchPattern(route.pattern, pathname);
+        const compiled = (route as any)._compiled as CompiledRoute | undefined;
+        const params = compiled
+            ? matchCompiled(compiled, route.pattern, pathname)
+            : matchPattern(route.pattern, pathname);
         if (params !== null) return { route, params };
     }
 

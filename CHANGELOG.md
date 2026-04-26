@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.2.1] - 2026-04-26
+
+### Changed
+- Pre-compile route patterns to `RegExp` at startup — `findMatch()` uses `regex.exec()` instead of splitting strings on every request; falls back to legacy matching for uncompiled routes (backward compat)
+
+---
+
 ## [0.2.0] - 2026-04-25
 
 ### Added

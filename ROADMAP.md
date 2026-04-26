@@ -1,7 +1,7 @@
 # Bosia — Roadmap
 
 > Track what's done, what's next, and where we're headed.
-> Current version: **0.2.0**
+> Current version: **0.2.1**
 
 ---
 
@@ -218,7 +218,7 @@
 ### Performance (at scale)
 - [x] 🟠 Request deduplication — deduplicate concurrent identical GET requests to same route; share in-flight loader promise instead of running twice. Scope dedup key by route+params (exclude user-specific loaders)
 - [ ] 🟡 Trie-based route matcher — replace linear O(n) route scan with radix trie for O(k) matching (k = URL segments). Matters when route count exceeds ~100
-- [ ] 🟡 Compiled route regex — pre-compile route patterns to `RegExp` at startup instead of parsing on every match
+- [x] 🟡 Compiled route regex — pre-compile route patterns to `RegExp` at startup instead of parsing on every match
 
 ---
 

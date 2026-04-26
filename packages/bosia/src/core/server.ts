@@ -3,8 +3,12 @@ import { Elysia } from "elysia";
 import { existsSync } from "fs";
 import { join, resolve as resolvePath } from "path";
 
-import { findMatch } from "./matcher.ts";
+import { findMatch, compileRoutes } from "./matcher.ts";
 import { apiRoutes, serverRoutes } from "bosia:routes";
+
+// Pre-compile route patterns into RegExp at startup (shared by renderer.ts via module reference)
+compileRoutes(apiRoutes);
+compileRoutes(serverRoutes);
 import type { Handle, RequestEvent } from "./hooks.ts";
 import { HttpError, Redirect, ActionFailure } from "./errors.ts";
 import { CookieJar } from "./cookies.ts";
