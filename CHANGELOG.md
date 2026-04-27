@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.2.2] - 2026-04-28
+
+### Changed
+- Bound prefetch cache to 50 entries with LRU eviction — oldest entry evicted when cache is full, preventing unbounded memory growth on pages with many prefetchable links
+
+---
+
 ## [0.2.1] - 2026-04-26
 
 ### Changed

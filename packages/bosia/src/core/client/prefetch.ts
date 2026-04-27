@@ -10,6 +10,7 @@ export function dataUrl(path: string): string {
 }
 
 export const prefetchCache = new Map<string, any>();
+const MAX_PREFETCH_ENTRIES = 50;
 
 // In-flight fetch deduplication
 const pending = new Set<string>();
@@ -31,6 +32,10 @@ export async function prefetchPath(path: string): Promise<void> {
     try {
         const res = await fetch(dataUrl(path));
         if (res.ok) {
+            if (prefetchCache.size >= MAX_PREFETCH_ENTRIES) {
+                const oldest = prefetchCache.keys().next().value;
+                if (oldest !== undefined) prefetchCache.delete(oldest);
+            }
             prefetchCache.set(path, await res.json());
         }
     } catch {
