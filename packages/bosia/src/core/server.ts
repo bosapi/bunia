@@ -72,7 +72,7 @@ const CORS_CONFIG: CorsConfig | null = _corsAllowedOrigins?.length
         allowedHeaders: splitCsvEnv("CORS_ALLOWED_HEADERS"),
         exposedHeaders: splitCsvEnv("CORS_EXPOSED_HEADERS"),
         credentials: process.env.CORS_CREDENTIALS === "true" || undefined,
-        maxAge: process.env.CORS_MAX_AGE ? parseInt(process.env.CORS_MAX_AGE, 10) : undefined,
+        maxAge: parseCorsMaxAge(process.env.CORS_MAX_AGE),
     }
     : null;
 
@@ -375,6 +375,20 @@ async function handleRequest(request: Request, url: URL): Promise<Response> {
             drainResolve();
         }
     }
+}
+
+// ─── CORS Max Age ─────────────────────────────────────────
+
+function parseCorsMaxAge(value?: string): number | undefined {
+    if (!value) return undefined;
+    if (!/^\d+$/.test(value)) {
+        throw new Error(`Invalid CORS_MAX_AGE: "${value}" — must be a non-negative integer (seconds)`);
+    }
+    const n = parseInt(value, 10);
+    if (!Number.isFinite(n) || n > Number.MAX_SAFE_INTEGER) {
+        throw new Error(`Invalid CORS_MAX_AGE: "${value}" — must be a non-negative integer (seconds)`);
+    }
+    return n;
 }
 
 // ─── Body Size Limit ──────────────────────────────────────

@@ -149,7 +149,7 @@
 - [ ] 🟡 CORS `Vary: Origin` on all responses when CORS is configured — prevent CDN caching bugs on non-matching origins
 - [ ] 🟡 Validate prerender `entries()` return values — sanitize path segments before URL substitution
 - [x] 🟡 Escape `lang` attribute in HTML shell — `<html lang="${lang}">` injects `lang` raw; if a `metadata()` derives `lang` from URL/user input it can break out of the attribute
-- [ ] ⚪ Validate `CORS_MAX_AGE` env — reject non-numeric values instead of producing `NaN` header
+- [x] ⚪ Validate `CORS_MAX_AGE` env — reject non-numeric values instead of producing `NaN` header
 
 ### Performance
 - [x] 🟠 Parallelize client + server builds — run both `Bun.build()` calls with `Promise.all()` instead of sequentially (~500-1000ms savings)

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Security
 - Validate `lang` attribute in SSR HTML shell against an RFC 5646 allowlist (`/^[a-zA-Z0-9-]{1,35}$/`); invalid values fall back to `"en"`. Prevents attribute-injection XSS when a user `metadata()` derives `lang` from URL/headers, and bounds `_shellOpenCache` to valid tags so attacker-controlled `lang` values can no longer poison the cache for memory-exhaustion DoS
+- Validate `CORS_MAX_AGE` env at startup — non-numeric, negative, or decimal values now throw a clear error instead of producing `Access-Control-Max-Age: NaN` (which silently disables CORS preflight caching in all browsers). Empty or unset values continue to use the 86400s default.
 
 ---
 
