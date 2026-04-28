@@ -55,6 +55,13 @@ function getPublicDynamicEnv(): Record<string, string> {
     return result;
 }
 
+// ─── Lang Validation ──────────────────────────────────────
+
+const LANG_RE = /^[a-zA-Z0-9-]{1,35}$/;
+function safeLang(lang?: string): string {
+    return lang && LANG_RE.test(lang) ? lang : "en";
+}
+
 // ─── HTML Builder ─────────────────────────────────────────
 
 export function buildHtml(
@@ -88,7 +95,7 @@ export function buildHtml(
             : "";
 
     return `<!DOCTYPE html>
-<html lang="${lang || "en"}">
+<html lang="${safeLang(lang)}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,7 +120,7 @@ const _shellOpenCache = new Map<string, string>();
 
 /** Chunk 1: everything from <!DOCTYPE> through CSS/modulepreload links (head still open) */
 export function buildHtmlShellOpen(lang?: string): string {
-    const key = lang || "en";
+    const key = safeLang(lang);
     const cached = _shellOpenCache.get(key);
     if (cached) return cached;
     const cssLinks = (distManifest.css ?? [])
