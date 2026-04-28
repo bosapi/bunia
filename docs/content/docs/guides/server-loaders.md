@@ -106,9 +106,32 @@ For the full guide on `metadata()` — including Open Graph tags, language/link 
 | `params`   | `Record<string, string>` | Dynamic route parameters                 |
 | `locals`   | `Record<string, any>`    | Data set by middleware hooks             |
 | `cookies`  | `Cookies`                | Read/write cookies                       |
-| `fetch`    | `Function`               | Session-aware fetch (forwards cookies)   |
+| `fetch`    | `Function`               | Fetch helper (cookies forwarded same-origin only) |
 | `parent`   | `() => Promise<Record>`  | Data from parent layout loaders          |
 | `metadata` | `Record \| null`         | Data passed from `metadata()` function   |
+
+## Cookie Forwarding
+
+The `fetch` helper forwards the user's cookies **only on same-origin requests**, or to origins listed in the `INTERNAL_HOSTS` env var. Cross-origin requests to third-party hosts (e.g. `https://api.weather.com`) get **no Cookie header** to prevent leaking the session token.
+
+```ts
+// Same-origin → cookie forwarded automatically
+const me = await fetch("/api/me");
+
+// Third-party → NO cookie sent. Pass auth explicitly.
+const weather = await fetch("https://api.weather.com/v1/now", {
+  headers: { Authorization: `Bearer ${process.env.WEATHER_API_KEY}` },
+});
+```
+
+For cross-origin internal services that legitimately share the session cookie (e.g. a sibling backend on a subdomain or another container), allowlist their origins:
+
+```bash
+# .env
+INTERNAL_HOSTS=https://api.example.com,http://users-svc:8080
+```
+
+Comma-separated list of full origins. Malformed entries are skipped with a warning at startup. To override per request, pass `init.headers.cookie` or an `Authorization` header explicitly — those are never overwritten.
 
 ## Error Handling
 

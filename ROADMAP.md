@@ -141,12 +141,14 @@
 ### Security
 - [x] Cookie secure defaults — default `HttpOnly; Secure; SameSite=Lax` on `cookies.set()` with opt-out
 - [x] Auto-detect `Cache-Control` on `/__bosia/data/` — `private, no-cache` when cookies accessed; `public, max-age=0, must-revalidate` otherwise
+- [x] 🔴 `load()` `fetch` cookie scoping — `makeFetch` now forwards the `Cookie` header only to same-origin requests or origins in the `INTERNAL_HOSTS` allowlist; third-party hosts get no cookie. User-supplied `init.headers.cookie` is preserved
 - [ ] 🟠 Trusted proxy configuration — `TRUST_PROXY` env to control when `X-Forwarded-*` headers are trusted in CSRF checks
 - [ ] 🟠 `allowExternal` redirect validation — still validate against `javascript:`, `data:`, `vbscript:` schemes even when `allowExternal: true`
 - [ ] 🟠 CSP nonce infrastructure — per-request nonce generation, inject into all framework `<script>` tags, expose nonce in hooks for user scripts
 - [ ] 🟡 CORS preflight validation — validate requested method/headers against allowed config
 - [ ] 🟡 CORS `Vary: Origin` on all responses when CORS is configured — prevent CDN caching bugs on non-matching origins
 - [ ] 🟡 Validate prerender `entries()` return values — sanitize path segments before URL substitution
+- [ ] 🟡 Escape `lang` attribute in HTML shell — `<html lang="${lang}">` injects `lang` raw; if a `metadata()` derives `lang` from URL/user input it can break out of the attribute
 - [ ] ⚪ Validate `CORS_MAX_AGE` env — reject non-numeric values instead of producing `NaN` header
 
 ### Performance
@@ -157,20 +159,24 @@
 ### Server Reliability
 - [ ] 🟠 Stream backpressure handling — check `controller.desiredSize` to prevent memory buildup on slow/disconnected clients
 - [ ] 🟠 Streaming SSR error recovery — render proper error page instead of bare `<p>Internal Server Error</p>` when `render()` throws mid-stream
-- [ ] 🟡 Prerender process cleanup — proper signal handling, verified termination, use random port instead of hardcoded 13572
+- [ ] 🟠 `renderPageWithFormData` loader error handling — currently does not catch `HttpError`/`Redirect` thrown from `loadRouteData()` after a successful form action; let them surface as proper redirect/error responses instead of crashing the request
+- [ ] 🟡 Prerender process cleanup — proper signal handling, verified termination (`await child.exited` after `kill()`), use random port instead of hardcoded 13572
 - [ ] 🟡 Fix `buildAndRestart` recursive tail call — replace recursion with `while` loop to prevent stack growth under rapid file changes
 
 ### Client
 - [x] 🟡 Bound prefetch cache size — `prefetchCache` grows unbounded between navigations; add LRU eviction (max ~50 entries)
 - [x] 🟡 Prefetch cache TTL — stale prefetch data served after long idle; discard entries older than 30s on `consumePrefetch()`
+- [ ] 🟠 Router click handler must respect modifier/middle clicks — `router.svelte.ts` currently SPA-navigates on Cmd/Ctrl/Shift/Alt+click and middle-click, breaking "open in new tab/window". Bail when `e.button !== 0`, any modifier key is held, `e.defaultPrevented`, or anchor has `rel="external"`
 
 ### Build
 - [ ] 🟡 Fail build on tsconfig.json corruption — don't silently continue with degraded config
+- [ ] 🟡 `compress()` threshold uses character count not byte count — `body.length` on a UTF-8 string under-counts multi-byte content; switch to `Buffer.byteLength` or `TextEncoder().encode(...).length` before threshold check
+- [ ] 🟡 `.env` parser inline-comment stripping — `KEY="value" # note` currently keeps ` # note` as part of the value; strip trailing comment after the closing quote
 - [ ] ⚪ Tune gzip compression threshold — current 1024-byte threshold is low; consider raising to ~2KB
 
 ### DX
+- [ ] 🟠 Dev proxy must forward `X-Forwarded-Host` / `X-Forwarded-Proto` to the inner app server — without them the inner CSRF check derives `expectedOrigin = http://localhost:APP_PORT` while the browser's `Origin` is `http://localhost:DEV_PORT`, causing same-origin POST/form actions to 403 in dev
 - [ ] 🟡 Stale env cleanup in dev — reset removed `.env` vars on hot-reload
-- [ ] 🟡 Document cookie forwarding risk — `load()` fetch helper forwards session cookies to all requests including external APIs
 
 ---
 
@@ -217,6 +223,7 @@
 
 ### Performance (at scale)
 - [x] 🟠 Request deduplication — deduplicate concurrent identical GET requests to same route; share in-flight loader promise instead of running twice. Scope dedup key by route+params (exclude user-specific loaders)
+- [ ] 🔴 Dedup key cross-user data leak — `dedupKey()` only fingerprints the `Authorization` header and a literal `authorization` cookie. Apps using session cookies under any other name (`sid`, `session`, `connect.sid`, `__Secure-next-auth.session-token`, etc.) collide across users — User B receives the loader result computed for User A's cookies. Also: cookies written by the deduped loader land only on the first request's `CookieJar`; concurrent waiters lose their `Set-Cookie` headers. Fix: hash the entire `Cookie` header (or disable dedup when any cookie is present), and replay outgoing cookies onto every waiting jar
 - [ ] 🟡 Trie-based route matcher — replace linear O(n) route scan with radix trie for O(k) matching (k = URL segments). Matters when route count exceeds ~100
 - [x] 🟡 Compiled route regex — pre-compile route patterns to `RegExp` at startup instead of parsing on every match
 

@@ -96,7 +96,7 @@ The `data` object from `metadata()` becomes `event.metadata` in `load()`. If no 
 | `url`     | `URL`                    | The request URL                      |
 | `locals`  | `Record<string, any>`    | Data set by middleware hooks         |
 | `cookies` | `Cookies`                | Read/write cookies                   |
-| `fetch`   | `Function`               | Session-aware fetch (forwards cookies) |
+| `fetch`   | `Function`               | Fetch helper (cookies forwarded same-origin only — see [Server Loaders → Cookie Forwarding](/guides/server-loaders#cookie-forwarding)) |
 
 ## Metadata Return Type
 

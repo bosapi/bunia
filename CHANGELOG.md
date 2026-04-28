@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.2.2] - 2026-04-28
 
+### Security
+- Scope `load()` / `metadata()` `fetch` cookie forwarding to same-origin requests — previously the user's `Cookie` header was attached to every outbound URL including third-party hosts, leaking the session token. Cookies are now sent only to same-origin or `INTERNAL_HOSTS`-allowlisted origins. **Behavior change:** `load()` calls to external APIs no longer auto-forward cookies; pass `Authorization` or `init.headers.cookie` explicitly. Set `INTERNAL_HOSTS=https://api.example.com,http://users-svc:8080` to allowlist cross-origin internal services that share the session
+
 ### Changed
 - Bound prefetch cache to 50 entries with LRU eviction — oldest entry evicted when cache is full, preventing unbounded memory growth on pages with many prefetchable links
 - Prefetch cache TTL — entries older than 30s are discarded on consumption and re-fetched on hover/viewport, preventing stale data after long idle

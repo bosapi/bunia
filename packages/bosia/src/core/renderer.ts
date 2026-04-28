@@ -37,22 +37,59 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
     ]);
 }
 
+// ─── Internal-Host Allowlist ─────────────────────────────
+// Origins that share the user's session cookie. Cookie is auto-forwarded
+// to same-origin requests AND to any origin in this set. Anything else
+// (third-party APIs) gets no Cookie header by default.
+
+const INTERNAL_HOSTS: Set<string> = (() => {
+    const raw = process.env.INTERNAL_HOSTS?.split(",").map(s => s.trim()).filter(Boolean) ?? [];
+    const valid = new Set<string>();
+    for (const entry of raw) {
+        try {
+            valid.add(new URL(entry).origin);
+        } catch {
+            console.warn(`⚠️  INTERNAL_HOSTS: ignoring invalid origin "${entry}"`);
+        }
+    }
+    return valid;
+})();
+
+if (INTERNAL_HOSTS.size > 0) {
+    console.log(`🍪 Internal hosts (cookies forwarded): ${[...INTERNAL_HOSTS].join(", ")}`);
+}
+
 // ─── Session-Aware Fetch ─────────────────────────────────
-// Passed to load() functions so they can call internal APIs
-// with the current user's cookies automatically forwarded.
+// Passed to load() functions so they can call internal APIs with the
+// current user's cookies automatically forwarded. Cookie is attached
+// only on same-origin requests or to origins in INTERNAL_HOSTS — never
+// to arbitrary third-party hosts (which would leak the session token).
 
 function makeFetch(req: Request, url: URL) {
     const cookie = req.headers.get("cookie") ?? "";
-    const origin = url.origin;
+    const sameOrigin = url.origin;
 
     return (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-        const resolved =
-            typeof input === "string" && input.startsWith("/")
-                ? `${origin}${input}`
-                : input;
+        let targetOrigin: string | null = null;
+        let resolved: RequestInfo | URL = input;
+
+        try {
+            if (typeof input === "string") {
+                const parsed = new URL(input, sameOrigin);
+                targetOrigin = parsed.origin;
+                resolved = parsed.href;
+            } else if (input instanceof URL) {
+                targetOrigin = input.origin;
+            } else {
+                targetOrigin = new URL(input.url).origin;
+            }
+        } catch {
+            targetOrigin = null;
+        }
 
         const headers = new Headers(init?.headers);
-        if (cookie && !headers.has("cookie")) headers.set("cookie", cookie);
+        const trusted = targetOrigin !== null && (targetOrigin === sameOrigin || INTERNAL_HOSTS.has(targetOrigin));
+        if (cookie && trusted && !headers.has("cookie")) headers.set("cookie", cookie);
 
         return globalThis.fetch(resolved, { ...init, headers });
     };
