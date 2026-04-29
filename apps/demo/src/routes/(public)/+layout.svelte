@@ -12,6 +12,7 @@
             <a href="/about" class="text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
             <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</a>
             <a href="/all/foo/bar" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Catch-all</a>
+            <a href="/ssr-off" class="text-sm text-muted-foreground hover:text-foreground transition-colors">SSR off</a>
             <a href="/api/hello" target="_blank" class="text-sm text-muted-foreground hover:text-foreground transition-colors">API</a>
         </nav>
     </header>
