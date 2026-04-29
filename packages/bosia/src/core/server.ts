@@ -251,12 +251,21 @@ async function resolve(event: RequestEvent): Promise<Response> {
     if (method === "POST") {
         const pageMatch = findMatch(serverRoutes, path);
         if (pageMatch?.route.pageServer) {
+            // `use:enhance` sets this header — return JSON instead of re-rendering HTML
+            const isEnhanced = request.headers.get("x-bosia-action") === "1";
+
             try {
                 const mod = await pageMatch.route.pageServer();
                 if (mod.actions && typeof mod.actions === "object") {
                     const actionName = parseActionName(url);
                     const action = mod.actions[actionName];
                     if (!action) {
+                        if (isEnhanced) {
+                            return Response.json(
+                                { type: "error", status: 404, message: `Action "${actionName}" not found` },
+                                { status: 404 },
+                            );
+                        }
                         return renderErrorPage(404, `Action "${actionName}" not found`, url, request);
                     }
 
@@ -266,12 +275,21 @@ async function resolve(event: RequestEvent): Promise<Response> {
                         result = await action(event);
                     } catch (err) {
                         if (err instanceof Redirect) {
+                            if (isEnhanced) {
+                                return Response.json({ type: "redirect", status: 303, location: err.location });
+                            }
                             return new Response(null, {
                                 status: 303,
                                 headers: { Location: err.location },
                             });
                         }
                         if (err instanceof HttpError) {
+                            if (isEnhanced) {
+                                return Response.json(
+                                    { type: "error", status: err.status, message: err.message },
+                                    { status: err.status },
+                                );
+                            }
                             return renderErrorPage(err.status, err.message, url, request);
                         }
                         throw err;
@@ -279,6 +297,9 @@ async function resolve(event: RequestEvent): Promise<Response> {
 
                     // Redirect returned (not thrown)
                     if (result instanceof Redirect) {
+                        if (isEnhanced) {
+                            return Response.json({ type: "redirect", status: 303, location: result.location });
+                        }
                         return new Response(null, {
                             status: 303,
                             headers: { Location: result.location },
@@ -287,24 +308,48 @@ async function resolve(event: RequestEvent): Promise<Response> {
 
                     // ActionFailure — re-render with failure status
                     if (result instanceof ActionFailure) {
+                        if (isEnhanced) {
+                            return Response.json(
+                                { type: "failure", status: result.status, data: result.data },
+                                { status: result.status },
+                            );
+                        }
                         return renderPageWithFormData(url, locals, request, cookies, result.data, result.status);
                     }
 
                     // Success — re-render page with action return data
+                    if (isEnhanced) {
+                        return Response.json({ type: "success", status: 200, data: result ?? null });
+                    }
                     return renderPageWithFormData(url, locals, request, cookies, result ?? null, 200);
                 }
             } catch (err) {
                 if (err instanceof Redirect) {
+                    if (isEnhanced) {
+                        return Response.json({ type: "redirect", status: 303, location: err.location });
+                    }
                     return new Response(null, {
                         status: 303,
                         headers: { Location: err.location },
                     });
                 }
                 if (err instanceof HttpError) {
+                    if (isEnhanced) {
+                        return Response.json(
+                            { type: "error", status: err.status, message: err.message },
+                            { status: err.status },
+                        );
+                    }
                     return renderErrorPage(err.status, err.message, url, request);
                 }
                 if (isDev) console.error("Form action error:", err);
                 else console.error("Form action error:", (err as Error).message ?? err);
+                if (isEnhanced) {
+                    return Response.json(
+                        { type: "error", status: 500, message: "Internal Server Error" },
+                        { status: 500 },
+                    );
+                }
                 return Response.json({ error: "Internal Server Error" }, { status: 500 });
             }
         }

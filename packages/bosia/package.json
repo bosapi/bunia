@@ -31,7 +31,8 @@
     "package.json"
   ],
   "exports": {
-    ".": "./src/lib/index.ts"
+    ".": "./src/lib/index.ts",
+    "./client": "./src/lib/client.ts"
   },
   "bin": {
     "bosia": "src/cli/index.ts"

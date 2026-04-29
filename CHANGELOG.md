@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.2.3] - 2026-04-29
 
+### Added
+- `use:enhance` Svelte action — progressive enhancement for `<form method="POST">`. Intercepts submission, POSTs via `fetch` with `x-bosia-action: 1`, updates the `form` prop reactively, and re-fetches loader data — all without a page reload. Falls back to the existing full-reload flow when JS is disabled. Server returns a typed `ActionResult` JSON shape (`success` / `failure` / `redirect` / `error`); `error` results populate `form.error` for inline rendering rather than swapping to the global error page. Optional `SubmitFunction` callback mirrors SvelteKit's API for cancellation, custom result handling, and `update({ reset, invalidateAll })`. Import via `bosia/client` — kept on a separate subpath so client-only modules (router, virtual `bosia:routes`) aren't pulled into server-side `+page.server.ts` imports.
+
 ### Security
 - Validate `lang` attribute in SSR HTML shell against an RFC 5646 allowlist (`/^[a-zA-Z0-9-]{1,35}$/`); invalid values fall back to `"en"`. Prevents attribute-injection XSS when a user `metadata()` derives `lang` from URL/headers, and bounds `_shellOpenCache` to valid tags so attacker-controlled `lang` values can no longer poison the cache for memory-exhaustion DoS
 - Validate `CORS_MAX_AGE` env at startup — non-numeric, negative, or decimal values now throw a clear error instead of producing `Access-Control-Max-Age: NaN` (which silently disables CORS preflight caching in all browsers). Empty or unset values continue to use the 86400s default.

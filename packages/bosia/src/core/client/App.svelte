@@ -3,6 +3,7 @@
   import { findMatch } from "../matcher.ts";
   import { clientRoutes } from "bosia:routes";
   import { consumePrefetch, prefetchCache, dataUrl } from "./prefetch.ts";
+  import { appState } from "./appState.svelte.ts";
 
   let {
     ssrMode = false,
@@ -22,11 +23,13 @@
 
   let PageComponent = $state<any>(ssrPageComponent);
   let layoutComponents = $state<any[]>(ssrLayoutComponents ?? []);
-  let pageData = $state<Record<string, any>>(ssrPageData ?? {});
-  let layoutData = $state<Record<string, any>[]>(ssrLayoutData ?? []);
-  // Kept separate to avoid a read→write cycle inside the $effect below
-  let routeParams = $state<Record<string, string>>(ssrPageData?.params ?? {});
-  let formData = $state<any>(ssrFormData);
+  // In SSR mode, render directly from props (server module singletons must
+  // not hold per-request state). On the client, read/write through `appState`
+  // so `use:enhance` and other helpers can update the same cells.
+  const pageData = $derived(ssrMode ? (ssrPageData ?? {}) : appState.pageData);
+  const layoutData = $derived(ssrMode ? (ssrLayoutData ?? []) : appState.layoutData);
+  const routeParams = $derived(ssrMode ? (ssrPageData?.params ?? {}) : appState.routeParams);
+  const formData = $derived(ssrMode ? ssrFormData : appState.form);
   let navigating = $state(false);
   let navDone = $state(false);
   // Skip bar on the very first effect run (initial hydration — data already present)
@@ -47,7 +50,7 @@
     firstNav = false;
     if (isFirst) return; // Initial hydration — data already in SSR props, no fetch needed
 
-    formData = null;
+    appState.form = null;
     if (navDoneTimer) { clearTimeout(navDoneTimer); navDoneTimer = null; }
     navDone = false;
     navigating = true;
@@ -82,9 +85,9 @@
       }
       PageComponent = pageMod.default;
       layoutComponents = layoutMods.map((m: any) => m.default);
-      pageData = result?.pageData ?? {};
-      layoutData = result?.layoutData ?? [];
-      routeParams = result?.pageData?.params ?? match.params;
+      appState.pageData = result?.pageData ?? {};
+      appState.layoutData = result?.layoutData ?? [];
+      appState.routeParams = result?.pageData?.params ?? match.params;
 
       // Scroll to top on forward navigation (not on popstate/back-forward)
       if (router.isPush) window.scrollTo(0, 0);

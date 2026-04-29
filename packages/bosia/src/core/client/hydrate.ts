@@ -4,6 +4,7 @@ import { router } from "./router.svelte.ts";
 import { initPrefetch } from "./prefetch.ts";
 import { findMatch, compileRoutes } from "../matcher.ts";
 import { clientRoutes } from "bosia:routes";
+import { appState } from "./appState.svelte.ts";
 
 // Pre-compile route patterns into RegExp at startup (shared by App.svelte and router via module reference)
 compileRoutes(clientRoutes);
@@ -34,15 +35,26 @@ async function main() {
         router.params = match.params;
     }
 
+    const ssrPageData = (window as any).__BOSIA_PAGE_DATA__ ?? {};
+    const ssrLayoutData = (window as any).__BOSIA_LAYOUT_DATA__ ?? [];
+    const ssrFormData = (window as any).__BOSIA_FORM_DATA__ ?? null;
+
+    // Seed shared client state so `use:enhance` and other helpers
+    // start from the same values App.svelte renders during hydration.
+    appState.pageData = ssrPageData;
+    appState.layoutData = ssrLayoutData;
+    appState.routeParams = ssrPageData?.params ?? (match?.params ?? {});
+    appState.form = ssrFormData;
+
     hydrate(App, {
         target: document.getElementById("app")!,
         props: {
             ssrMode: false,
             ssrPageComponent,
             ssrLayoutComponents,
-            ssrPageData: (window as any).__BOSIA_PAGE_DATA__ ?? {},
-            ssrLayoutData: (window as any).__BOSIA_LAYOUT_DATA__ ?? [],
-            ssrFormData: (window as any).__BOSIA_FORM_DATA__ ?? null,
+            ssrPageData,
+            ssrLayoutData,
+            ssrFormData,
         },
     });
 }

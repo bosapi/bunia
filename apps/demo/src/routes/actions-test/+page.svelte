@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { enhance } from 'bosia/client';
   import type { PageData, ActionData } from './$types';
   let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
@@ -18,7 +19,13 @@
     </div>
   {/if}
 
-  <form method="POST" class="space-y-4">
+  {#if form?.error}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {form.error.message}
+    </div>
+  {/if}
+
+  <form method="POST" class="space-y-4" use:enhance>
     <div>
       <label for="name" class="block text-sm font-medium">Name</label>
       <input
@@ -52,7 +59,7 @@
     </button>
   </form>
 
-  <form method="POST" action="?/reset" class="mt-4">
+  <form method="POST" action="?/reset" class="mt-4" use:enhance>
     <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
       Reset (named action)
     </button>

@@ -119,6 +119,64 @@ export const actions = {
 };
 ```
 
+## Progressive Enhancement (`use:enhance`)
+
+By default, form submissions trigger a full-page reload. Apply the
+`enhance` action to intercept submission, POST via `fetch`, and update
+the `form` prop in place — no reload, scroll position preserved, focus
+intact.
+
+```svelte
+<script lang="ts">
+  import { enhance } from "bosia/client";
+  let { data, form } = $props();
+</script>
+
+<form method="POST" use:enhance>
+  <input name="email" value={form?.email ?? ""} />
+  <button type="submit">Submit</button>
+</form>
+```
+
+If JavaScript is disabled, the form falls back to the standard POST
+flow described above — no extra work required.
+
+### Customizing the submission
+
+Pass a callback to run logic before the request fires (e.g. add an
+`Authorization` header), and optionally return a second callback to
+override the default post-result behavior:
+
+```svelte
+<form
+  method="POST"
+  use:enhance={({ formData, cancel }) => {
+    if (!formData.get("email")) cancel();
+    return async ({ result, update }) => {
+      // Custom handling, then fall back to default behavior:
+      await update({ reset: false, invalidateAll: true });
+    };
+  }}
+>
+  ...
+</form>
+```
+
+Defaults when no callback is returned:
+
+- `success` → `form` prop set to action return data, form reset, loaders re-fetched
+- `failure` → `form` prop set to failure data; form NOT reset
+- `redirect` → SPA navigation to target
+- `error` → `form` prop set to `{ error: { message, status } }`
+
+Render error results inline:
+
+```svelte
+{#if form?.error}
+  <p class="form-error">{form.error.message}</p>
+{/if}
+```
+
 ## How It Works
 
 1. Browser submits the form as a standard POST request
@@ -126,3 +184,7 @@ export const actions = {
 3. On **success**: the page re-renders with the action return value as `form` prop and fresh `load()` data
 4. On **fail()**: the page re-renders with the failure data as `form` prop at the specified status code
 5. On **redirect()**: the browser follows the redirect
+
+When `use:enhance` is active, steps 3–5 happen via JSON instead of a
+page reload — the action runs on the server identically, only the
+response shape differs (signaled by an `x-bosia-action: 1` header).

@@ -199,7 +199,7 @@
 - [ ] 🟡 Page option: `trailingSlash` configuration
 
 ### Forms
-- [ ] 🟠 `use:enhance` progressive enhancement — client-side fetch submission with automatic form state management (like SvelteKit)
+- [x] 🟠 `use:enhance` progressive enhancement — client-side fetch submission with automatic form state management (like SvelteKit)
 
 ### Types
 - [ ] 🟠 Typed route params — generate `{ slug: string }` from `[slug]` instead of `Record<string, string>`
