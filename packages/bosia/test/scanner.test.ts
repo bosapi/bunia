@@ -66,6 +66,34 @@ describe("scanRoutes()", () => {
 		expect(route!.page).toBe("(public)/about/+page.svelte");
 	});
 
+	test("scope: route under (private)/ is private", () => {
+		write("(private)/dashboard/+page.svelte");
+		const m = scanRoutes();
+		const route = m.pages.find((p) => p.pattern === "/dashboard")!;
+		expect(route.scope).toBe("private");
+	});
+
+	test("scope: route under non-private group stays public", () => {
+		write("(public)/about/+page.svelte");
+		const m = scanRoutes();
+		const route = m.pages.find((p) => p.pattern === "/about")!;
+		expect(route.scope).toBe("public");
+	});
+
+	test("scope: route with no group is public", () => {
+		write("blog/+page.svelte");
+		const m = scanRoutes();
+		const route = m.pages.find((p) => p.pattern === "/blog")!;
+		expect(route.scope).toBe("public");
+	});
+
+	test("scope: (private) inheritance applies to nested children", () => {
+		write("(private)/account/settings/+page.svelte");
+		const m = scanRoutes();
+		const route = m.pages.find((p) => p.pattern === "/account/settings")!;
+		expect(route.scope).toBe("private");
+	});
+
 	test("layout chain accumulates root → leaf", () => {
 		write("+layout.svelte");
 		write("dashboard/+layout.svelte");

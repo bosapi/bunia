@@ -20,6 +20,7 @@ declare module "bosia:routes" {
 		pageServer: Loader | null;
 		layoutServers: { loader: Loader; depth: number }[];
 		trailingSlash: TrailingSlash;
+		scope: "public" | "private";
 	}>;
 
 	export const apiRoutes: Array<{

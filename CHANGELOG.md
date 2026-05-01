@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.3.1] - 2026-05-01
 
+### Added
+
+- Scope-aware request deduplication, replacing the cookie-fingerprint model. Default scope is `public`: concurrent identical requests to `/__bosia/data/<path>` share one in-flight loader promise keyed on URL alone (path + sorted query). Routes under any `(private)` group folder are marked `scope: "private"` by the scanner and skip the dedup wrapper, running their loader fresh per request. The decision propagates through nested folders (`(private)/account/settings/+page.svelte` → private). Generated `bosia:routes` `serverRoutes` entries gain a `scope: "public" | "private"` field; `PageRoute` type updated. New `packages/bosia/src/core/dedup.ts` exposes `dedupKey(url)` (URL normalization: drops trailing slash on non-root, sorts query params) and `dedup(key, fn)` (in-flight map, entry removed on settle / reject — not a TTL cache). Cookies-accessed flag still drives `Cache-Control: private, no-cache` vs `public, max-age=0, must-revalidate` inside the deduped block. New EN/ID docs page `guides/request-deduplication.md` documents the safety rules — per-user routes (`/dashboard`, `/cart`, `/settings`, anything reading cookies/session) MUST live under `(private)` or two concurrent users share one loader result.
+
+### Fixed
+
+- 🔴 Cross-user data leak in request dedup. Previous `dedupKey()` only fingerprinted the `Authorization` header and a literal `authorization` cookie — apps using `sid`, `session`, `connect.sid`, `__Secure-next-auth.session-token`, etc. collided across users (User B received User A's loader result). The folder-based scope model removes identity hashing entirely: per-user content opts out via `(private)` and runs per-request, public content is shared on URL alone. Forgetting `(private)` on a per-user route still leaks — the docs page surfaces this prominently.
+
+### Removed
+
+- Cookie/`Authorization` header identity hashing in `dedupKey()`. The `dedup.ts` rewrite drops all per-user logic; identity-cookie configuration deferred (no longer needed under the folder model).
+
 ### Fixed
 
 - `PROJECT_NAME is not defined` SSR `ReferenceError` in scaffolded apps. The recent prettier reformat rewrote `{{PROJECT_NAME}}` → `{{ PROJECT_NAME }}` inside template `.svelte` files; `prettier-plugin-svelte` parsed the spaced placeholder as a Svelte expression, and `create.ts`'s replace step (which only matches the no-space form) left it intact — so generated apps shipped `{{ PROJECT_NAME }}`, which Svelte compiled to an object-shorthand reference to an undeclared `PROJECT_NAME` and threw at SSR. Templates now follow the SvelteKit convention: no project-name placeholders inside `.svelte` files. Brand strings are hardcoded ("Bosia Demo" / "Welcome to Bosia" / "Bosia Todo"), and the `appName` returned from `+layout.server.ts` (still used to demo `parent()` data threading in the demo blog page) is a literal string. `{{PROJECT_NAME}}` only remains where prettier can't mangle it (`package.json`, `README.md`, `.env.example`); the CLI replace step is unchanged. Files touched: `demo/+layout.server.ts`, `demo/(public)/+layout.svelte`, `demo/(public)/+page.svelte`, `demo/(public)/about/+page.svelte`, `demo/(public)/blog/+page.svelte`, `demo/(public)/blog/[slug]/+page.svelte`, `demo/(public)/all/[...catchall]/+page.svelte`, `default/+page.svelte`, `default/about/+page.svelte`, `todo/+layout.server.ts`.

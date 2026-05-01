@@ -17,6 +17,12 @@ export interface PageRoute {
 	layoutServers: { path: string; depth: number }[];
 	/** Effective trailing-slash mode (page wins over layout chain). Defaults to "never". */
 	trailingSlash: TrailingSlash;
+	/**
+	 * Dedup scope. `"public"` (default) → loader runs once for concurrent identical
+	 * URLs. `"private"` → loader runs per-request (use for per-user routes).
+	 * Set by placing the route under a `(private)` group folder anywhere in the chain.
+	 */
+	scope: "public" | "private";
 }
 
 /** An API route discovered from the file system */

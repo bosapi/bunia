@@ -129,35 +129,9 @@ export async function load({ params }: LoadEvent) {
 
 ## Deduplikasi Request
 
-Ketika banyak klien mengakses route yang sama secara bersamaan, Bosia secara otomatis mendeduplikasi eksekusi loader. Alih-alih menjalankan `load()` sekali per request, request identik yang bersamaan berbagi satu promise yang sedang berjalan.
+Request identik yang bersamaan berbagi satu loader in-flight secara default. Route per-user (apa pun yang membaca cookie atau sesi) **wajib** opt out dengan menempatkannya di bawah folder grup `(private)`, atau Pengguna B akan menerima data Pengguna A.
 
-Contoh: 10 pengguna mengakses `/products` secara bersamaan menghasilkan **satu** pemanggilan `load()` — semua 10 menerima hasil yang sama.
-
-### Cara kerja
-
-- Kunci dedup dibangun dari **path route** + **query params yang diurutkan** + **identitas pengguna**
-- Jika request yang cocok sudah sedang berjalan, request baru menunggu promise yang sama
-- Setelah promise selesai (resolve atau reject), entri dihapus — tidak ada data basi, tidak ada TTL
-- Setiap request tetap mendapatkan response HTTP sendiri dengan header dan cookies masing-masing
-
-### Identitas pengguna
-
-Dedup menggunakan header `Authorization` atau cookie `authorization` (case-insensitive) untuk membedakan pengguna:
-
-- **Request anonim** (tanpa auth) berbagi kunci dedup yang sama — deduplikasi maksimal
-- **Request terautentikasi** dikunci per pengguna — pengguna berbeda selalu menjalankan loader terpisah
-
-:::caution
-Jika aplikasi Anda menggunakan **nama cookie berbeda** untuk autentikasi (bukan `authorization`), dedup akan memperlakukan pengguna terautentikasi sebagai anonim dan berbagi hasil loader antar mereka. Gunakan header `Authorization` atau ubah nama cookie auth Anda menjadi `authorization`.
-:::
-
-### Cakupan
-
-Dedup hanya berlaku untuk endpoint `/__bosia/data/` (pengambilan data navigasi sisi klien). Dedup **tidak** berlaku untuk:
-
-- Render halaman SSR (pemuatan halaman awal)
-- Request POST/PUT/DELETE
-- Route API (`+server.ts`)
+Lihat [Deduplikasi Request](./request-deduplication) untuk model lengkap dan aturan keamanannya.
 
 ## Timeout
 

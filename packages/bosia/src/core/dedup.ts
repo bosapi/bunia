@@ -1,32 +1,29 @@
-// packages/bosia/src/core/dedup.ts
-// Request deduplication for concurrent identical GET requests to /__bosia/data/
+// ─── Request Deduplication ──────────────────────────────
+// Concurrent in-flight coalescing for public routes. When N parallel requests
+// hit the same URL, run the loader once and share the resolved value across
+// all N waiters. Settled responses are NOT cached — once the promise resolves,
+// the entry is dropped, so the next request runs the loader again.
+//
+// Scope decision lives in the scanner: routes under a `(private)` group skip
+// dedup entirely. Per-user routes MUST be private — sharing a loader result
+// across users would leak data. See docs/guides/request-deduplication.md.
 
-const inflight = new Map<string, Promise<any>>();
+const inflight = new Map<string, Promise<unknown>>();
 
-const AUTH_COOKIE_RE = /(?:^|;\s*)authorization=([^;]*)/i;
-
-/** Build dedup key from route URL + request identity. Sort search params for consistency. */
-export function dedupKey(url: URL, request: Request): string {
+/** Build a stable dedup key from a URL: normalized path + sorted query. */
+export function dedupKey(url: URL): string {
 	let path = url.pathname;
 	if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 	const sorted = new URLSearchParams([...url.searchParams.entries()].sort());
 	const search = sorted.toString();
-	const base = search ? `${path}?${search}` : path;
-
-	const authHeader = request.headers.get("authorization") ?? "";
-	const cookieHeader = request.headers.get("cookie") ?? "";
-	const match = cookieHeader.match(AUTH_COOKIE_RE);
-	const authCookie = match?.[1] ?? "";
-	const identity = authHeader || authCookie;
-	if (!identity) return base;
-	return `${base}|${Bun.hash(identity).toString(36)}`;
+	return search ? `${path}?${search}` : path;
 }
 
-/** Run `fn` with dedup. Concurrent calls with same key share the in-flight promise. */
+/** Coalesce concurrent calls under `key`. `fn` runs at most once per inflight window. */
 export function dedup<T>(key: string, fn: () => Promise<T>): Promise<T> {
 	const existing = inflight.get(key);
-	if (existing) return existing;
+	if (existing) return existing as Promise<T>;
 	const promise = fn().finally(() => inflight.delete(key));
 	inflight.set(key, promise);
-	return promise;
+	return promise as Promise<T>;
 }

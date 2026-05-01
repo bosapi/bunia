@@ -1,52 +1,77 @@
 import { describe, expect, test } from "bun:test";
-import { dedupKey } from "../src/core/dedup.ts";
+import { dedup, dedupKey } from "../src/core/dedup.ts";
 
-function k(urlStr: string, headers: Record<string, string> = {}) {
-	const url = new URL(urlStr);
-	const req = new Request(urlStr, { headers });
-	return dedupKey(url, req);
-}
-
-describe("dedupKey", () => {
-	test("path-only for anonymous request", () => {
-		expect(k("https://x.test/foo")).toBe("/foo");
+describe("dedupKey()", () => {
+	test("returns pathname when no query", () => {
+		expect(dedupKey(new URL("https://x.test/blog"))).toBe("/blog");
 	});
 
-	test("strips trailing slash (non-root)", () => {
-		expect(k("https://x.test/foo/")).toBe("/foo");
+	test("normalizes trailing slash on non-root paths", () => {
+		expect(dedupKey(new URL("https://x.test/blog/"))).toBe("/blog");
 	});
 
-	test("keeps root /", () => {
-		expect(k("https://x.test/")).toBe("/");
+	test("preserves root /", () => {
+		expect(dedupKey(new URL("https://x.test/"))).toBe("/");
 	});
 
-	test("sorts query params for stable key", () => {
-		expect(k("https://x.test/p?b=2&a=1")).toBe(k("https://x.test/p?a=1&b=2"));
-		expect(k("https://x.test/p?a=1&b=2")).toBe("/p?a=1&b=2");
-	});
-
-	test("authorization header changes identity", () => {
-		const anon = k("https://x.test/p");
-		const authed = k("https://x.test/p", { authorization: "Bearer abc" });
-		expect(authed).not.toBe(anon);
-		expect(authed.startsWith("/p|")).toBe(true);
-	});
-
-	test("authorization cookie changes identity", () => {
-		const a = k("https://x.test/p", { cookie: "authorization=tokenA" });
-		const b = k("https://x.test/p", { cookie: "authorization=tokenB" });
-		expect(a).not.toBe(b);
-	});
-
-	test("same identity → same key", () => {
-		const a = k("https://x.test/p", { authorization: "Bearer abc" });
-		const b = k("https://x.test/p", { authorization: "Bearer abc" });
+	test("sorts query params for stable keys", () => {
+		const a = dedupKey(new URL("https://x.test/list?b=2&a=1"));
+		const b = dedupKey(new URL("https://x.test/list?a=1&b=2"));
 		expect(a).toBe(b);
+		expect(a).toBe("/list?a=1&b=2");
 	});
 
-	test("non-auth cookies don't affect key", () => {
-		const a = k("https://x.test/p", { cookie: "theme=dark" });
-		const b = k("https://x.test/p");
-		expect(a).toBe(b);
+	test("different paths produce different keys", () => {
+		expect(dedupKey(new URL("https://x.test/a"))).not.toBe(
+			dedupKey(new URL("https://x.test/b")),
+		);
+	});
+});
+
+describe("dedup()", () => {
+	test("concurrent calls with same key share one inflight promise", async () => {
+		let calls = 0;
+		const fn = async () => {
+			calls++;
+			await Bun.sleep(20);
+			return "result";
+		};
+		const [a, b, c] = await Promise.all([dedup("k", fn), dedup("k", fn), dedup("k", fn)]);
+		expect(calls).toBe(1);
+		expect(a).toBe("result");
+		expect(b).toBe("result");
+		expect(c).toBe("result");
+	});
+
+	test("different keys do not share", async () => {
+		let calls = 0;
+		const fn = async () => {
+			calls++;
+			return calls;
+		};
+		await Promise.all([dedup("a", fn), dedup("b", fn)]);
+		expect(calls).toBe(2);
+	});
+
+	test("entry removed after settle so subsequent calls re-run", async () => {
+		let calls = 0;
+		const fn = async () => {
+			calls++;
+			return calls;
+		};
+		await dedup("k2", fn);
+		await dedup("k2", fn);
+		expect(calls).toBe(2);
+	});
+
+	test("entry removed even when fn rejects", async () => {
+		let calls = 0;
+		const fn = async () => {
+			calls++;
+			throw new Error("boom");
+		};
+		await expect(dedup("k3", fn)).rejects.toThrow("boom");
+		await expect(dedup("k3", fn)).rejects.toThrow("boom");
+		expect(calls).toBe(2);
 	});
 });

@@ -17,6 +17,7 @@ import type { CsrfConfig } from "./csrf.ts";
 import { getCorsHeaders, handlePreflight } from "./cors.ts";
 import type { CorsConfig } from "./cors.ts";
 import { isDev, compress, isStaticPath } from "./html.ts";
+import { dedup, dedupKey } from "./dedup.ts";
 import {
 	loadRouteData,
 	loadMetadata,
@@ -25,7 +26,6 @@ import {
 	renderPageWithFormData,
 } from "./renderer.ts";
 import { getServerTime } from "../lib/utils.ts";
-import { dedup, dedupKey } from "./dedup.ts";
 
 // ─── User Hooks ──────────────────────────────────────────
 // Load src/hooks.server.ts if present. Uses process.cwd() so
@@ -148,10 +148,9 @@ async function resolve(event: RequestEvent): Promise<Response> {
 		}
 		// Rewrite event.url so logging middleware sees the real page path, not /__bosia/data
 		event.url = routeUrl;
-		const dedupKeyStr = dedupKey(routeUrl, request);
 		try {
-			const result = await dedup(dedupKeyStr, async () => {
-				const pageMatch = findMatch(serverRoutes, routeUrl.pathname);
+			const pageMatch = findMatch(serverRoutes, routeUrl.pathname);
+			const runLoad = async () => {
 				const data = await loadRouteData(routeUrl, locals, request, cookies);
 
 				let metadata = null;
@@ -172,7 +171,14 @@ async function resolve(event: RequestEvent): Promise<Response> {
 				}
 
 				return { data, metadata, cookiesAccessed: (cookies as CookieJar).accessed };
-			});
+			};
+
+			// Dedup public routes by URL only. `(private)` scope routes (per-user content)
+			// skip the cache to prevent cross-user data leaks. See dedup.ts.
+			const result =
+				pageMatch?.route.scope === "private"
+					? await runLoad()
+					: await dedup(dedupKey(routeUrl), runLoad);
 
 			const cookiesWereAccessed = (cookies as CookieJar).accessed || result.cookiesAccessed;
 			const cc = cookiesWereAccessed

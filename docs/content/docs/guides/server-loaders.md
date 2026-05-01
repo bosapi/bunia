@@ -188,35 +188,9 @@ Under the hood, Bosia tracks whether `cookies.get()` or `cookies.getAll()` was c
 
 ## Request Deduplication
 
-When multiple clients hit the same route at the same time, Bosia automatically deduplicates the loader execution. Instead of running `load()` once per request, concurrent identical requests share a single in-flight promise.
+Concurrent identical requests share a single in-flight loader by default. Per-user routes (anything reading cookies or session) **must** opt out by living under a `(private)` group folder, or User B will receive User A's data.
 
-For example, 10 users requesting `/products` simultaneously results in **one** `load()` call — all 10 receive the same result.
-
-### How it works
-
-- The dedup key is built from the **route path** + **sorted query params** + **user identity**
-- If a matching request is already in-flight, new requests wait for the same promise
-- Once the promise settles (resolves or rejects), the entry is removed — no stale data, no TTL
-- Each request still gets its own HTTP response with its own headers and cookies
-
-### User identity
-
-Dedup uses the `Authorization` header or an `authorization` cookie (case-insensitive) to distinguish users:
-
-- **Anonymous requests** (no auth) share the same dedup key — maximum deduplication
-- **Authenticated requests** are keyed per user — different users always run separate loaders
-
-:::caution
-If your app uses a **different cookie name** for authentication (not `authorization`), dedup will treat authenticated users as anonymous and share loader results between them. Use the `Authorization` header or rename your auth cookie to `authorization`.
-:::
-
-### Scope
-
-Dedup applies **only** to the `/__bosia/data/` endpoint (client-side navigation data fetches). It does **not** apply to:
-
-- SSR page renders (initial page load)
-- POST/PUT/DELETE requests
-- API routes (`+server.ts`)
+See [Request Deduplication](./request-deduplication) for the full model and the safety rules.
 
 ## Timeouts
 

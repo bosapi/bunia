@@ -248,8 +248,8 @@
 
 ### Performance (at scale)
 
-- [x] 🟠 Request deduplication — deduplicate concurrent identical GET requests to same route; share in-flight loader promise instead of running twice. Scope dedup key by route+params (exclude user-specific loaders)
-- [ ] 🔴 Dedup key cross-user data leak — `dedupKey()` only fingerprints the `Authorization` header and a literal `authorization` cookie. Apps using session cookies under any other name (`sid`, `session`, `connect.sid`, `__Secure-next-auth.session-token`, etc.) collide across users — User B receives the loader result computed for User A's cookies. Also: cookies written by the deduped loader land only on the first request's `CookieJar`; concurrent waiters lose their `Set-Cookie` headers. Fix: hash the entire `Cookie` header (or disable dedup when any cookie is present), and replay outgoing cookies onto every waiting jar
+- [x] 🟠 Request deduplication — deduplicate concurrent identical GET requests to same route; share in-flight loader promise instead of running twice. Scope dedup key by route+params (exclude user-specific loaders). Reworked in 0.3.1 around a folder convention: dedup ON by default keyed on URL only; per-user routes opt out by living under `(private)`
+- [x] 🔴 Dedup key cross-user data leak — replaced cookie-fingerprint identity with a folder convention. Routes under any `(private)` group folder skip dedup entirely and run per-request; all other routes are deduped on URL alone. Apps with per-user content must place routes under `(private)` (dashboards, carts, settings) or User B will receive User A's loader result. See `docs/guides/request-deduplication.md` for safety rules
 - [ ] 🟡 Trie-based route matcher — replace linear O(n) route scan with radix trie for O(k) matching (k = URL segments). Matters when route count exceeds ~100
 - [x] 🟡 Compiled route regex — pre-compile route patterns to `RegExp` at startup instead of parsing on every match
 

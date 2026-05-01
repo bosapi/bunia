@@ -44,6 +44,7 @@ export function scanRoutes(): RouteManifest {
 		layoutChain: string[],
 		layoutServerChain: { path: string; depth: number }[],
 		inheritedTrailingSlash: TrailingSlash,
+		inheritedScope: "public" | "private",
 	) {
 		const fullDir = join(ROUTES_DIR, dir);
 		if (!existsSync(fullDir)) return;
@@ -94,6 +95,7 @@ export function scanRoutes(): RouteManifest {
 				pageServer: pageServerFile,
 				layoutServers: [...currentLayoutServers],
 				trailingSlash: effectiveTs,
+				scope: inheritedScope,
 			});
 		}
 
@@ -105,6 +107,9 @@ export function scanRoutes(): RouteManifest {
 			const dirName = entry.name;
 			// Route groups like (public), (auth) are invisible in URLs
 			const isGroup = /^\(.*\)$/.test(dirName);
+			// `(private)` anywhere in the chain marks descendants as per-user (dedup off)
+			const childScope: "public" | "private" =
+				inheritedScope === "private" || dirName === "(private)" ? "private" : "public";
 
 			walk(
 				dir ? join(dir, dirName) : dirName,
@@ -112,11 +117,12 @@ export function scanRoutes(): RouteManifest {
 				currentLayouts,
 				currentLayoutServers,
 				currentTrailingSlash,
+				childScope,
 			);
 		}
 	}
 
-	walk("", [], [], [], "never");
+	walk("", [], [], [], "never", "public");
 
 	// Warn when a catch-all exists but no exact route covers its prefix.
 	// e.g. "/[...slug]" matches everything EXCEPT "/" (which needs its own +page.svelte).

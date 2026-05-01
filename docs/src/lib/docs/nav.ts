@@ -28,6 +28,11 @@ export const sidebar: NavGroup[] = [
 			{ label: "Routing", slug: "guides/routing" },
 			{ label: "Server Loaders", labelId: "Server Loader", slug: "guides/server-loaders" },
 			{
+				label: "Request Deduplication",
+				labelId: "Deduplikasi Request",
+				slug: "guides/request-deduplication",
+			},
+			{
 				label: "Server Metadata",
 				labelId: "Server Metadata",
 				slug: "guides/server-metadata",
