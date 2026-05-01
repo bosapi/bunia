@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>About | {{ PROJECT_NAME }}</title>
+	<title>About | Bosia</title>
 </svelte:head>
 
 <div>

@@ -26,7 +26,7 @@
 </script>
 
 <svelte:head>
-	<title>Blog | {{ PROJECT_NAME }}</title>
+	<title>Blog | Bosia Demo</title>
 </svelte:head>
 
 <div class="space-y-8">

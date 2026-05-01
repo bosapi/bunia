@@ -4,7 +4,7 @@ import type { LoadEvent } from "bosia";
 // and to all layouts via the `data` prop.
 export async function load({ locals }: LoadEvent) {
 	return {
-		appName: "{{PROJECT_NAME}}",
+		appName: "Bosia Demo",
 		requestTime: (locals.requestTime as number | null) ?? null,
 	};
 }

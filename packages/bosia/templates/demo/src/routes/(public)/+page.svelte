@@ -37,8 +37,8 @@
 </script>
 
 <svelte:head>
-	<title>{{ PROJECT_NAME }}</title>
-	<meta name="description" content="{{ PROJECT_NAME }} — SSR + Svelte 5 + Bun + ElysiaJS" />
+	<title>Bosia Demo</title>
+	<meta name="description" content="Bosia Demo — SSR + Svelte 5 + Bun + ElysiaJS" />
 </svelte:head>
 
 <div class="space-y-12">
@@ -46,7 +46,7 @@
 	<div class="space-y-3 pt-4">
 		<h1 class="text-5xl font-bold tracking-tight flex items-center gap-3">
 			<img src="/favicon.svg" alt="" class="size-10" />
-			{{ PROJECT_NAME }}
+			Bosia Demo
 		</h1>
 		<p class="text-xl text-muted-foreground max-w-xl">
 			A minimalist fullstack framework — SSR, Svelte 5 Runes, Bun, and ElysiaJS.
