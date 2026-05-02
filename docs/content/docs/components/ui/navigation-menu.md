@@ -5,7 +5,7 @@ demo: NavigationMenuDemo
 ---
 
 ```bash
-bosia add navigation-menu
+bun x bosia@latest add navigation-menu
 ```
 
 A compound horizontal navigation menu where each item can reveal a popover of related links. Only one panel is open at a time and a small hover-intent delay prevents flicker as the cursor moves between triggers and panels.

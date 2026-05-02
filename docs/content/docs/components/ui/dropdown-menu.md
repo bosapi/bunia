@@ -5,7 +5,7 @@ demo: DropdownMenuDemo
 ---
 
 ```bash
-bosia add dropdown-menu
+bun x bosia@latest add dropdown-menu
 ```
 
 A context-managed dropdown with trigger, content, items, and separator. Handles click-outside and Escape to close.

@@ -5,7 +5,7 @@ demo: AlertDemo
 ---
 
 ```bash
-bosia add alert
+bun x bosia@latest add alert
 ```
 
 A compound alert component with title and description slots.

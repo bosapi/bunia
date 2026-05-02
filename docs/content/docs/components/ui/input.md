@@ -5,7 +5,7 @@ demo: InputDemo
 ---
 
 ```bash
-bosia add input
+bun x bosia@latest add input
 ```
 
 A styled text input with bindable value.

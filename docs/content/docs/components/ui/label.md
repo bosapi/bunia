@@ -5,7 +5,7 @@ demo: LabelDemo
 ---
 
 ```bash
-bosia add label
+bun x bosia@latest add label
 ```
 
 An accessible label that pairs with form controls. Automatically dims when the associated control is disabled via the `peer-disabled` modifier.

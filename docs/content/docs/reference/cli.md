@@ -96,12 +96,12 @@ Place test files anywhere Bun discovers them (default: `*.test.ts` / `*.test.tsx
 Install a UI component from the registry.
 
 ```bash
-bosia add <component>
+bun x bosia@latest add <component>
 ```
 
 - Downloads component files to `src/lib/components/ui/<component>/`
-- Supports **path-based names** — `bosia add shop/cart` installs to `src/lib/components/shop/cart/`
-- Components without a path prefix default to `ui/` — `bosia add button` → `src/lib/components/ui/button/`
+- Supports **path-based names** — `bun x bosia@latest add shop/cart` installs to `src/lib/components/shop/cart/`
+- Components without a path prefix default to `ui/` — `bun x bosia@latest add button` → `src/lib/components/ui/button/`
 - If a component already exists, prompts to **replace** or **skip**
 - Automatically installs component dependencies (other components it depends on)
 - Installs required npm packages via `bun add`
@@ -110,10 +110,10 @@ bosia add <component>
 Example:
 
 ```bash
-bosia add button              # → src/lib/components/ui/button/
-bosia add card                # → src/lib/components/ui/card/
-bosia add shop/cart           # → src/lib/components/shop/cart/
-bosia add dashboard/widgets   # → src/lib/components/dashboard/widgets/
+bun x bosia@latest add button              # → src/lib/components/ui/button/
+bun x bosia@latest add card                # → src/lib/components/ui/card/
+bun x bosia@latest add shop/cart           # → src/lib/components/shop/cart/
+bun x bosia@latest add dashboard/widgets   # → src/lib/components/dashboard/widgets/
 ```
 
 ## bosia feat

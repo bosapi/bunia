@@ -5,7 +5,7 @@ demo: TabsDemo
 ---
 
 ```bash
-bosia add tabs
+bun x bosia@latest add tabs
 ```
 
 A compound component for switching between mutually exclusive sections of content. Built on `role="tablist"` / `role="tab"` / `role="tabpanel"` with roving tabindex, arrow key navigation, and `Home`/`End` support.

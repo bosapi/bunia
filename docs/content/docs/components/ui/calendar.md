@@ -5,7 +5,7 @@ demo: CalendarDemo
 ---
 
 ```bash
-bosia add calendar
+bun x bosia@latest add calendar
 ```
 
 A composable calendar component for single date selection. Built with native JS `Date` — zero external dependencies.

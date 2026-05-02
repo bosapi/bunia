@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 // ─── Bosia CLI ────────────────────────────────────────────
-//   bosia create <name>   scaffold a new project
-//   bosia dev             start the development server
-//   bosia build           build for production
-//   bosia start           run the production server
-//   bosia add <name>      add a UI component from the registry
-//   bosia feat <name>     add a feature scaffold from the registry
+//   bun x bosia@latest create <name>   scaffold a new project
+//   bun x bosia dev                       start the development server
+//   bun x bosia build                     build for production
+//   bun x bosia start                     run the production server
+//   bun x bosia@latest add <name>         add a UI component from the registry
+//   bun x bosia@latest feat <name>        add a feature scaffold from the registry
 
 const [, , command, ...args] = process.argv;
 
@@ -67,17 +67,17 @@ Commands:
   feat <feature>      Add a feature scaffold from the registry [--local]
 
 Examples:
-  bosia create my-app
-  bosia create my-app --template todo
-  bosia dev
-  bosia build
-  bosia start
-  bosia test
-  bosia test --watch
-  bosia test --coverage
-  bosia add button              → src/lib/components/ui/button/
-  bosia add shop/cart           → src/lib/components/shop/cart/
-  bosia feat login
+  bun x bosia@latest create my-app
+  bun x bosia@latest create my-app --template todo
+  bun x bosia dev
+  bun x bosia build
+  bun x bosia start
+  bun x bosia test
+  bun x bosia test --watch
+  bun x bosia test --coverage
+  bun x bosia@latest add button              → src/lib/components/ui/button/
+  bun x bosia@latest add shop/cart           → src/lib/components/shop/cart/
+  bun x bosia@latest feat login
 `);
 			break;
 		}

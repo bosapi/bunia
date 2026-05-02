@@ -5,7 +5,7 @@ demo: BreadcrumbDemo
 ---
 
 ```bash
-bosia add breadcrumb
+bun x bosia@latest add breadcrumb
 ```
 
 A composable, semantic navigation component built with `<nav aria-label="breadcrumb">`, an `<ol>` list, and individual `<li>` items. Stateless — purely markup and styling.

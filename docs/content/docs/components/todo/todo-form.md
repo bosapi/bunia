@@ -4,7 +4,7 @@ description: A form component for creating new todo items with validation feedba
 ---
 
 ```bash
-bosia add todo/todo-form
+bun x bosia@latest add todo/todo-form
 ```
 
 A form that submits a `POST` to `?/create` with a `title` field. Displays an optional error message below.

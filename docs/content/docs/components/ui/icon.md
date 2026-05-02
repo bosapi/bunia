@@ -5,7 +5,7 @@ demo: IconGrid
 ---
 
 ```bash
-bosia add icon
+bun x bosia@latest add icon
 ```
 
 50+ Lucide icons built-in, with zero npm dependencies. Icons are stored as raw SVG strings in `icons.ts` — add more by copying from [lucide.dev](https://lucide.dev/icons).

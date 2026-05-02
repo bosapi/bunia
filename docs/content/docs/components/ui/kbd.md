@@ -5,7 +5,7 @@ demo: KbdDemo
 ---
 
 ```bash
-bosia add kbd
+bun x bosia@latest add kbd
 ```
 
 Renders a styled `<kbd>` element that looks like a keycap. Use `KbdGroup` to display key combinations with "+" separators.

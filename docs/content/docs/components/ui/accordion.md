@@ -5,7 +5,7 @@ demo: AccordionDemo
 ---
 
 ```bash
-bosia add accordion
+bun x bosia@latest add accordion
 ```
 
 A compound component for collapsing sections of content. Built on `aria-expanded` triggers wired to `role="region"` panels, with roving arrow-key navigation and support for single- or multi-open modes.

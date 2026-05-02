@@ -19,7 +19,7 @@ Framework fullstack yang cepat dan lengkap. Konvensi SvelteKit, tanpa Node.js, t
 ## Mulai Cepat
 
 ```bash
-bunx bosia create my-app
+bun x bosia@latest create my-app
 cd my-app
 bun run dev
 ```

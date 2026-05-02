@@ -5,7 +5,7 @@ demo: SelectDemo
 ---
 
 ```bash
-bosia add select
+bun x bosia@latest add select
 ```
 
 A compound select component built on `role="combobox"` / `role="listbox"` with keyboard navigation, groups, labels, separators, and a hidden input for form submission.

@@ -11,7 +11,7 @@ import {
 	bunAdd,
 } from "./registry.ts";
 
-// ─── bosia feat <feature> [--local] ──────────────────────
+// ─── bun x bosia@latest feat <feature> [--local] ─────────
 // Fetches a feature scaffold from the GitHub registry (or local
 // registry with --local) and copies route/lib files, installs npm deps.
 // Supports nested feature dependencies (e.g. todo → drizzle).
@@ -34,7 +34,7 @@ interface FeatureMeta {
 	name: string;
 	description: string;
 	features?: string[]; // other bosia features required
-	components: string[]; // bosia components to install via `bosia add`
+	components: string[]; // bosia components to install via `bun x bosia@latest add`
 	files: FileEntry[]; // file entries with per-file strategy
 	npmDeps: Record<string, string>;
 	npmDevDeps?: Record<string, string>;
@@ -50,7 +50,7 @@ const installedFeats = new Set<string>();
 export async function runFeat(name: string | undefined, flags: string[] = []) {
 	if (!name) {
 		console.error(
-			"❌ Please provide a feature name.\n   Usage: bosia feat <feature> [--local]",
+			"❌ Please provide a feature name.\n   Usage: bun x bosia@latest feat <feature> [--local]",
 		);
 		process.exit(1);
 	}

@@ -5,7 +5,7 @@ demo: DialogDemo
 ---
 
 ```bash
-bosia add dialog
+bun x bosia@latest add dialog
 ```
 
 A modal dialog that overlays the page with a backdrop, traps focus, locks body scroll, and closes on Escape or backdrop click. Fully accessible with `role="dialog"`, `aria-modal`, `aria-labelledby`, and `aria-describedby`.

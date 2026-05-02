@@ -5,7 +5,7 @@ demo: CommandDemo
 ---
 
 ```bash
-bosia add command
+bun x bosia@latest add command
 ```
 
 Fast, composable, unstyled command menu primitive. Use for command palettes, search UIs, and the building blocks of `Combobox`.

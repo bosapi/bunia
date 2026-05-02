@@ -4,7 +4,7 @@ description: A single todo item with toggle, inline edit, and delete actions.
 ---
 
 ```bash
-bosia add todo/todo-item
+bun x bosia@latest add todo/todo-item
 ```
 
 Renders a single todo with toggle (complete/incomplete), inline editing on double-click, and a delete button. Uses form actions (`?/toggle`, `?/update`, `?/delete`).

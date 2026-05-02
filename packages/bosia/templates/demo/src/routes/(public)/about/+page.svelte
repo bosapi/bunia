@@ -9,7 +9,7 @@
 	</p>
 
 	<ul class="space-y-2 text-foreground">
-		{#each ["Bun runtime — fast builds, native TypeScript", "ElysiaJS — HTTP server with type-safe routing", "Svelte 5 Runes — fine-grained reactivity", "Isomorphic SSR with client hydration", "File-based routing (SvelteKit-compatible conventions)", "Nested layouts and route groups (public), (auth), (admin)", "Dynamic params [slug] and catch-all [...rest]", "Server loaders with parent() data threading", "Hooks — sequence() middleware for auth, logging, etc.", "Component registry — bosia add button", "Feature registry — bosia feat login"] as item}
+		{#each ["Bun runtime — fast builds, native TypeScript", "ElysiaJS — HTTP server with type-safe routing", "Svelte 5 Runes — fine-grained reactivity", "Isomorphic SSR with client hydration", "File-based routing (SvelteKit-compatible conventions)", "Nested layouts and route groups (public), (auth), (admin)", "Dynamic params [slug] and catch-all [...rest]", "Server loaders with parent() data threading", "Hooks — sequence() middleware for auth, logging, etc.", "Component registry — bun x bosia@latest add button", "Feature registry — bosia feat login"] as item}
 			<li class="flex items-start gap-2">
 				<span class="text-primary mt-0.5">✓</span>
 				<span>{item}</span>

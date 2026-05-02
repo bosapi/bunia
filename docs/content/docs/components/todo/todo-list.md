@@ -4,7 +4,7 @@ description: A list component that renders todo items with completion stats.
 ---
 
 ```bash
-bosia add todo/todo-list
+bun x bosia@latest add todo/todo-list
 ```
 
 Renders a list of todos using `TodoItem`, with an empty state and a completion counter. Depends on `todo/todo-item`.

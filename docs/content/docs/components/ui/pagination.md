@@ -5,7 +5,7 @@ demo: PaginationDemo
 ---
 
 ```bash
-bosia add pagination
+bun x bosia@latest add pagination
 ```
 
 A composable, stateless pagination component. The parent owns the current page state — this component only renders semantic `<nav>`, `<ul>`, and `<li>` markup with button-styled links.

@@ -5,7 +5,7 @@ demo: BadgeDemo
 ---
 
 ```bash
-bosia add badge
+bun x bosia@latest add badge
 ```
 
 A small status label with variant styling.

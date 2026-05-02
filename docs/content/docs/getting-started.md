@@ -10,7 +10,7 @@ description: Create your first Bosia project in under a minute.
 ## Create a New Project
 
 ```bash
-bunx bosia create my-app
+bun x bosia@latest create my-app
 ```
 
 You'll be prompted to pick a template:
@@ -24,7 +24,7 @@ You'll be prompted to pick a template:
 To skip the prompt:
 
 ```bash
-bunx bosia create my-app --template todo
+bun x bosia@latest create my-app --template todo
 ```
 
 ## Development

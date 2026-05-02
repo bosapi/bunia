@@ -5,7 +5,7 @@ demo: CarouselDemo
 ---
 
 ```bash
-bosia add carousel
+bun x bosia@latest add carousel
 ```
 
 A carousel built with CSS scroll-snap. Supports horizontal and vertical orientation, keyboard navigation, and prev/next buttons. Zero external dependencies.

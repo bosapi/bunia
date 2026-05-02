@@ -5,7 +5,7 @@ demo: InputGroupDemo
 ---
 
 ```bash
-bosia add input-group
+bun x bosia@latest add input-group
 ```
 
 Input Group composes inputs with prefix/suffix addons — icons, text, buttons, or other components — inside a single bordered container with shared focus state.

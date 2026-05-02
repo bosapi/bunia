@@ -5,7 +5,7 @@ demo: SwitchDemo
 ---
 
 ```bash
-bosia add switch
+bun x bosia@latest add switch
 ```
 
 A toggle switch built on a native `<button>` with `role="switch"`, featuring a pill-shaped track with a sliding thumb.

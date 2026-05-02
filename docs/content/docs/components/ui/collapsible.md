@@ -5,7 +5,7 @@ demo: CollapsibleDemo
 ---
 
 ```bash
-bosia add collapsible
+bun x bosia@latest add collapsible
 ```
 
 A simple expand/collapse primitive. Unlike Accordion, Collapsible manages a single open/closed state with no multi-item coordination or arrow-key navigation.

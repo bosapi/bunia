@@ -5,7 +5,7 @@ demo: SidebarDemo
 ---
 
 ```bash
-bosia add sidebar
+bun x bosia@latest add sidebar
 ```
 
 A composable sidebar with header, scrollable content, grouped menus, collapsible items, and icon-mode collapse. Uses `sidebar-*` CSS custom properties for theming.

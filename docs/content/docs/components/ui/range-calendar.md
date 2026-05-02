@@ -5,7 +5,7 @@ demo: RangeCalendarDemo
 ---
 
 ```bash
-bosia add range-calendar
+bun x bosia@latest add range-calendar
 ```
 
 A composable calendar for selecting date ranges. Built on top of the `calendar` component — reuses `CalendarHeader` for navigation. Native JS `Date`, zero external dependencies.

@@ -11,13 +11,13 @@ import {
 	bunAdd,
 } from "./registry.ts";
 
-// ─── bosia add <component> ────────────────────────────────
+// ─── bun x bosia@latest add <component> ──────────────────
 // Fetches a component from the GitHub registry (or local registry
 // with --local) and copies it into src/lib/components/<path>/.
 //
 // Path-based names:
-//   bosia add button       → src/lib/components/ui/button/
-//   bosia add shop/cart    → src/lib/components/shop/cart/
+//   bun x bosia@latest add button       → src/lib/components/ui/button/
+//   bun x bosia@latest add shop/cart    → src/lib/components/shop/cart/
 
 interface ComponentMeta {
 	name: string;
@@ -48,7 +48,7 @@ export async function initAddRegistry(root: string | null) {
 export async function runAdd(name: string | undefined, flags: string[] = []) {
 	if (!name) {
 		console.error(
-			"❌ Please provide a component name.\n   Usage: bosia add <component> [--local]",
+			"❌ Please provide a component name.\n   Usage: bun x bosia@latest add <component> [--local]",
 		);
 		process.exit(1);
 	}

@@ -5,7 +5,7 @@ demo: SkeletonDemo
 ---
 
 ```bash
-bosia add skeleton
+bun x bosia@latest add skeleton
 ```
 
 A minimal placeholder element used to stub out the shape of content while data is loading. Renders a single `<div>` with `animate-pulse rounded-md bg-accent` base classes — size and shape are controlled entirely through Tailwind utility classes.

@@ -5,7 +5,7 @@ demo: NativeSelectDemo
 ---
 
 ```bash
-bosia add native-select
+bun x bosia@latest add native-select
 ```
 
 A styled wrapper around the native HTML `<select>` element. Uses `appearance-none` with a custom chevron. Great for mobile and form compatibility.

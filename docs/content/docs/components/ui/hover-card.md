@@ -5,7 +5,7 @@ demo: HoverCardDemo
 ---
 
 ```bash
-bosia add hover-card
+bun x bosia@latest add hover-card
 ```
 
 A hover-triggered floating panel for showing rich previews (user cards, link previews, etc.) when a pointer hovers or focuses a trigger.

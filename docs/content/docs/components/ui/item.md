@@ -5,7 +5,7 @@ demo: ItemDemo
 ---
 
 ```bash
-bosia add item
+bun x bosia@latest add item
 ```
 
 A compound layout component with composable sub-components: `Item`, `ItemMedia`, `ItemContent`, `ItemTitle`, `ItemDescription`, `ItemActions`, `ItemHeader`, `ItemFooter`, `ItemGroup`, and `ItemSeparator`.

@@ -5,7 +5,7 @@ demo: SeparatorDemo
 ---
 
 ```bash
-bosia add separator
+bun x bosia@latest add separator
 ```
 
 A horizontal or vertical divider line.

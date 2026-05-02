@@ -5,7 +5,7 @@ demo: ProgressDemo
 ---
 
 ```bash
-bosia add progress
+bun x bosia@latest add progress
 ```
 
 A linear progress indicator that visualizes task completion. Renders a `<div role="progressbar">` track with an inner indicator whose `translateX` transform is driven by the `value` / `max` ratio. Fully accessible via `aria-valuemin`, `aria-valuemax`, and `aria-valuenow`.

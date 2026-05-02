@@ -5,7 +5,7 @@ demo: ContextMenuDemo
 ---
 
 ```bash
-bosia add context-menu
+bun x bosia@latest add context-menu
 ```
 
 A right-click triggered menu that appears at the cursor position. Supports items, labels, keyboard shortcut hints, separators, and nested sub-menus.

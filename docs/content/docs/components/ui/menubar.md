@@ -5,7 +5,7 @@ demo: MenubarDemo
 ---
 
 ```bash
-bosia add menubar
+bun x bosia@latest add menubar
 ```
 
 A horizontal menu bar with multiple dropdown menus. Click to open a menu, then hover between triggers to switch. Handles click-outside and Escape to close.

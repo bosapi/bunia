@@ -112,7 +112,7 @@
 - [x] 🟠 `todo` template (formerly `drizzle`) — PostgreSQL + Drizzle ORM with full CRUD todo demo
 - [x] 🟠 `drizzle` feature — `bosia feat drizzle` scaffolds DB connection, schema aggregator, migrations dir, seed runner
 - [x] 🟠 `todo` feature — `bosia feat todo` scaffolds todo schema, repository, service, routes, components, and seed data
-- [x] 🟡 `todo` component — `bosia add todo` installs todo-form, todo-item, todo-list components
+- [x] 🟡 `todo` component — `bun x bosia@latest add todo` installs todo-form, todo-item, todo-list components
 - [x] 🟡 Registry as single source of truth — `bosia create --template todo` installs features from registry via `template.json` instead of duplicating files
 
 ### Hooks & Middleware
@@ -130,7 +130,7 @@
 - [x] 🟡 Dev server auto-restart on crash
 - [x] 🟡 Components documentation page with usage examples and prop tables
 - [x] 🟡 Interactive component previews in docs — live Svelte demos (button, badge, input, separator, avatar, card, dropdown-menu)
-- [x] 🟡 Nested registry structure for `todo` components — subfolder pattern matching `ui/`, with group install (`bosia add todo`) and individual install (`bosia add todo/todo-form`)
+- [x] 🟡 Nested registry structure for `todo` components — subfolder pattern matching `ui/`, with group install (`bun x bosia@latest add todo`) and individual install (`bun x bosia@latest add todo/todo-form`)
 - [x] 🟡 Nested docs sidebar — UI and Todo as sub-groups under Components
 - [x] 🟠 SEO infrastructure — `Metadata` type supports `lang` and `link` fields; dynamic `<html lang>`; `<link>` tag rendering in streaming SSR
 - [x] 🟡 Docs SEO — OG tags, Twitter cards, canonical URLs, hreflang alternates on all pages

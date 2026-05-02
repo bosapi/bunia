@@ -5,7 +5,7 @@ demo: AvatarDemo
 ---
 
 ```bash
-bosia add avatar
+bun x bosia@latest add avatar
 ```
 
 An avatar with image and fallback support. Shows fallback content when the image fails to load.

@@ -5,7 +5,7 @@ demo: AspectRatioDemo
 ---
 
 ```bash
-bosia add aspect-ratio
+bun x bosia@latest add aspect-ratio
 ```
 
 Displays content within a desired ratio using the CSS padding-bottom technique.

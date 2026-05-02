@@ -5,7 +5,7 @@ demo: CardDemo
 ---
 
 ```bash
-bosia add card
+bun x bosia@latest add card
 ```
 
 A card with composable sub-components: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, and `CardFooter`.

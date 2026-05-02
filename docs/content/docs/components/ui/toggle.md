@@ -5,7 +5,7 @@ demo: ToggleDemo
 ---
 
 ```bash
-bosia add toggle
+bun x bosia@latest add toggle
 ```
 
 A two-state button built on a native `<button>` with `aria-pressed`, used for toolbar actions like bold, italic, or view toggles. Distinct from Switch, which is a form control.

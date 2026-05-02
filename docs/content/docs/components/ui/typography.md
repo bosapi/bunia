@@ -5,7 +5,7 @@ demo: TypographyDemo
 ---
 
 ```bash
-bosia add typography
+bun x bosia@latest add typography
 ```
 
 Thin wrappers around semantic HTML elements with consistent Tailwind styling. Import individual components instead of memorizing class strings.
@@ -55,7 +55,7 @@ All components also spread `...restProps` onto their root element.
 <TypographyH1>My Page Title</TypographyH1>
 <TypographyLead>A brief introduction to the page.</TypographyLead>
 <TypographyP>
-	Use <TypographyInlineCode>bosia add typography</TypographyInlineCode> to install.
+	Use <TypographyInlineCode>bun x bosia@latest add typography</TypographyInlineCode> to install.
 </TypographyP>
 <TypographyMuted>Last updated today.</TypographyMuted>
 ```

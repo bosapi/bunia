@@ -5,7 +5,7 @@ demo: SpinnerDemo
 ---
 
 ```bash
-bosia add spinner
+bun x bosia@latest add spinner
 ```
 
 A simple animated loading indicator. Renders an SVG with `role="status"` and `aria-label="Loading"` by default. Size and color are controlled entirely through Tailwind utility classes.

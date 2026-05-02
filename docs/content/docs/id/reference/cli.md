@@ -95,12 +95,12 @@ Letakkan file tes di mana saja yang ditemukan Bun (default: `*.test.ts` / `*.tes
 Instal komponen UI dari registry.
 
 ```bash
-bosia add <component>
+bun x bosia@latest add <component>
 ```
 
 - Mengunduh file komponen ke `src/lib/components/ui/<component>/`
-- Mendukung **nama berbasis path** — `bosia add shop/cart` menginstal ke `src/lib/components/shop/cart/`
-- Komponen tanpa prefix path default ke `ui/` — `bosia add button` → `src/lib/components/ui/button/`
+- Mendukung **nama berbasis path** — `bun x bosia@latest add shop/cart` menginstal ke `src/lib/components/shop/cart/`
+- Komponen tanpa prefix path default ke `ui/` — `bun x bosia@latest add button` → `src/lib/components/ui/button/`
 - Jika komponen sudah ada, akan bertanya apakah ingin **mengganti** atau **lewati**
 - Secara otomatis menginstal dependensi komponen (komponen lain yang menjadi dependensinya)
 - Menginstal paket npm yang diperlukan melalui `bun add`
@@ -109,9 +109,9 @@ bosia add <component>
 Contoh:
 
 ```bash
-bosia add button              # → src/lib/components/ui/button/
-bosia add card                # → src/lib/components/ui/card/
-bosia add shop/cart           # → src/lib/components/shop/cart/
+bun x bosia@latest add button              # → src/lib/components/ui/button/
+bun x bosia@latest add card                # → src/lib/components/ui/card/
+bun x bosia@latest add shop/cart           # → src/lib/components/shop/cart/
 ```
 
 ## bosia feat

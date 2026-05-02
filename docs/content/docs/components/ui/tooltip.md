@@ -5,7 +5,7 @@ demo: TooltipDemo
 ---
 
 ```bash
-bosia add tooltip
+bun x bosia@latest add tooltip
 ```
 
 A context-managed tooltip with trigger and content. Shows on hover or focus after a configurable delay, hides on leave, blur, or Escape.

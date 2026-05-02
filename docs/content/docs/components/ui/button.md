@@ -5,7 +5,7 @@ demo: ButtonDemo
 ---
 
 ```bash
-bosia add button
+bun x bosia@latest add button
 ```
 
 An accessible button with multiple variants and sizes. Renders as `<a>` when `href` is provided.

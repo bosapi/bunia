@@ -5,7 +5,7 @@ demo: TableDemo
 ---
 
 ```bash
-bosia add table
+bun x bosia@latest add table
 ```
 
 Thin wrapper components around native HTML table elements (`<table>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<th>`, `<td>`, `<caption>`) with consistent styling and `cn()` class merging.

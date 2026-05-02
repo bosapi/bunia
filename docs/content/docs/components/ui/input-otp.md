@@ -5,7 +5,7 @@ demo: InputOtpDemo
 ---
 
 ```bash
-bosia add input-otp
+bun x bosia@latest add input-otp
 ```
 
 Input OTP renders a row of character cells that feel like separate boxes but behave like a single input — paste a full code in any cell, backspace to step back, and benefit from mobile SMS autofill via `autocomplete="one-time-code"`.

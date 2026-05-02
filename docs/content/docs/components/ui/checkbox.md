@@ -5,7 +5,7 @@ demo: CheckboxDemo
 ---
 
 ```bash
-bosia add checkbox
+bun x bosia@latest add checkbox
 ```
 
 A checkbox built on a native `<button>` with `role="checkbox"`, supporting checked, unchecked, and indeterminate states.

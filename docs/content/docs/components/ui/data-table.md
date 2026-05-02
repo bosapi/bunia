@@ -5,7 +5,7 @@ demo: DataTableDemo
 ---
 
 ```bash
-bosia add data-table
+bun x bosia@latest add data-table
 ```
 
 A fully-featured data table with sorting, filtering, and pagination. Automatically installs dependencies: `button`, `input`, `separator`.

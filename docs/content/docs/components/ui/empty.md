@@ -5,7 +5,7 @@ demo: EmptyDemo
 ---
 
 ```bash
-bosia add empty
+bun x bosia@latest add empty
 ```
 
 A compound component for empty states. Composable sub-components: `Empty`, `EmptyHeader`, `EmptyMedia`, `EmptyTitle`, `EmptyDescription`, and `EmptyContent`.

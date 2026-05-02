@@ -5,7 +5,7 @@ demo: ScrollAreaDemo
 ---
 
 ```bash
-bosia add scroll-area
+bun x bosia@latest add scroll-area
 ```
 
 Augments native scroll behavior with a custom-styled scrollbar.

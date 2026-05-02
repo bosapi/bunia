@@ -5,7 +5,7 @@ demo: FormDemo
 ---
 
 ```bash
-bosia add form
+bun x bosia@latest add form
 ```
 
 Form wraps a native `<form>` element and provides validation state management. Errors are automatically distributed to child `Field` components via Svelte context — no manual error-prop wiring needed.

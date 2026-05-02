@@ -5,7 +5,7 @@ demo: SliderDemo
 ---
 
 ```bash
-bosia add slider
+bun x bosia@latest add slider
 ```
 
 A slider built on pointer events and ARIA `role="slider"`, with single-thumb and range (two-thumb) modes, horizontal and vertical orientations.

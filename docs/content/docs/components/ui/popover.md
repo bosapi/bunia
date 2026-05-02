@@ -5,7 +5,7 @@ demo: PopoverDemo
 ---
 
 ```bash
-bosia add popover
+bun x bosia@latest add popover
 ```
 
 A floating panel anchored to a trigger. Supports click (default) and hover modes. Dismisses on click-outside (click mode) and Escape.

@@ -5,7 +5,7 @@ demo: SonnerDemo
 ---
 
 ```bash
-bosia add sonner
+bun x bosia@latest add sonner
 ```
 
 A zero-dependency toast notification component. Provides success, error, info, warning, and default toast variants with shadcn-compatible styling.

@@ -5,7 +5,7 @@ demo: DatePickerDemo
 ---
 
 ```bash
-bosia add date-picker
+bun x bosia@latest add date-picker
 ```
 
 Convenience wrapper that composes `Popover` + `Calendar` into a single date picker. The popover auto-closes when a date is selected. For full control, compose `Popover` + `Calendar` directly.

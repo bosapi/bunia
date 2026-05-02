@@ -5,7 +5,7 @@ demo: RadioGroupDemo
 ---
 
 ```bash
-bosia add radio-group
+bun x bosia@latest add radio-group
 ```
 
 A compound radio group built on `<button role="radio">` elements with arrow key navigation, roving tabindex, and hidden inputs for form submission.

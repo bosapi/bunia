@@ -5,7 +5,7 @@ demo: ButtonGroupDemo
 ---
 
 ```bash
-bosia add button-group
+bun x bosia@latest add button-group
 ```
 
 Button Group merges adjacent buttons into a single visual unit by collapsing their borders and rounding only the outer corners. Use it for toolbars, segmented controls, or any set of related actions.

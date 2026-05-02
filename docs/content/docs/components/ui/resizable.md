@@ -5,7 +5,7 @@ demo: ResizableDemo
 ---
 
 ```bash
-bosia add resizable
+bun x bosia@latest add resizable
 ```
 
 Drag-to-resize panel groups. Supports horizontal and vertical layouts, nested groups, and an optional grip handle.

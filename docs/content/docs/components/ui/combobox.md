@@ -5,7 +5,7 @@ demo: ComboboxDemo
 ---
 
 ```bash
-bosia add combobox
+bun x bosia@latest add combobox
 ```
 
 Convenience wrapper that composes `Popover` + `Command` into a single searchable select. No new dropdown or filter logic — it reuses the existing primitives and exposes a simple `items` API with a `bind:value`.

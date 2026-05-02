@@ -309,7 +309,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Restructured `todo` registry to nested subfolder pattern — each sub-component (`todo-form`, `todo-item`, `todo-list`) in its own folder with `meta.json` and barrel `index.ts`, matching the `ui/` convention
-- `bosia add todo` now installs via group dependencies; `bosia add todo/todo-form` installs individual sub-components
+- `bun x bosia@latest add todo` now installs via group dependencies; `bun x bosia@latest add todo/todo-form` installs individual sub-components
 - Moved UI component docs into `components/ui/` subfolder; added todo component docs under `components/todo/`
 - Docs sidebar now supports nested nav groups — UI and Todo render as sub-groups under Components
 
@@ -382,7 +382,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `drizzle` project template — PostgreSQL + Drizzle ORM starter with full CRUD todo demo, seed system, and REST API (`bosia create --template drizzle`)
 - `drizzle` feature registry entry — `bosia feat drizzle` scaffolds DB connection singleton, schema aggregator, migrations directory, seed runner with `__bosia_seeds` tracking table, and `drizzle.config.ts`
 - `todo` feature registry entry — `bosia feat todo` scaffolds todo schema, typed queries, routes with form actions, REST API, components, and seed data (depends on drizzle feature)
-- `todo` component registry entry — `bosia add todo` installs todo-form, todo-item, todo-list Svelte components
+- `todo` component registry entry — `bun x bosia@latest add todo` installs todo-form, todo-item, todo-list Svelte components
 - Feature registry support in `registry/index.json` — new `features` array alongside existing `components`
 
 ## [0.1.2] - 2026-03-28
@@ -425,9 +425,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Component registry — 12 Svelte 5 UI components (avatar, badge, button, card, chart, data-table, dropdown-menu, icon, input, navbar, separator, sidebar) in `registry/components/`
 - Interactive component previews in docs — live, clickable demos on 7 component pages (button, badge, input, separator, avatar, card, dropdown-menu) using hydrated Svelte components via `@astrojs/svelte`
-- `bosia add --local` flag for installing components from the local registry during development
+- `bun x bosia@latest add --local` flag for installing components from the local registry during development
 - `bosia add` now auto-creates `src/lib/utils.ts` (cn utility) if it doesn't exist
-- Path-based component names — `bosia add shop/cart` installs to `src/lib/components/shop/cart/`; names without a path default to `ui/` prefix
+- Path-based component names — `bun x bosia@latest add shop/cart` installs to `src/lib/components/shop/cart/`; names without a path default to `ui/` prefix
 - Overwrite prompt — `bosia add` asks to replace or skip when a component already exists in the project
 - Components documentation — dedicated sidebar group with individual pages for all 12 components
 

@@ -40,7 +40,7 @@
 				class="mt-8 inline-flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 font-mono text-sm text-muted-foreground"
 			>
 				<span class="text-primary select-none">$</span>
-				<span class="select-all">bun create bosia my-app</span>
+				<span class="select-all">bun x bosia@latest create my-app</span>
 			</div>
 		</div>
 	</section>
@@ -53,7 +53,7 @@
 				A complete framework with batteries included.
 			</p>
 			<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-				{#each [{ icon: "⚡", title: "Bun-powered", desc: "Instant dev server, fast builds, and a single runtime for everything." }, { icon: "🎯", title: "File-based routing", desc: "+page.svelte, +layout.svelte, +server.ts — just like SvelteKit." }, { icon: "🌊", title: "Streaming SSR", desc: "Render HTML as it streams with non-blocking metadata and layouts." }, { icon: "🔒", title: "Secure by default", desc: "CSRF protection, XSS escaping, and security headers — zero config." }, { icon: "🧩", title: "Component registry", desc: "Add shadcn-style components with `bosia add button`." }, { icon: "📐", title: "TypeScript first", desc: "Auto-generated PageData and LayoutData types for every route." }] as f}
+				{#each [{ icon: "⚡", title: "Bun-powered", desc: "Instant dev server, fast builds, and a single runtime for everything." }, { icon: "🎯", title: "File-based routing", desc: "+page.svelte, +layout.svelte, +server.ts — just like SvelteKit." }, { icon: "🌊", title: "Streaming SSR", desc: "Render HTML as it streams with non-blocking metadata and layouts." }, { icon: "🔒", title: "Secure by default", desc: "CSRF protection, XSS escaping, and security headers — zero config." }, { icon: "🧩", title: "Component registry", desc: "Add shadcn-style components with `bun x bosia@latest add button`." }, { icon: "📐", title: "TypeScript first", desc: "Auto-generated PageData and LayoutData types for every route." }] as f}
 					<div class="rounded-lg border border-border p-5 space-y-2">
 						<div class="text-2xl">{f.icon}</div>
 						<h3 class="font-semibold">{f.title}</h3>
@@ -69,7 +69,7 @@
 		<div class="mx-auto max-w-3xl">
 			<h2 class="text-3xl font-bold text-center mb-12">Get started in seconds</h2>
 			<div class="space-y-4">
-				{#each [{ step: "1", label: "Create a new project", code: "bun create bosia my-app" }, { step: "2", label: "Start the dev server", code: "cd my-app && bun run dev" }, { step: "3", label: "Add a component", code: "bosia add button" }] as s}
+				{#each [{ step: "1", label: "Create a new project", code: "bun x bosia@latest create my-app" }, { step: "2", label: "Start the dev server", code: "cd my-app && bun run dev" }, { step: "3", label: "Add a component", code: "bun x bosia@latest add button" }] as s}
 					<div class="flex gap-4 items-start">
 						<div
 							class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold"

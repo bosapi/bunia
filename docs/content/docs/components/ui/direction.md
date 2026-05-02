@@ -5,7 +5,7 @@ demo: DirectionDemo
 ---
 
 ```bash
-bosia add direction
+bun x bosia@latest add direction
 ```
 
 A context provider that sets `dir` on a wrapper element and exposes the current direction to descendant components via `useDirection()`. Useful for apps supporting right-to-left languages like Arabic, Hebrew, and Persian.

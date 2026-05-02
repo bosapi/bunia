@@ -5,7 +5,7 @@ demo: TextareaDemo
 ---
 
 ```bash
-bosia add textarea
+bun x bosia@latest add textarea
 ```
 
 A multi-line text input with bindable value and auto-growing height.

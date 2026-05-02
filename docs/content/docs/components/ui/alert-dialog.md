@@ -5,7 +5,7 @@ demo: AlertDialogDemo
 ---
 
 ```bash
-bosia add alert-dialog
+bun x bosia@latest add alert-dialog
 ```
 
 A modal dialog that interrupts the user with important content and expects a response. Unlike a regular Dialog, the Alert Dialog uses `role="alertdialog"` and does **not** close when clicking the backdrop — the user must explicitly choose an action.

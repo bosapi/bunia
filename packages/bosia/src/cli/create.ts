@@ -5,7 +5,7 @@ import * as p from "@clack/prompts";
 import { installFeature, initFeatRegistry, resolveLocalRegistry } from "./feat.ts";
 import { initAddRegistry } from "./add.ts";
 
-// ─── bosia create <name> [--template <name>] ──────────────
+// ─── bun x bosia@latest create <name> [--template <name>] ─
 
 const TEMPLATES_DIR = resolve(import.meta.dir, "../../templates");
 const BOSIA_PKG = JSON.parse(readFileSync(resolve(import.meta.dir, "../../package.json"), "utf-8"));
@@ -19,7 +19,9 @@ const TEMPLATE_DESCRIPTIONS: Record<string, string> = {
 
 export async function runCreate(name: string | undefined, args: string[] = []) {
 	if (!name) {
-		console.error("❌ Please provide a project name.\n   Usage: bosia create my-app");
+		console.error(
+			"❌ Please provide a project name.\n   Usage: bun x bosia@latest create my-app",
+		);
 		process.exit(1);
 	}
 

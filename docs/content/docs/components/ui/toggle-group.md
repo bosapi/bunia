@@ -5,7 +5,7 @@ demo: ToggleGroupDemo
 ---
 
 ```bash
-bosia add toggle-group
+bun x bosia@latest add toggle-group
 ```
 
 A group of toggle buttons for toolbar-style interactions. Supports single selection (like a radio group) or multiple selection (like checkboxes). Built on `role="group"` with roving tabindex and arrow key navigation.

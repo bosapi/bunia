@@ -29,7 +29,7 @@
 		{
 			icon: "🧩",
 			label: "Component registry",
-			desc: "bosia add button — shadcn-style, code you own",
+			desc: "bun x bosia@latest add button — shadcn-style, code you own",
 		},
 		{
 			icon: "✨",

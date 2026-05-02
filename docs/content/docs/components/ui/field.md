@@ -5,7 +5,7 @@ demo: FieldDemo
 ---
 
 ```bash
-bosia add field
+bun x bosia@latest add field
 ```
 
 Field is a layout and accessibility wrapper for form controls. It generates a unique `id` and passes `aria-describedby` and `aria-invalid` to children via Svelte context — no manual plumbing required.

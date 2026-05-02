@@ -5,7 +5,7 @@ demo: NavbarDemo
 ---
 
 ```bash
-bosia add navbar
+bun x bosia@latest add navbar
 ```
 
 A responsive navigation bar with desktop link row, mobile hamburger menu, dark mode toggle, and optional user avatar dropdown. Automatically installs dependencies: `button`, `avatar`, `dropdown-menu`, `icon`.
