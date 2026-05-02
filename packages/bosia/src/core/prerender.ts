@@ -1,8 +1,28 @@
 import { writeFileSync, mkdirSync, cpSync, existsSync } from "fs";
+import { createServer } from "net";
 import { join } from "path";
 import type { RouteManifest, TrailingSlash } from "./types.ts";
 
 import { BOSIA_NODE_PATH } from "./paths.ts";
+
+/** Acquire an OS-assigned ephemeral port. Tiny TOCTOU race window; acceptable for build-time use. */
+export function getEphemeralPort(): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const srv = createServer();
+		srv.unref();
+		srv.on("error", reject);
+		srv.listen(0, "127.0.0.1", () => {
+			const addr = srv.address();
+			if (!addr || typeof addr === "string") {
+				srv.close();
+				reject(new Error("Failed to acquire ephemeral port"));
+				return;
+			}
+			const port = addr.port;
+			srv.close(() => resolve(port));
+		});
+	});
+}
 
 const CORE_DIR = import.meta.dir;
 
@@ -104,7 +124,7 @@ export async function prerenderStaticRoutes(manifest: RouteManifest): Promise<vo
 
 	console.log(`\n🖨️  Prerendering ${targets.length} route(s)...`);
 
-	const port = 13572;
+	const port = await getEphemeralPort();
 	const child = Bun.spawn(["bun", "run", "./dist/server/index.js"], {
 		env: {
 			...process.env,
@@ -116,78 +136,93 @@ export async function prerenderStaticRoutes(manifest: RouteManifest): Promise<vo
 		stderr: "ignore",
 	});
 
-	// Poll /_health until ready (max 10s)
-	const base = `http://localhost:${port}`;
-	let ready = false;
-	for (let i = 0; i < 50; i++) {
-		await Bun.sleep(200);
-		try {
-			const res = await fetch(`${base}/_health`);
-			if (res.ok) {
-				ready = true;
-				break;
+	const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+	let receivedSignal: NodeJS.Signals | null = null;
+	const onSignal = (sig: NodeJS.Signals) => {
+		receivedSignal = sig;
+	};
+	for (const sig of signals) process.once(sig, onSignal);
+
+	try {
+		// Poll /_health until ready (max 10s)
+		const base = `http://localhost:${port}`;
+		let ready = false;
+		for (let i = 0; i < 50; i++) {
+			await Bun.sleep(200);
+			try {
+				const res = await fetch(`${base}/_health`);
+				if (res.ok) {
+					ready = true;
+					break;
+				}
+			} catch {
+				/* not ready yet */
 			}
-		} catch {
-			/* not ready yet */
 		}
-	}
 
-	if (!ready) {
-		child.kill();
-		console.error("❌ Prerender server failed to start");
-		return;
-	}
+		if (!ready) {
+			console.error("❌ Prerender server failed to start");
+			return;
+		}
 
-	mkdirSync("./dist/prerendered", { recursive: true });
+		mkdirSync("./dist/prerendered", { recursive: true });
 
-	for (const { path: routePath, trailingSlash: ts } of targets) {
-		try {
-			// Hit the canonical URL so the server doesn't 308 us mid-prerender
-			const canonicalRoute = canonicalRouteFor(routePath, ts);
+		for (const { path: routePath, trailingSlash: ts } of targets) {
+			try {
+				// Hit the canonical URL so the server doesn't 308 us mid-prerender
+				const canonicalRoute = canonicalRouteFor(routePath, ts);
 
-			const res = await fetch(`${base}${canonicalRoute}`, {
-				signal: AbortSignal.timeout(PRERENDER_TIMEOUT),
-			});
-			const html = await res.text();
-
-			// Filename strategy:
-			//   never  → about.html        (canonical /about, served by static host as /about → about.html)
-			//   always → about/index.html  (canonical /about/, static host serves /about/ → about/index.html)
-			//   ignore → about/index.html  (single emit; both URLs resolve via server canonicalize=off)
-			//   root   → index.html
-			const outPath = prerenderOutPath(routePath, ts);
-			mkdirSync(outPath.substring(0, outPath.lastIndexOf("/")), { recursive: true });
-			writeFileSync(outPath, html);
-
-			// Also prerender the data payload (filename matches dataUrl() — strips trailing slash)
-			const dataPath = prerenderDataPath(routePath);
-			const dataRes = await fetch(`${base}/__bosia/data${dataPath}`, {
-				signal: AbortSignal.timeout(PRERENDER_TIMEOUT),
-			});
-			if (dataRes.ok) {
-				const dataJson = await dataRes.text();
-				const dataOutPath = `./dist/prerendered/__bosia/data${dataPath}`;
-				mkdirSync(dataOutPath.substring(0, dataOutPath.lastIndexOf("/")), {
-					recursive: true,
+				const res = await fetch(`${base}${canonicalRoute}`, {
+					signal: AbortSignal.timeout(PRERENDER_TIMEOUT),
 				});
-				writeFileSync(dataOutPath, dataJson);
-				console.log(`   ✅ ${routePath} → ${outPath} (+ data)`);
-			} else {
-				console.log(`   ✅ ${routePath} → ${outPath}`);
-			}
-		} catch (err) {
-			if (err instanceof DOMException && err.name === "TimeoutError") {
-				console.error(
-					`   ❌ Prerender timed out for ${routePath} after ${PRERENDER_TIMEOUT / 1000}s — increase PRERENDER_TIMEOUT to raise the limit`,
-				);
-			} else {
-				console.error(`   ❌ Failed to prerender ${routePath}:`, err);
+				const html = await res.text();
+
+				// Filename strategy:
+				//   never  → about.html        (canonical /about, served by static host as /about → about.html)
+				//   always → about/index.html  (canonical /about/, static host serves /about/ → about/index.html)
+				//   ignore → about/index.html  (single emit; both URLs resolve via server canonicalize=off)
+				//   root   → index.html
+				const outPath = prerenderOutPath(routePath, ts);
+				mkdirSync(outPath.substring(0, outPath.lastIndexOf("/")), { recursive: true });
+				writeFileSync(outPath, html);
+
+				// Also prerender the data payload (filename matches dataUrl() — strips trailing slash)
+				const dataPath = prerenderDataPath(routePath);
+				const dataRes = await fetch(`${base}/__bosia/data${dataPath}`, {
+					signal: AbortSignal.timeout(PRERENDER_TIMEOUT),
+				});
+				if (dataRes.ok) {
+					const dataJson = await dataRes.text();
+					const dataOutPath = `./dist/prerendered/__bosia/data${dataPath}`;
+					mkdirSync(dataOutPath.substring(0, dataOutPath.lastIndexOf("/")), {
+						recursive: true,
+					});
+					writeFileSync(dataOutPath, dataJson);
+					console.log(`   ✅ ${routePath} → ${outPath} (+ data)`);
+				} else {
+					console.log(`   ✅ ${routePath} → ${outPath}`);
+				}
+			} catch (err) {
+				if (err instanceof DOMException && err.name === "TimeoutError") {
+					console.error(
+						`   ❌ Prerender timed out for ${routePath} after ${PRERENDER_TIMEOUT / 1000}s — increase PRERENDER_TIMEOUT to raise the limit`,
+					);
+				} else {
+					console.error(`   ❌ Failed to prerender ${routePath}:`, err);
+				}
 			}
 		}
-	}
 
-	child.kill();
-	console.log("✅ Prerendering complete");
+		console.log("✅ Prerendering complete");
+	} finally {
+		for (const sig of signals) process.off(sig, onSignal);
+		child.kill();
+		await child.exited;
+		if (receivedSignal) {
+			// Re-raise so parent exit code is 128+signum (standard Unix convention)
+			process.kill(process.pid, receivedSignal);
+		}
+	}
 }
 
 // ─── Static Site Output ──────────────────────────────────

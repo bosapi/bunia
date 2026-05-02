@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	canonicalRouteFor,
+	getEphemeralPort,
 	prerenderDataPath,
 	prerenderOutPath,
 	substituteParams,
@@ -84,5 +85,19 @@ describe("prerenderDataPath()", () => {
 	test("non-root strips trailing slash + .json", () => {
 		expect(prerenderDataPath("/about")).toBe("/about.json");
 		expect(prerenderDataPath("/about/")).toBe("/about.json");
+	});
+});
+
+describe("getEphemeralPort()", () => {
+	test("returns a usable port in ephemeral range", async () => {
+		const port = await getEphemeralPort();
+		expect(port).toBeGreaterThan(1024);
+		expect(port).toBeLessThanOrEqual(65535);
+	});
+
+	test("returns different ports across calls", async () => {
+		const a = await getEphemeralPort();
+		const b = await getEphemeralPort();
+		expect(a).not.toBe(b);
 	});
 });
