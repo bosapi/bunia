@@ -276,64 +276,72 @@ export async function renderSSRStream(
 
 	const enc = new TextEncoder();
 
+	// ssr=false → no render() needed; ship shell + hydration as a single response.
+	// ssr=false && csr=false is meaningless (nothing renders) — force csr=true.
+	if (!data.ssr) {
+		if (!data.csr && isDev) {
+			console.warn(
+				`⚠️  ${url.pathname}: ssr=false && csr=false renders nothing — forcing csr=true`,
+			);
+		}
+		const html =
+			buildHtmlShellOpen(metadata?.lang) +
+			buildMetadataChunk(metadata) +
+			buildHtmlTail("", "", data.pageData, data.layoutData, true, null, false);
+		return new Response(html, {
+			headers: { "Content-Type": "text/html; charset=utf-8" },
+		});
+	}
+
+	// Render-first: run render() before committing to a 200. Failure → proper error page
+	// with correct status code, instead of a bare <p> mixed into an already-flushed shell.
+	let body: string, head: string;
+	try {
+		({ body, head } = render(App, {
+			props: {
+				ssrMode: true,
+				ssrPageComponent: pageMod.default,
+				ssrLayoutComponents: layoutMods.map((m: any) => m.default),
+				ssrPageData: data.pageData,
+				ssrLayoutData: data.layoutData,
+			},
+		}));
+	} catch (err) {
+		if (isDev) console.error("SSR render error:", err);
+		else console.error("SSR render error:", (err as Error).message ?? err);
+		return renderErrorPage(500, "Internal Server Error", url, req);
+	}
+
+	// Pre-compute all chunks; pull-based stream gives Bun native backpressure.
+	const chunks: Uint8Array[] = [
+		enc.encode(buildHtmlShellOpen(metadata?.lang)),
+		enc.encode(buildMetadataChunk(metadata)),
+		enc.encode(buildHtmlTail(body, head, data.pageData, data.layoutData, data.csr)),
+	];
+
+	let i = 0;
+	let cancelled = false;
+	const onAbort = () => {
+		cancelled = true;
+	};
+	req.signal.addEventListener("abort", onAbort, { once: true });
+
 	const stream = new ReadableStream<Uint8Array>({
-		async start(controller) {
-			// Chunk 1: head opening (CSS, modulepreload — cached per lang)
-			controller.enqueue(enc.encode(buildHtmlShellOpen(metadata?.lang)));
-
-			// Chunk 2: metadata tags, close </head>, open <body> + spinner
-			controller.enqueue(enc.encode(buildMetadataChunk(metadata)));
-
-			try {
-				if (!data!.ssr) {
-					// ssr=false → skip render(); ship empty shell + hydration scripts.
-					// ssr=false && csr=false is meaningless (nothing renders) — force csr=true.
-					if (!data!.csr && isDev) {
-						console.warn(
-							`⚠️  ${url.pathname}: ssr=false && csr=false renders nothing — forcing csr=true`,
-						);
-					}
-					controller.enqueue(
-						enc.encode(
-							buildHtmlTail(
-								"",
-								"",
-								data!.pageData,
-								data!.layoutData,
-								true,
-								null,
-								false,
-							),
-						),
-					);
-					controller.close();
-					return;
-				}
-
-				const { body, head } = render(App, {
-					props: {
-						ssrMode: true,
-						ssrPageComponent: pageMod.default,
-						ssrLayoutComponents: layoutMods.map((m: any) => m.default),
-						ssrPageData: data!.pageData,
-						ssrLayoutData: data!.layoutData,
-					},
-				});
-
-				// Chunk 3: rendered content
-				controller.enqueue(
-					enc.encode(
-						buildHtmlTail(body, head, data!.pageData, data!.layoutData, data!.csr),
-					),
-				);
+		pull(controller) {
+			if (cancelled || i >= chunks.length) {
 				controller.close();
-			} catch (err) {
-				// Only render() can throw here — data is already loaded successfully
-				if (isDev) console.error("SSR render error:", err);
-				else console.error("SSR render error:", (err as Error).message ?? err);
-				controller.enqueue(enc.encode(`<p>Internal Server Error</p></body></html>`));
-				controller.close();
+				req.signal.removeEventListener("abort", onAbort);
+				return;
 			}
+			controller.enqueue(chunks[i++]);
+			if (i >= chunks.length) {
+				controller.close();
+				req.signal.removeEventListener("abort", onAbort);
+			}
+		},
+		cancel() {
+			cancelled = true;
+			req.signal.removeEventListener("abort", onAbort);
 		},
 	});
 
