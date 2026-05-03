@@ -330,7 +330,7 @@
 - [ ] 🟡 Playwright config template in `bosia create` scaffolding
 - [ ] 🟡 Test file examples in project templates
 - [ ] 🟡 `bosia feat test` scaffolder for generating test files
-- [ ] 🟠 Docs: testing overview, unit tests, integration tests, component tests, E2E
+- [x] 🟠 Docs: testing guide for end-user apps using `bun test` (unit-level; integration/component/E2E pending utilities)
 
 ---
 
