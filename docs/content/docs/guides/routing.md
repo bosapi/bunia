@@ -118,13 +118,14 @@ Create `+error.svelte` to handle errors thrown by loaders:
 ```svelte
 <!-- src/routes/+error.svelte -->
 <script lang="ts">
-	let { error } = $props();
+	import type { ErrorProps } from "./$types";
+	let { error }: ErrorProps = $props();
 </script>
 
 <h1>{error.status}</h1><p>{error.message}</p>
 ```
 
-The error page receives the `HttpError` thrown by `error()` in a loader. Place it at the route level where you want to catch errors — it catches errors from all child routes.
+The error page receives the `HttpError` thrown by `error()` in a loader. Place it at the route level where you want to catch errors — it catches errors from all child routes. `ErrorProps` and the underlying `PageError` type come from the generated `./$types` module — no manual prop typing needed.
 
 ## Page Options
 

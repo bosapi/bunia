@@ -226,7 +226,7 @@
 ### Types
 
 - [x] 🟠 Typed route params — generate `{ slug: string }` from `[slug]` instead of `Record<string, string>`
-- [ ] 🟡 Error page types in generated `$types.d.ts`
+- [x] 🟡 Error page types in generated `$types.d.ts`
 
 ### Server
 

@@ -50,6 +50,8 @@ export function generateRouteTypes(manifest: RouteManifest): void {
 		}
 	}
 
+	if (manifest.errorPage && !dirs.has(".")) dirs.set(".", {});
+
 	for (const [dir, info] of dirs) {
 		// Path segments of the route dir (empty array for root ".")
 		const segments = dir === "." ? [] : dir.split("/").filter(Boolean);
@@ -95,6 +97,12 @@ export function generateRouteTypes(manifest: RouteManifest): void {
 			lines.push(`export type PageData = { params: Params };`);
 		}
 		lines.push(`export type PageProps = { data: PageData };`);
+
+		if (dir === "." && manifest.errorPage) {
+			lines.push(``);
+			lines.push(`export type PageError = { status: number; message: string };`);
+			lines.push(`export type ErrorProps = { error: PageError };`);
+		}
 
 		// ActionData — union of all action return types, unwrapping ActionFailure
 		if (info.pageServer) {

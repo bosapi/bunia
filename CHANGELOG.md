@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added a Testing guide in the docs that shows how to write and run tests in your app with `bun test`, including file naming, env variables, and what to test today.
+- Error pages can now import `ErrorProps` and `PageError` from `./$types` instead of declaring the prop shape by hand — same pattern as `PageProps` for regular pages.
 
 ### Changed
 

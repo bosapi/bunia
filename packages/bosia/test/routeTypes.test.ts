@@ -230,10 +230,10 @@ describe("ensureRootDirs()", () => {
 		expect(cfg.compilerOptions.rootDirs).toContain("./extra");
 	});
 
-	test("does nothing on unparseable tsconfig", () => {
+	test("throws on unparseable tsconfig", () => {
 		writeFileSync(join(tmpDir, "tsconfig.json"), "{ this is not json");
-		ensureRootDirs();
-		// File untouched (still invalid)
+		expect(() => ensureRootDirs()).toThrow(/invalid JSON/);
+		// File untouched
 		expect(readFileSync(join(tmpDir, "tsconfig.json"), "utf-8")).toBe("{ this is not json");
 	});
 });

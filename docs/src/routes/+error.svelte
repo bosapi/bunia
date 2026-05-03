@@ -1,5 +1,6 @@
 <script lang="ts">
-	let { error }: { error: { status: number; message: string } } = $props();
+	import type { ErrorProps } from "./$types";
+	let { error }: ErrorProps = $props();
 </script>
 
 <div class="flex min-h-screen items-center justify-center">
