@@ -186,7 +186,7 @@
 
 ### Build
 
-- [ ] 🟡 Fail build on tsconfig.json corruption — don't silently continue with degraded config
+- [x] 🟡 Fail build on tsconfig.json corruption — don't silently continue with degraded config
 - [x] 🟡 `compress()` threshold uses character count not byte count — `body.length` on a UTF-8 string under-counts multi-byte content; switch to `Buffer.byteLength` or `TextEncoder().encode(...).length` before threshold check
 - [x] 🟡 `.env` parser inline-comment stripping — `KEY="value" # note` currently keeps ` # note` as part of the value; strip trailing comment after the closing quote
 - [x] ⚪ Tune gzip compression threshold — raised to 2KB (`GZIP_MIN_BYTES = 2048`); small responses fit in single TCP packet, gzip overhead outweighs savings below this size

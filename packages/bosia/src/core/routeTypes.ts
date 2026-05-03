@@ -144,12 +144,10 @@ export function ensureRootDirs(): void {
 	let tsconfig: any;
 	try {
 		tsconfig = JSON.parse(readFileSync(tsconfigPath, "utf-8"));
-	} catch {
-		console.warn(
-			"⚠️  Could not parse tsconfig.json — add rootDirs manually:\n" +
-				'   "rootDirs": [".", ".bosia/types"]',
+	} catch (err) {
+		throw new Error(
+			`tsconfig.json at ${tsconfigPath} is invalid JSON: ${(err as Error).message}. Fix the file and re-run.`,
 		);
-		return;
 	}
 
 	const rootDirs: string[] = tsconfig.compilerOptions?.rootDirs ?? [];

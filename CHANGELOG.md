@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added a Testing guide in the docs that shows how to write and run tests in your app with `bun test`, including file naming, env variables, and what to test today.
 
+### Changed
+
+- The build now stops with a clear error if your `tsconfig.json` is malformed, pointing to the file and the parse problem — instead of continuing with broken `$lib` / `$registry` / `./$types` imports.
+
 ### Fixed
 
 - Fixed a crash that could happen after submitting a form without JavaScript when the page tried to redirect or show an error — the browser now follows the redirect or sees the error page as expected.

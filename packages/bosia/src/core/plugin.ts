@@ -1,4 +1,5 @@
 import { join, dirname } from "path";
+import { existsSync } from "fs";
 
 // ─── Bun Build Plugin ─────────────────────────────────────
 // Resolves:
@@ -9,11 +10,18 @@ import { join, dirname } from "path";
 let cachedTsconfigPaths: Record<string, string[]> | null = null;
 async function getTsconfigPaths() {
 	if (cachedTsconfigPaths !== null) return cachedTsconfigPaths;
-	try {
-		const tsconfig = await Bun.file(join(process.cwd(), "tsconfig.json")).json();
-		cachedTsconfigPaths = tsconfig?.compilerOptions?.paths || {};
-	} catch {
+	const tsconfigPath = join(process.cwd(), "tsconfig.json");
+	if (!existsSync(tsconfigPath)) {
 		cachedTsconfigPaths = {};
+		return cachedTsconfigPaths;
+	}
+	try {
+		const tsconfig = await Bun.file(tsconfigPath).json();
+		cachedTsconfigPaths = tsconfig?.compilerOptions?.paths || {};
+	} catch (err) {
+		throw new Error(
+			`tsconfig.json at ${tsconfigPath} is invalid JSON: ${(err as Error).message}. Fix the file and re-run.`,
+		);
 	}
 	return cachedTsconfigPaths!;
 }
