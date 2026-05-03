@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.3.3] - 2026-05-03
+
+### Fixed
+
+- Fixed a crash that could happen after submitting a form without JavaScript when the page tried to redirect or show an error — the browser now follows the redirect or sees the error page as expected.
+
+---
+
 ## [0.3.2] - 2026-05-02
 
 ### Fixed

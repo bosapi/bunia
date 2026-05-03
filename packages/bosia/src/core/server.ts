@@ -404,7 +404,7 @@ async function resolve(event: RequestEvent): Promise<Response> {
 								{ status: result.status },
 							);
 						}
-						return renderPageWithFormData(
+						return await renderPageWithFormData(
 							url,
 							locals,
 							request,
@@ -422,7 +422,7 @@ async function resolve(event: RequestEvent): Promise<Response> {
 							data: result ?? null,
 						});
 					}
-					return renderPageWithFormData(
+					return await renderPageWithFormData(
 						url,
 						locals,
 						request,
