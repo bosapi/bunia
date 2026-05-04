@@ -163,7 +163,7 @@ function scheduleBuild() {
 // Owns the SSE connection so it survives app server restarts.
 // All other requests are proxied to the app server.
 
-Bun.serve({
+const devServer = Bun.serve({
 	port: DEV_PORT,
 	idleTimeout: 255,
 	async fetch(req) {
@@ -242,7 +242,7 @@ function isGenerated(path: string): boolean {
 	return GENERATED.some((g) => path.startsWith(g));
 }
 
-watch(join(process.cwd(), "src"), { recursive: true }, (_event, filename) => {
+const srcWatcher = watch(join(process.cwd(), "src"), { recursive: true }, (_event, filename) => {
 	if (!filename) return;
 	const abs = join(process.cwd(), "src", filename);
 	if (isGenerated(abs)) return;
@@ -257,7 +257,7 @@ watch(join(process.cwd(), "src"), { recursive: true }, (_event, filename) => {
 
 const ENV_FILES = new Set([".env", ".env.local", ".env.development", ".env.development.local"]);
 
-watch(process.cwd(), { recursive: false }, (_event, filename) => {
+const envWatcher = watch(process.cwd(), { recursive: false }, (_event, filename) => {
 	if (!filename || !ENV_FILES.has(filename)) return;
 	console.log(`[watch] env changed: ${filename}`);
 	reloadEnv();
@@ -274,14 +274,23 @@ console.log("👀 Watching src/ for changes...\n");
 
 let shuttingDown = false;
 async function shutdown() {
-	if (shuttingDown) process.exit(130);
+	if (shuttingDown) return; // re-entry from process-group signals or impatient ^C — drain is already running
 	shuttingDown = true;
 	intentionalKill = true;
+
+	if (buildTimer) clearTimeout(buildTimer);
+	srcWatcher.close();
+	envWatcher.close();
+	devServer.stop(true); // closes SSE conns → abort listeners clear ping intervals
+
 	if (appProcess) {
 		appProcess.kill("SIGTERM");
 		await Promise.race([appProcess.exited, Bun.sleep(2_500)]);
 	}
-	process.exit(0);
+
+	// Safety net: if any stray handle still holds the loop, force clean exit.
+	// .unref() so the timer itself doesn't keep the loop alive when drain succeeds.
+	setTimeout(() => process.exit(0), 1_500).unref();
 }
 
 process.on("SIGINT", shutdown);

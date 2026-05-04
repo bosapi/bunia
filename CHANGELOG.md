@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - You can now drop a `+error.svelte` file into any route folder, not just the project root. When something goes wrong in that section of the site, the matching error page shows up wrapped in the same layouts as the page above it — so your header, sidebar, and other navigation stay visible while the broken bit is replaced. If a folder has no `+error.svelte`, the next one up the tree is used; if none exist, the root error page is used as before.
 - Errors hit during in-app navigation no longer trigger a full page reload when a nearby `+error.svelte` can handle them — the surrounding layout stays mounted and only the broken page is swapped out.
 
+### Fixed
+
+- Pressing Ctrl+C to stop `bun run dev` no longer prints a misleading `error: script "dev" exited with code 130` line. The dev server now shuts down cleanly and exits with status 0, the same as `bun run start`.
+
 ---
 
 ## [0.3.3] - 2026-05-03
