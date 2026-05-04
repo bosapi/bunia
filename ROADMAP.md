@@ -1,7 +1,7 @@
 # Bosia — Roadmap
 
 > Track what's done, what's next, and where we're headed.
-> Current version: **0.3.1**
+> Current version: **0.3.4**
 
 ---
 
@@ -321,7 +321,102 @@
 
 ---
 
-## v0.4.0 — E2E Testing & Docs (Phase 5 + 6)
+## v0.4.0 — Plugin Core
+
+> First-party plugin system. Standardize OpenAPI / OpenTelemetry / server-timing as plugins; let third parties drop in any Elysia plugin. Full design in `plans/plugin-feature.md`.
+
+### Config & Types
+
+- [ ] 🔴 `bosia.config.ts` loader — `packages/bosia/src/core/config.ts`; resolve from `process.cwd()`, compile via `Bun.build({ target: "bun" })`, cache, default to `{ plugins: [] }`
+- [ ] 🔴 Public types in `packages/bosia/src/lib/index.ts` — `BosiaPlugin`, `BosiaConfig`, `BuildContext`, `DevContext`, `RenderContext`, `defineConfig` helper
+
+### Elysia Hooks
+
+- [ ] 🔴 `elysia.before` / `elysia.after` mount points in `server.ts:587` — `before` runs raw routes (e.g. `/openapi.json`) bypassing framework middleware; `after` receives `RouteManifest` for introspection
+
+### Build Hooks
+
+- [ ] 🟠 `build.preBuild` / `build.postScan` / `build.postBuild` in `build.ts` — call `preBuild` before `loadEnv`, `postScan` after `scanRoutes()`, `postBuild` after `generateStaticSite()`
+- [ ] 🟠 `build.bunPlugins(target)` merged into client + server `Bun.build()` plugin arrays (`build.ts:96, 110`)
+
+### Render Hooks
+
+- [ ] 🟠 `render.head` fragments injected before `</head>` in `buildMetadataChunk` (`html.ts:153`)
+- [ ] 🟠 `render.bodyEnd` fragments injected before `</body>` in `buildHtmlTail` (`html.ts:194, 222`)
+- [ ] 🟠 `RenderContext` (request, route, metadata) threaded from `renderer.ts:279-338` into `html.ts` builders
+
+### First-Party Plugin
+
+- [ ] 🟠 `bosia/plugins/server-timing` — exercises `elysia.before`; adds `Server-Timing: total;dur=...` header
+
+### Docs & Demo
+
+- [ ] 🟡 `docs/src/content/docs/plugins.md` — usage guide
+- [ ] 🟡 `apps/demo/bosia.config.ts` — server-timing wired
+
+---
+
+## v0.4.1 — OpenAPI Plugin
+
+> Auto-bridge file routes to OpenAPI spec.
+
+- [ ] 🟠 `bosia/plugins/openapi` first-party plugin
+- [ ] 🟠 `build.postScan` reads `RouteManifest`, emits `dist/openapi.json`
+- [ ] 🟠 Runtime mount via `elysia.before` — `GET /openapi.json`, `GET /docs` (Scalar/Swagger UI)
+- [ ] 🟡 Optional `schema` export on `+server.ts` (TypeBox or Zod, decide later)
+- [ ] 🟡 Docs: OpenAPI usage page
+
+---
+
+## v0.4.2 — OpenTelemetry Plugin
+
+> Tracing + metrics for production apps.
+
+- [ ] 🟠 `bosia/plugins/opentelemetry` first-party plugin
+- [ ] 🟠 OTLP exporter config via env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, etc.)
+- [ ] 🟠 Trace `elysia.before` request → response, `load()` calls, render time
+- [ ] 🟡 Verify `dev` parity — telemetry must work in `bosia dev`
+
+---
+
+## v0.4.3 — Inspector Plugin
+
+> Click element in browser → open exact source file:line in editor / hand off to AI agent. No Vite, no React-style fiber tree — does it via compile-time attribute injection.
+
+### Compile-Time
+
+- [ ] 🟠 `bosia/plugins/inspector` first-party plugin (dev-only)
+- [ ] 🟠 Contributes Bun plugin via `build.bunPlugins("browser")` — runs before `SveltePlugin()` in `build.ts:107`
+- [ ] 🟠 Parses `.svelte` source with `svelte/compiler` `parse()`, walks `RegularElement` nodes, injects `data-bosia-loc="<relpath>:<line>:<col>"` via `magic-string` (preserves source maps)
+- [ ] 🟡 Skips `<svelte:*>` and component (capitalized) tags
+- [ ] 🟡 Strips attribute from production builds (no-op when not dev)
+
+### Runtime Overlay
+
+- [ ] 🟠 Dev-only client overlay injected via `render.bodyEnd` — alt+hover highlights element, alt+click captures `data-bosia-loc`
+- [ ] 🟠 `POST /__bosia/locate` endpoint (mounted via `elysia.before`) — receives `{ file, line, col }`, copies to clipboard or opens editor
+- [ ] 🟡 Editor integration — `code -g file:line` (configurable via `inspector({ editor: "code" | "cursor" | "zed" })`)
+- [ ] 🟡 Toast feedback — overlay shows "copied <file>:<line>" on click
+
+### Docs
+
+- [ ] 🟡 `docs/src/content/docs/inspector.md` — usage + AI-agent workflow
+
+---
+
+## v0.5.0 — Full Plugin Lifecycle
+
+> Complete the plugin surface; uninstall + virtual modules.
+
+- [ ] 🟠 `dev.onStart` + `dev.onFileChange` wired in `dev.ts`
+- [ ] 🟠 `client.onHydrate` + `client.onNavigate` in `core/client/hydrate.ts` + `router.svelte.ts`
+- [ ] 🟠 Virtual modules from plugins — extend `core/plugin.ts` resolver pattern
+- [ ] 🟡 Plugin uninstall via `bosia feat`
+- [ ] 🟡 Docs: full plugin authoring guide
+
+---
+
+## v0.6.0 — E2E Testing & Docs (Phase 5 + 6)
 
 > Full browser testing with Playwright + comprehensive test docs.
 
@@ -342,6 +437,5 @@ Intentional omissions — out of scope for the framework:
 - Image optimization (infrastructure concern)
 - i18n (user's responsibility)
 - Rate limiting (reverse proxy concern)
-- Plugin/extension system (premature)
 - Adapter system (intentionally tied to Bun + Elysia)
 - Service worker tooling (out of scope)
