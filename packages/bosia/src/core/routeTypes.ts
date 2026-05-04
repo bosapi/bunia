@@ -34,8 +34,11 @@ function paramsForDir(dir: string): string[] {
 }
 
 export function generateRouteTypes(manifest: RouteManifest): void {
-	// Collect { dir → { pageServer?, layoutServer? } }
-	const dirs = new Map<string, { pageServer?: string; layoutServer?: string }>();
+	// Collect { dir → { pageServer?, layoutServer?, hasErrorPage? } }
+	const dirs = new Map<
+		string,
+		{ pageServer?: string; layoutServer?: string; hasErrorPage?: boolean }
+	>();
 
 	for (const route of manifest.pages) {
 		const pageDir = routeDirOf(route.page);
@@ -48,9 +51,17 @@ export function generateRouteTypes(manifest: RouteManifest): void {
 			if (!dirs.has(lsDir)) dirs.set(lsDir, {});
 			dirs.get(lsDir)!.layoutServer = ls.path;
 		}
+		for (const ep of route.errorPages ?? []) {
+			const epDir = routeDirOf(ep.path);
+			if (!dirs.has(epDir)) dirs.set(epDir, {});
+			dirs.get(epDir)!.hasErrorPage = true;
+		}
 	}
 
-	if (manifest.errorPage && !dirs.has(".")) dirs.set(".", {});
+	if (manifest.errorPage) {
+		if (!dirs.has(".")) dirs.set(".", {});
+		dirs.get(".")!.hasErrorPage = true;
+	}
 
 	for (const [dir, info] of dirs) {
 		// Path segments of the route dir (empty array for root ".")
@@ -98,7 +109,7 @@ export function generateRouteTypes(manifest: RouteManifest): void {
 		}
 		lines.push(`export type PageProps = { data: PageData };`);
 
-		if (dir === "." && manifest.errorPage) {
+		if (info.hasErrorPage) {
 			lines.push(``);
 			lines.push(`export type PageError = { status: number; message: string };`);
 			lines.push(`export type ErrorProps = { error: PageError };`);

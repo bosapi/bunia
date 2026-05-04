@@ -37,6 +37,7 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 	lines.push("  pattern: string;");
 	lines.push("  page: () => Promise<any>;");
 	lines.push("  layouts: (() => Promise<any>)[];");
+	lines.push("  errorPages: { loader: () => Promise<any>; depth: number }[];");
 	lines.push("  hasServerData: boolean;");
 	lines.push('  trailingSlash: "never" | "always" | "ignore";');
 	lines.push("}> = [");
@@ -44,11 +45,18 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 		const layoutImports = r.layouts
 			.map((l) => `() => import(${JSON.stringify(toImportPath(l))})`)
 			.join(", ");
+		const errorPageImports = r.errorPages
+			.map(
+				(ep) =>
+					`{ loader: () => import(${JSON.stringify(toImportPath(ep.path))}), depth: ${ep.depth} }`,
+			)
+			.join(", ");
 		const hasServerData = !!(r.pageServer || r.layoutServers.length > 0);
 		lines.push("  {");
 		lines.push(`    pattern: ${JSON.stringify(r.pattern)},`);
 		lines.push(`    page: () => import(${JSON.stringify(toImportPath(r.page))}),`);
 		lines.push(`    layouts: [${layoutImports}],`);
+		lines.push(`    errorPages: [${errorPageImports}],`);
 		lines.push(`    hasServerData: ${hasServerData},`);
 		lines.push(`    trailingSlash: ${JSON.stringify(r.trailingSlash)},`);
 		lines.push("  },");
@@ -62,6 +70,7 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 	lines.push("  layoutModules: (() => Promise<any>)[];");
 	lines.push("  pageServer: (() => Promise<any>) | null;");
 	lines.push("  layoutServers: { loader: () => Promise<any>; depth: number }[];");
+	lines.push("  errorPages: { loader: () => Promise<any>; depth: number }[];");
 	lines.push('  trailingSlash: "never" | "always" | "ignore";');
 	lines.push('  scope: "public" | "private";');
 	lines.push("}> = [");
@@ -75,6 +84,12 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 					`{ loader: () => import(${JSON.stringify(toImportPath(ls.path))}), depth: ${ls.depth} }`,
 			)
 			.join(", ");
+		const errorPageImports = r.errorPages
+			.map(
+				(ep) =>
+					`{ loader: () => import(${JSON.stringify(toImportPath(ep.path))}), depth: ${ep.depth} }`,
+			)
+			.join(", ");
 		lines.push("  {");
 		lines.push(`    pattern: ${JSON.stringify(r.pattern)},`);
 		lines.push(`    pageModule: () => import(${JSON.stringify(toImportPath(r.page))}),`);
@@ -83,6 +98,7 @@ export function generateRoutesFile(manifest: RouteManifest): void {
 			`    pageServer: ${r.pageServer ? `() => import(${JSON.stringify(toImportPath(r.pageServer))})` : "null"},`,
 		);
 		lines.push(`    layoutServers: [${layoutServerImports}],`);
+		lines.push(`    errorPages: [${errorPageImports}],`);
 		lines.push(`    trailingSlash: ${JSON.stringify(r.trailingSlash)},`);
 		lines.push(`    scope: ${JSON.stringify(r.scope)},`);
 		lines.push("  },");
@@ -138,6 +154,7 @@ function generateClientRoutesFile(
 	lines.push("  pattern: string;");
 	lines.push("  page: () => Promise<any>;");
 	lines.push("  layouts: (() => Promise<any>)[];");
+	lines.push("  errorPages: { loader: () => Promise<any>; depth: number }[];");
 	lines.push("  hasServerData: boolean;");
 	lines.push('  trailingSlash: "never" | "always" | "ignore";');
 	lines.push("}> = [");
@@ -145,11 +162,18 @@ function generateClientRoutesFile(
 		const layoutImports = r.layouts
 			.map((l) => `() => import(${JSON.stringify(toImportPath(l))})`)
 			.join(", ");
+		const errorPageImports = r.errorPages
+			.map(
+				(ep) =>
+					`{ loader: () => import(${JSON.stringify(toImportPath(ep.path))}), depth: ${ep.depth} }`,
+			)
+			.join(", ");
 		const hasServerData = !!(r.pageServer || r.layoutServers.length > 0);
 		lines.push("  {");
 		lines.push(`    pattern: ${JSON.stringify(r.pattern)},`);
 		lines.push(`    page: () => import(${JSON.stringify(toImportPath(r.page))}),`);
 		lines.push(`    layouts: [${layoutImports}],`);
+		lines.push(`    errorPages: [${errorPageImports}],`);
 		lines.push(`    hasServerData: ${hasServerData},`);
 		lines.push(`    trailingSlash: ${JSON.stringify(r.trailingSlash)},`);
 		lines.push("  },");

@@ -210,8 +210,16 @@ async function resolve(event: RequestEvent): Promise<Response> {
 				);
 			}
 			if (err instanceof HttpError) {
+				const e = err as HttpError & {
+					errorDepth?: number;
+					errorOrigin?: "page" | "layout";
+				};
 				return compress(
-					JSON.stringify({ error: err.message, status: err.status }),
+					JSON.stringify({
+						error: { status: err.status, message: err.message },
+						errorDepth: e.errorDepth ?? null,
+						errorOrigin: e.errorOrigin ?? null,
+					}),
 					"application/json",
 					request,
 					err.status,

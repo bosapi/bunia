@@ -1,3 +1,4 @@
+import { error } from "bosia";
 import type { PageServerLoad, PageMetadataLoad } from "./$types";
 
 const posts: Record<string, { title: string; date: string; tags: string[]; content: string }> = {
@@ -46,6 +47,11 @@ export const metadata: PageMetadataLoad = ({ params }) => {
 };
 
 export const load = (async ({ params, parent, metadata }) => {
+	// Demo: throw inside the page loader to exercise nested +error.svelte.
+	if (params.slug === "boom") {
+		error(500, "boom");
+	}
+
 	// parent() gives us data from +layout.server.ts (appName, requestTime)
 	const parentData = await parent();
 

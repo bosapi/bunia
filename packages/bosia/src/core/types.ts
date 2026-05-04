@@ -15,6 +15,13 @@ export interface PageRoute {
 	pageServer: string | null;
 	/** Chain of +layout.server.ts files root → leaf, with their layout depth */
 	layoutServers: { path: string; depth: number }[];
+	/**
+	 * Chain of +error.svelte files root → leaf. `depth` is the layout depth this
+	 * boundary protects: errors thrown by code at depth ≥ `depth` (page) or
+	 * depth > `depth` (layout) are caught by this page. Depth 0 = wrapped by no
+	 * layouts; depth N = wrapped by layouts[0..N-1].
+	 */
+	errorPages: { path: string; depth: number }[];
 	/** Effective trailing-slash mode (page wins over layout chain). Defaults to "never". */
 	trailingSlash: TrailingSlash;
 	/**

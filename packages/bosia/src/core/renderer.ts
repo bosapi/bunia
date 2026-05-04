@@ -4,6 +4,7 @@ import { findMatch } from "./matcher.ts";
 import { serverRoutes, errorPage } from "bosia:routes";
 import type { Cookies } from "./hooks.ts";
 import { HttpError, Redirect } from "./errors.ts";
+import { pickErrorPage, type ErrorOrigin } from "./errorMatch.ts";
 import App from "./client/App.svelte";
 import {
 	buildHtml,
@@ -107,6 +108,28 @@ function makeFetch(req: Request, url: URL) {
 	};
 }
 
+// ─── Error Context Stamping ──────────────────────────────
+// Annotate an HttpError with the layout depth and origin where it was
+// thrown, plus the partial layoutData accumulated so far. The data
+// endpoint forwards this to the client; the SSR catch sites use it to
+// render the right nested boundary inside the right layout chain.
+
+function stampErrorContext(
+	err: HttpError,
+	depth: number,
+	origin: ErrorOrigin,
+	partialLayoutData: Record<string, any>[],
+): void {
+	const e = err as HttpError & {
+		errorDepth?: number;
+		errorOrigin?: ErrorOrigin;
+		partialLayoutData?: Record<string, any>[];
+	};
+	e.errorDepth ??= depth;
+	e.errorOrigin ??= origin;
+	e.partialLayoutData ??= [...partialLayoutData];
+}
+
 // ─── Route Data Loader ───────────────────────────────────
 // Runs layout + page server loaders for a given URL.
 // Used by both SSR and the /__bosia/data JSON endpoint.
@@ -143,10 +166,16 @@ export async function loadRouteData(
 					)) ?? {};
 			}
 		} catch (err) {
-			if (err instanceof HttpError || err instanceof Redirect) throw err;
+			if (err instanceof Redirect) throw err;
+			if (err instanceof HttpError) {
+				stampErrorContext(err, ls.depth, "layout", layoutData);
+				throw err;
+			}
 			if (isDev) console.error("Layout server load error:", err);
 			else console.error("Layout server load error:", (err as Error).message ?? err);
-			throw new HttpError(500, "Internal Server Error");
+			const wrapped = new HttpError(500, "Internal Server Error");
+			stampErrorContext(wrapped, ls.depth, "layout", layoutData);
+			throw wrapped;
 		}
 	}
 
@@ -181,10 +210,16 @@ export async function loadRouteData(
 					)) ?? {};
 			}
 		} catch (err) {
-			if (err instanceof HttpError || err instanceof Redirect) throw err;
+			if (err instanceof Redirect) throw err;
+			if (err instanceof HttpError) {
+				stampErrorContext(err, route.layoutModules.length, "page", layoutData);
+				throw err;
+			}
 			if (isDev) console.error("Page server load error:", err);
 			else console.error("Page server load error:", (err as Error).message ?? err);
-			throw new HttpError(500, "Internal Server Error");
+			const wrapped = new HttpError(500, "Internal Server Error");
+			stampErrorContext(wrapped, route.layoutModules.length, "page", layoutData);
+			throw wrapped;
 		}
 	}
 
@@ -244,7 +279,7 @@ export async function renderSSRStream(
 			return Response.redirect(err.location, err.status);
 		}
 		if (err instanceof HttpError) {
-			return renderErrorPage(err.status, err.message, url, req);
+			return renderErrorPage(err.status, err.message, url, req, route);
 		}
 		if (isDev) console.error("Metadata load error:", err);
 		else console.error("Metadata load error:", (err as Error).message ?? err);
@@ -266,10 +301,26 @@ export async function renderSSRStream(
 		]);
 	} catch (err) {
 		if (err instanceof Redirect) return Response.redirect(err.location, err.status);
-		if (err instanceof HttpError) return renderErrorPage(err.status, err.message, url, req);
+		if (err instanceof HttpError) {
+			const e = err as HttpError & {
+				errorDepth?: number;
+				errorOrigin?: ErrorOrigin;
+				partialLayoutData?: Record<string, any>[];
+			};
+			return renderErrorPage(
+				err.status,
+				err.message,
+				url,
+				req,
+				route,
+				e.errorDepth,
+				e.errorOrigin,
+				e.partialLayoutData,
+			);
+		}
 		if (isDev) console.error("SSR load error:", err);
 		else console.error("SSR load error:", (err as Error).message ?? err);
-		return renderErrorPage(500, "Internal Server Error", url, req);
+		return renderErrorPage(500, "Internal Server Error", url, req, route);
 	}
 
 	if (!data) return renderErrorPage(404, "Not Found", url, req);
@@ -309,7 +360,17 @@ export async function renderSSRStream(
 	} catch (err) {
 		if (isDev) console.error("SSR render error:", err);
 		else console.error("SSR render error:", (err as Error).message ?? err);
-		return renderErrorPage(500, "Internal Server Error", url, req);
+		// Render-phase errors fall through to deepest boundary like a page error.
+		return renderErrorPage(
+			500,
+			"Internal Server Error",
+			url,
+			req,
+			route,
+			route.layoutModules.length,
+			"page",
+			data.layoutData,
+		);
 	}
 
 	// Pre-compute all chunks; pull-based stream gives Bun native backpressure.
@@ -411,18 +472,71 @@ export async function renderPageWithFormData(
 }
 
 // ─── Error Page Renderer ──────────────────────────────────
+// 1. If a route is known, try the nearest nested +error.svelte and render
+//    it inside the matching prefix of the layout chain.
+// 2. Otherwise fall back to the global root +error.svelte.
+// 3. Otherwise return a plain-text response.
 
 export async function renderErrorPage(
 	status: number,
 	message: string,
 	url: URL,
 	req: Request,
+	route?: any,
+	errorDepth?: number,
+	errorOrigin?: ErrorOrigin,
+	partialLayoutData?: Record<string, any>[],
 ): Promise<Response> {
+	// 1. Nested boundary
+	if (route && errorDepth !== undefined && route.errorPages?.length) {
+		const origin = errorOrigin ?? "page";
+		const picked = pickErrorPage<() => Promise<any>>(
+			route.errorPages as { loader: () => Promise<any>; depth: number }[],
+			errorDepth,
+			origin,
+		);
+		if (picked) {
+			try {
+				const K = picked.depth;
+				const [errorMod, layoutMods] = await Promise.all([
+					picked.loader(),
+					Promise.all(
+						route.layoutModules.slice(0, K).map((l: () => Promise<any>) => l()),
+					),
+				]);
+				const layoutData: Record<string, any>[] = [];
+				for (let i = 0; i < K; i++) layoutData.push(partialLayoutData?.[i] ?? {});
+				const { body, head } = render(App, {
+					props: {
+						ssrMode: true,
+						ssrLayoutComponents: layoutMods.map((m: any) => m.default),
+						ssrLayoutData: layoutData,
+						ssrErrorComponent: errorMod.default,
+						ssrErrorProps: { error: { status, message } },
+						ssrErrorDepth: K,
+					},
+				});
+				// csr=false: no client hydration on the error page itself.
+				const html = buildHtml(body, head, { status, message }, layoutData, false);
+				return compress(html, "text/html; charset=utf-8", req, status);
+			} catch (err) {
+				if (isDev) console.error("Nested error page render failed:", err);
+				else
+					console.error(
+						"Nested error page render failed:",
+						(err as Error).message ?? err,
+					);
+				// fall through to global / text fallback
+			}
+		}
+	}
+
+	// 2. Global root error page
 	if (errorPage) {
 		try {
 			const mod = await errorPage();
 			// Render the error component directly — NOT through App.svelte.
-			// App.svelte always remaps ssrPageData to a `data` prop, but +error.svelte
+			// App.svelte remaps ssrPageData to a `data` prop, but +error.svelte
 			// expects `error` as a direct prop: `let { error } = $props()`.
 			const { body, head } = render(mod.default, {
 				props: { error: { status, message } },

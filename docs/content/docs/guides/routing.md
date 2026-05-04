@@ -127,6 +127,29 @@ Create `+error.svelte` to handle errors thrown by loaders:
 
 The error page receives the `HttpError` thrown by `error()` in a loader. Place it at the route level where you want to catch errors — it catches errors from all child routes. `ErrorProps` and the underlying `PageError` type come from the generated `./$types` module — no manual prop typing needed.
 
+### Nested error boundaries
+
+`+error.svelte` can live in any route folder, not just the root. When a loader throws, Bosia walks up from the failing route and renders the nearest `+error.svelte` **inside the matching prefix of the layout chain** — so the surrounding nav, header, and other layouts above the boundary stay visible while only the broken page is replaced.
+
+```text
+src/routes/
+  +layout.svelte      ← root chrome
+  +error.svelte       ← global fallback
+  blog/
+    +layout.svelte    ← blog chrome
+    +error.svelte     ← catches errors from /blog and /blog/*
+    [slug]/
+      +page.server.ts ← if this throws, the blog +error.svelte renders
+                        wrapped in root layout + blog layout
+```
+
+Rules:
+
+- An error thrown by a `+page` or `+page.server.ts` is caught by the deepest `+error.svelte` at or above the page's depth.
+- An error thrown by a `+layout.server.ts` is caught by the deepest `+error.svelte` **above** the failing layout — the boundary in the same folder cannot catch its own layout (it would render inside the broken layout).
+- If no nested boundary matches, the root `+error.svelte` is used. If there is none, a plain-text response is returned.
+- During in-app navigation the surrounding layout stays mounted — only the broken page is swapped out, no full reload.
+
 ## Page Options
 
 Toggle rendering behavior per page by exporting flags from `+page.server.ts`:

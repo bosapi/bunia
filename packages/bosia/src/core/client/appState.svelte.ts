@@ -15,6 +15,12 @@ class AppState {
 	layoutData = $state<Record<string, any>[]>([]);
 	routeParams = $state<Record<string, string>>({});
 	form = $state<any>(null);
+	// Nested-error boundary state — set when a client navigation hits an
+	// error and a matching +error.svelte is found. Cleared on every
+	// successful navigation in App.svelte.
+	errorComponent = $state<any>(null);
+	errorProps = $state<{ error: { status: number; message: string } } | null>(null);
+	errorDepth = $state<number | null>(null);
 }
 
 export const appState = new AppState();

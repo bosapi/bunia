@@ -43,6 +43,7 @@ export function scanRoutes(): RouteManifest {
 		urlSegments: string[],
 		layoutChain: string[],
 		layoutServerChain: { path: string; depth: number }[],
+		errorPageChain: { path: string; depth: number }[],
 		inheritedTrailingSlash: TrailingSlash,
 		inheritedScope: "public" | "private",
 	) {
@@ -54,6 +55,7 @@ export function scanRoutes(): RouteManifest {
 		// Accumulate layouts for this level
 		const currentLayouts = [...layoutChain];
 		const currentLayoutServers = [...layoutServerChain];
+		const currentErrorPages = [...errorPageChain];
 		let currentTrailingSlash = inheritedTrailingSlash;
 
 		if (items.some((i) => i.isFile() && i.name === "+layout.svelte")) {
@@ -67,6 +69,14 @@ export function scanRoutes(): RouteManifest {
 			});
 			const ts = readTrailingSlash(join(ROUTES_DIR, layoutServerPath));
 			if (ts) currentTrailingSlash = ts;
+		}
+		if (items.some((i) => i.isFile() && i.name === "+error.svelte")) {
+			// depth = number of layouts wrapping this dir (this dir's layout included).
+			// An error page at depth K renders inside layouts[0..K-1].
+			currentErrorPages.push({
+				path: join(dir, "+error.svelte"),
+				depth: currentLayouts.length,
+			});
 		}
 
 		// API route (+server.ts)
@@ -94,6 +104,7 @@ export function scanRoutes(): RouteManifest {
 				layouts: [...currentLayouts],
 				pageServer: pageServerFile,
 				layoutServers: [...currentLayoutServers],
+				errorPages: [...currentErrorPages],
 				trailingSlash: effectiveTs,
 				scope: inheritedScope,
 			});
@@ -116,13 +127,14 @@ export function scanRoutes(): RouteManifest {
 				isGroup ? [...urlSegments] : [...urlSegments, dirName],
 				currentLayouts,
 				currentLayoutServers,
+				currentErrorPages,
 				currentTrailingSlash,
 				childScope,
 			);
 		}
 	}
 
-	walk("", [], [], [], "never", "public");
+	walk("", [], [], [], [], "never", "public");
 
 	// Warn when a catch-all exists but no exact route covers its prefix.
 	// e.g. "/[...slug]" matches everything EXCEPT "/" (which needs its own +page.svelte).

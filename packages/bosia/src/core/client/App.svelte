@@ -4,6 +4,7 @@
 	import { clientRoutes } from "bosia:routes";
 	import { consumePrefetch, prefetchCache, dataUrl } from "./prefetch.ts";
 	import { appState } from "./appState.svelte.ts";
+	import { pickErrorPage } from "../errorMatch.ts";
 
 	let {
 		ssrMode = false,
@@ -12,6 +13,9 @@
 		ssrPageData = {},
 		ssrLayoutData = [],
 		ssrFormData = null,
+		ssrErrorComponent = null,
+		ssrErrorProps = null,
+		ssrErrorDepth = null,
 	}: {
 		ssrMode?: boolean;
 		ssrPageComponent?: any;
@@ -19,6 +23,9 @@
 		ssrPageData?: Record<string, any>;
 		ssrLayoutData?: Record<string, any>[];
 		ssrFormData?: any;
+		ssrErrorComponent?: any;
+		ssrErrorProps?: { error: { status: number; message: string } } | null;
+		ssrErrorDepth?: number | null;
 	} = $props();
 
 	let PageComponent = $state<any>(ssrPageComponent);
@@ -30,6 +37,9 @@
 	const layoutData = $derived(ssrMode ? (ssrLayoutData ?? []) : appState.layoutData);
 	const routeParams = $derived(ssrMode ? (ssrPageData?.params ?? {}) : appState.routeParams);
 	const formData = $derived(ssrMode ? ssrFormData : appState.form);
+	const ErrorComponent = $derived(ssrMode ? ssrErrorComponent : appState.errorComponent);
+	const errorProps = $derived(ssrMode ? ssrErrorProps : appState.errorProps);
+	const errorDepth = $derived(ssrMode ? ssrErrorDepth : appState.errorDepth);
 	let navigating = $state(false);
 	let navDone = $state(false);
 	// Skip bar on the very first effect run (initial hydration — data already present)
@@ -74,7 +84,7 @@
 			match.route.page(),
 			Promise.all(match.route.layouts.map((l: any) => l())),
 			dataFetch,
-		]).then(([pageMod, layoutMods, result]: [any, any[], any]) => {
+		]).then(async ([pageMod, layoutMods, result]: [any, any[], any]) => {
 			if (cancelled) return;
 			navigating = false;
 			navDone = true;
@@ -86,8 +96,49 @@
 				return;
 			}
 			if (result?.error || (result === null && match.route.hasServerData)) {
-				// Data fetch failed (e.g. static hosting with no server) — full page load
-				window.location.href = path;
+				// New shape: { error: { status, message }, errorDepth, errorOrigin }
+				const errInfo = result?.error;
+				const errStatus =
+					typeof errInfo === "object" && errInfo !== null
+						? (errInfo.status ?? 500)
+						: (result?.status ?? 500);
+				const errMessage =
+					typeof errInfo === "object" && errInfo !== null
+						? (errInfo.message ?? "Internal Server Error")
+						: typeof errInfo === "string"
+							? errInfo
+							: "Internal Server Error";
+				const errDepth: number =
+					typeof result?.errorDepth === "number"
+						? result.errorDepth
+						: match.route.layouts.length;
+				const errOrigin = result?.errorOrigin === "layout" ? "layout" : "page";
+				const picked = pickErrorPage(match.route.errorPages ?? [], errDepth, errOrigin);
+				if (!picked) {
+					// No nested boundary — full reload so server can render global error page
+					window.location.href = path;
+					return;
+				}
+				try {
+					const K = picked.depth;
+					const [errMod, ...layoutModsForError] = await Promise.all([
+						picked.loader(),
+						...match.route.layouts.slice(0, K).map((l: any) => l()),
+					]);
+					if (cancelled) return;
+					layoutComponents = layoutModsForError.map((m: any) => m.default);
+					const newLayoutData: Record<string, any>[] = [];
+					for (let i = 0; i < K; i++) newLayoutData.push({});
+					appState.layoutData = newLayoutData;
+					appState.pageData = {};
+					appState.routeParams = match.params;
+					appState.errorComponent = errMod.default;
+					appState.errorProps = { error: { status: errStatus, message: errMessage } };
+					appState.errorDepth = K;
+					if (router.isPush) window.scrollTo(0, 0);
+				} catch {
+					window.location.href = path;
+				}
 				return;
 			}
 			PageComponent = pageMod.default;
@@ -95,6 +146,10 @@
 			appState.pageData = result?.pageData ?? {};
 			appState.layoutData = result?.layoutData ?? [];
 			appState.routeParams = result?.pageData?.params ?? match.params;
+			// Successful navigation — clear any prior error state.
+			appState.errorComponent = null;
+			appState.errorProps = null;
+			appState.errorDepth = null;
 
 			// Scroll to top on forward navigation (not on popstate/back-forward)
 			if (router.isPush) window.scrollTo(0, 0);
@@ -133,25 +188,34 @@
 	<div class="bosia-bar done"></div>
 {/if}
 
-{#if layoutComponents.length > 0}
-	{@render renderLayout(0)}
+{#if ErrorComponent}
+	{@const depth = errorDepth ?? 0}
+	{#if depth > 0 && layoutComponents.length > 0}
+		{@render renderLayout(0, depth)}
+	{:else}
+		<ErrorComponent {...errorProps ?? {}} />
+	{/if}
+{:else if layoutComponents.length > 0}
+	{@render renderLayout(0, layoutComponents.length)}
 {:else if PageComponent}
 	<PageComponent data={{ ...pageData, params: routeParams }} form={formData} />
 {:else}
 	<p>Loading...</p>
 {/if}
 
-{#snippet renderLayout(index: number)}
+{#snippet renderLayout(index: number, leafDepth: number)}
 	{@const Layout = layoutComponents[index]}
 	{@const data = layoutData[index] ?? {}}
 
-	{#if index < layoutComponents.length - 1}
+	{#if index < leafDepth - 1}
 		<Layout {data}>
-			{@render renderLayout(index + 1)}
+			{@render renderLayout(index + 1, leafDepth)}
 		</Layout>
 	{:else}
 		<Layout {data}>
-			{#if PageComponent}
+			{#if ErrorComponent}
+				<ErrorComponent {...errorProps ?? {}} />
+			{:else if PageComponent}
 				<PageComponent data={{ ...pageData, params: routeParams }} form={formData} />
 			{:else}
 				<p>Loading...</p>
