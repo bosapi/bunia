@@ -1,7 +1,7 @@
 # Bosia — Roadmap
 
 > Track what's done, what's next, and where we're headed.
-> Current version: **0.3.4**
+> Current version: **0.4.0**
 
 ---
 
@@ -328,32 +328,32 @@
 
 ### Config & Types
 
-- [ ] 🔴 `bosia.config.ts` loader — `packages/bosia/src/core/config.ts`; resolve from `process.cwd()`, compile via `Bun.build({ target: "bun" })`, cache, default to `{ plugins: [] }`
-- [ ] 🔴 Public types in `packages/bosia/src/lib/index.ts` — `BosiaPlugin`, `BosiaConfig`, `BuildContext`, `DevContext`, `RenderContext`, `defineConfig` helper
+- [x] 🔴 `bosia.config.ts` loader — `packages/bosia/src/core/config.ts`; resolve from `process.cwd()`, compile via `Bun.build({ target: "bun" })`, cache, default to `{ plugins: [] }`
+- [x] 🔴 Public types in `packages/bosia/src/lib/index.ts` — `BosiaPlugin`, `BosiaConfig`, `BuildContext`, `DevContext`, `RenderContext`, `defineConfig` helper
 
 ### Elysia Hooks
 
-- [ ] 🔴 `elysia.before` / `elysia.after` mount points in `server.ts:587` — `before` runs raw routes (e.g. `/openapi.json`) bypassing framework middleware; `after` receives `RouteManifest` for introspection
+- [x] 🔴 `backend.before` / `backend.after` mount points in `server.ts` — `before` runs raw routes (e.g. `/openapi.json`) bypassing framework middleware; `after` receives `RouteManifest` for introspection
 
 ### Build Hooks
 
-- [ ] 🟠 `build.preBuild` / `build.postScan` / `build.postBuild` in `build.ts` — call `preBuild` before `loadEnv`, `postScan` after `scanRoutes()`, `postBuild` after `generateStaticSite()`
-- [ ] 🟠 `build.bunPlugins(target)` merged into client + server `Bun.build()` plugin arrays (`build.ts:96, 110`)
+- [x] 🟠 `build.preBuild` / `build.postScan` / `build.postBuild` in `build.ts` — call `preBuild` before `loadEnv`, `postScan` after `scanRoutes()`, `postBuild` after `generateStaticSite()`
+- [x] 🟠 `build.bunPlugins(target)` merged into client + server `Bun.build()` plugin arrays
 
 ### Render Hooks
 
-- [ ] 🟠 `render.head` fragments injected before `</head>` in `buildMetadataChunk` (`html.ts:153`)
-- [ ] 🟠 `render.bodyEnd` fragments injected before `</body>` in `buildHtmlTail` (`html.ts:194, 222`)
-- [ ] 🟠 `RenderContext` (request, route, metadata) threaded from `renderer.ts:279-338` into `html.ts` builders
+- [x] 🟠 `render.head` fragments injected before `</head>` in `buildMetadataChunk`
+- [x] 🟠 `render.bodyEnd` fragments injected before `</body>` in `buildHtmlTail`
+- [x] 🟠 `RenderContext` (request, route, metadata) threaded from `renderer.ts` into `html.ts` builders
 
 ### First-Party Plugin
 
-- [ ] 🟠 `bosia/plugins/server-timing` — exercises `elysia.before`; adds `Server-Timing: total;dur=...` header
+- [x] 🟠 `bosia/plugins/server-timing` — exercises `backend.before`; adds `Server-Timing: handler;dur=...` header
 
 ### Docs & Demo
 
-- [ ] 🟡 `docs/src/content/docs/plugins.md` — usage guide
-- [ ] 🟡 `apps/demo/bosia.config.ts` — server-timing wired
+- [x] 🟡 `docs/content/docs/guides/plugins.md` — usage guide
+- [x] 🟡 `apps/demo/bosia.config.ts` — server-timing wired
 
 ---
 
@@ -363,7 +363,7 @@
 
 - [ ] 🟠 `bosia/plugins/openapi` first-party plugin
 - [ ] 🟠 `build.postScan` reads `RouteManifest`, emits `dist/openapi.json`
-- [ ] 🟠 Runtime mount via `elysia.before` — `GET /openapi.json`, `GET /docs` (Scalar/Swagger UI)
+- [ ] 🟠 Runtime mount via `backend.before` — `GET /openapi.json`, `GET /docs` (Scalar/Swagger UI)
 - [ ] 🟡 Optional `schema` export on `+server.ts` (TypeBox or Zod, decide later)
 - [ ] 🟡 Docs: OpenAPI usage page
 
@@ -375,7 +375,7 @@
 
 - [ ] 🟠 `bosia/plugins/opentelemetry` first-party plugin
 - [ ] 🟠 OTLP exporter config via env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, etc.)
-- [ ] 🟠 Trace `elysia.before` request → response, `load()` calls, render time
+- [ ] 🟠 Trace `backend.before` request → response, `load()` calls, render time
 - [ ] 🟡 Verify `dev` parity — telemetry must work in `bosia dev`
 
 ---
@@ -395,7 +395,7 @@
 ### Runtime Overlay
 
 - [ ] 🟠 Dev-only client overlay injected via `render.bodyEnd` — alt+hover highlights element, alt+click captures `data-bosia-loc`
-- [ ] 🟠 `POST /__bosia/locate` endpoint (mounted via `elysia.before`) — receives `{ file, line, col }`, copies to clipboard or opens editor
+- [ ] 🟠 `POST /__bosia/locate` endpoint (mounted via `backend.before`) — receives `{ file, line, col }`, copies to clipboard or opens editor
 - [ ] 🟡 Editor integration — `code -g file:line` (configurable via `inspector({ editor: "code" | "cursor" | "zed" })`)
 - [ ] 🟡 Toast feedback — overlay shows "copied <file>:<line>" on click
 

@@ -150,7 +150,7 @@ const SPINNER =
 	`@keyframes __bs__{to{transform:rotate(360deg)}}</style><i></i></div>`;
 
 /** Chunk 2: metadata tags + close </head> + open <body> + spinner */
-export function buildMetadataChunk(metadata: Metadata | null): string {
+export function buildMetadataChunk(metadata: Metadata | null, headExtras?: string[]): string {
 	let out = "\n";
 	if (metadata) {
 		if (metadata.title) out += `  <title>${escapeHtml(metadata.title)}</title>\n`;
@@ -174,6 +174,11 @@ export function buildMetadataChunk(metadata: Metadata | null): string {
 		}
 	} else {
 		out += `  <title>Bosia App</title>\n`;
+	}
+	if (headExtras?.length) {
+		for (const fragment of headExtras) {
+			if (fragment) out += `  ${fragment}\n`;
+		}
 	}
 	out += `</head>\n<body>\n${SPINNER}`;
 	return out;
@@ -199,6 +204,7 @@ export function buildHtmlTail(
 	csr: boolean,
 	formData: any = null,
 	ssr = true,
+	bodyEndExtras?: string[],
 ): string {
 	let out = `<script>document.getElementById('__bs__').remove()</script>`;
 	out += `\n<div id="app">${body}</div>`;
@@ -218,6 +224,11 @@ export function buildHtmlTail(
 		out += `\n<script type="module" src="/dist/client/${distManifest.entry}${cacheBust}"></script>`;
 	} else if (isDev) {
 		out += `\n<script>!function r(){var e=new EventSource("/__bosia/sse");e.addEventListener("reload",()=>location.reload());e.onopen=()=>r._ok||(r._ok=1);e.onerror=()=>{e.close();setTimeout(r,2000)}}()</script>`;
+	}
+	if (bodyEndExtras?.length) {
+		for (const fragment of bodyEndExtras) {
+			if (fragment) out += `\n${fragment}`;
+		}
 	}
 	out += `\n</body>\n</html>`;
 	return out;

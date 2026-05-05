@@ -52,6 +52,7 @@ export const sidebar: NavGroup[] = [
 			{ label: "Styling", slug: "guides/styling" },
 			{ label: "Security", labelId: "Keamanan", slug: "guides/security" },
 			{ label: "Testing", slug: "guides/testing" },
+			{ label: "Plugins", labelId: "Plugin", slug: "guides/plugins" },
 		],
 	},
 	{

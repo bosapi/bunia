@@ -1,10 +1,12 @@
 import { Elysia } from "elysia";
 
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join, resolve as resolvePath } from "path";
 
 import { findMatch, compileRoutes, canonicalPathname } from "./matcher.ts";
 import { apiRoutes, serverRoutes } from "bosia:routes";
+import { loadPlugins } from "./config.ts";
+import type { RouteManifest } from "./types.ts";
 
 // Pre-compile route patterns into RegExp at startup (shared by renderer.ts via module reference)
 compileRoutes(apiRoutes);
@@ -594,16 +596,68 @@ let shuttingDown = false;
 let inFlight = 0;
 let drainResolve: (() => void) | null = null;
 
+// ─── Plugin Loading ───────────────────────────────────────
+
+const plugins = await loadPlugins(process.cwd());
+if (plugins.length > 0) {
+	console.log(`🔌 Loaded ${plugins.length} plugin(s): ${plugins.map((p) => p.name).join(", ")}`);
+}
+
+// Read the build-time route manifest so plugins.backend.after can introspect routes.
+function loadBuiltManifest(): RouteManifest {
+	const path = "./dist/route-manifest.json";
+	if (existsSync(path)) {
+		try {
+			return JSON.parse(readFileSync(path, "utf-8"));
+		} catch {}
+	}
+	// Fallback: synthesize from runtime arrays (no file paths, just patterns).
+	return {
+		pages: serverRoutes.map((r: any) => ({
+			pattern: r.pattern,
+			page: "",
+			layouts: [],
+			pageServer: r.pageServer ? "" : null,
+			layoutServers: [],
+			errorPages: [],
+			trailingSlash: r.trailingSlash,
+			scope: r.scope,
+		})),
+		apis: apiRoutes.map((r: any) => ({ pattern: r.pattern, server: "" })),
+		errorPage: null,
+	};
+}
+
+const routeManifest = loadBuiltManifest();
+
 // ─── Elysia App ───────────────────────────────────────────
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : isDev ? 9001 : 9000;
 
-const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
-	.onError(({ error }) => {
+// Elysia's chained generics drift when plugins add routes — track the app as a
+// loose `Elysia` so plugin-extended types stay assignable.
+let app: Elysia = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } }).onError(
+	({ error }) => {
 		if (isDev) console.error("Uncaught server error:", error);
 		else console.error("Uncaught server error:", (error as Error)?.message ?? error);
 		return Response.json({ error: "Internal Server Error" }, { status: 500 });
-	})
+	},
+) as unknown as Elysia;
+
+// Plugins.backend.before — runs before framework middleware/routes.
+// Plugin-registered routes here BYPASS the framework (CSRF, hooks, etc.).
+for (const plugin of plugins) {
+	if (plugin.backend?.before) {
+		try {
+			app = (await plugin.backend.before(app)) ?? app;
+		} catch (err) {
+			console.error(`❌ Plugin "${plugin.name}" backend.before failed:`, err);
+			throw err;
+		}
+	}
+}
+
+app = app
 	// Static files are served by resolve() with path traversal protection and security headers
 	// API routes must intercept all HTTP methods before the GET catch-all
 	.onBeforeHandle(async ({ request }) => {
@@ -612,31 +666,43 @@ const app = new Elysia({ serve: { maxRequestBodySize: BODY_SIZE_LIMIT } })
 		return handleRequest(request, url);
 	})
 	// SSR pages
-	.get("*", ({ request }) => {
+	.get("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
 	})
 	// Non-GET catch-alls so onBeforeHandle fires for API routes on other methods
-	.post("*", ({ request }) => {
+	.post("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
 	})
-	.put("*", ({ request }) => {
+	.put("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
 	})
-	.patch("*", ({ request }) => {
+	.patch("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
 	})
-	.delete("*", ({ request }) => {
+	.delete("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
 	})
-	.options("*", ({ request }) => {
+	.options("*", ({ request }: { request: Request }) => {
 		const url = new URL(request.url);
 		return handleRequest(request, url);
-	});
+	}) as unknown as Elysia;
+
+// Plugins.backend.after — runs after framework routes; receives the route manifest.
+for (const plugin of plugins) {
+	if (plugin.backend?.after) {
+		try {
+			app = (await plugin.backend.after(app, { manifest: routeManifest })) ?? app;
+		} catch (err) {
+			console.error(`❌ Plugin "${plugin.name}" backend.after failed:`, err);
+			throw err;
+		}
+	}
+}
 
 app.listen(PORT, () => {
 	// In dev mode the proxy owns the user-facing port — don't print the internal port

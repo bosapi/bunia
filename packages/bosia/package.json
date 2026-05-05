@@ -1,6 +1,6 @@
 {
 	"name": "bosia",
-	"version": "0.3.4",
+	"version": "0.4.0",
 	"type": "module",
 	"description": "A fast, batteries-included fullstack framework — SSR · Svelte 5 Runes · Bun · ElysiaJS. File-based routing inspired by SvelteKit. No Node.js, no Vite, no adapters.",
 	"keywords": [
@@ -32,7 +32,8 @@
 	],
 	"exports": {
 		".": "./src/lib/index.ts",
-		"./client": "./src/lib/client.ts"
+		"./client": "./src/lib/client.ts",
+		"./plugins/server-timing": "./src/core/plugins/server-timing.ts"
 	},
 	"bin": {
 		"bosia": "src/cli/index.ts"

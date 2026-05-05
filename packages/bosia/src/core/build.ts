@@ -10,6 +10,8 @@ import { prerenderStaticRoutes, generateStaticSite } from "./prerender.ts";
 import { loadEnv, classifyEnvVars } from "./env.ts";
 import { generateEnvModules } from "./envCodegen.ts";
 import { BOSIA_NODE_PATH, resolveBosiaBin } from "./paths.ts";
+import { loadPlugins } from "./config.ts";
+import type { BuildContext } from "./types/plugin.ts";
 
 // Resolved from this file's location inside the bosia package
 const CORE_DIR = import.meta.dir;
@@ -21,7 +23,24 @@ const isProduction = process.env.NODE_ENV === "production";
 const buildStart = performance.now();
 console.log("🏗️  Starting Bosia build...\n");
 
-// 0. Load .env files (before cleaning .bosia so loadEnv can set process.env early)
+// 0. Load plugins from bosia.config.ts
+const userPlugins = await loadPlugins(process.cwd());
+if (userPlugins.length > 0) {
+	console.log(`🔌 Plugins: ${userPlugins.map((p) => p.name).join(", ")}`);
+}
+
+const buildCtx: BuildContext = {
+	mode: isProduction ? "production" : "development",
+	cwd: process.cwd(),
+};
+
+for (const p of userPlugins) {
+	if (p.build?.preBuild) {
+		await p.build.preBuild(buildCtx);
+	}
+}
+
+// 0a. Load .env files (before cleaning .bosia so loadEnv can set process.env early)
 const envMode = isProduction ? "production" : "development";
 const envVars = loadEnv(envMode);
 const classifiedEnv = classifyEnvVars(envVars);
@@ -36,6 +55,7 @@ try {
 
 // 1. Scan routes
 const manifest = scanRoutes();
+buildCtx.manifest = manifest;
 console.log(`📂 Found ${manifest.pages.length} page route(s):`);
 for (const r of manifest.pages) {
 	console.log(`   ${r.pattern} → ${r.page}${r.pageServer ? " (server)" : ""}`);
@@ -44,6 +64,12 @@ if (manifest.apis.length > 0) {
 	console.log(`📡 Found ${manifest.apis.length} API route(s):`);
 	for (const r of manifest.apis) {
 		console.log(`   ${r.pattern} → ${r.server}`);
+	}
+}
+
+for (const p of userPlugins) {
+	if (p.build?.postScan) {
+		await p.build.postScan(manifest, buildCtx);
 	}
 }
 
@@ -82,6 +108,10 @@ const tailwindPromise = tailwindProc.exited;
 const clientPlugin = makeBosiaPlugin("browser");
 const serverPlugin = makeBosiaPlugin("bun");
 
+// Collect Bun build plugins contributed by user plugins, per target.
+const userClientBunPlugins = userPlugins.flatMap((p) => p.build?.bunPlugins?.("browser") ?? []);
+const userServerBunPlugins = userPlugins.flatMap((p) => p.build?.bunPlugins?.("bun") ?? []);
+
 // Build-time defines: inline PUBLIC_STATIC_* and STATIC_* vars
 const staticDefines: Record<string, string> = {};
 for (const [key, value] of Object.entries(classifiedEnv.publicStatic)) {
@@ -104,7 +134,7 @@ const clientPromise = Bun.build({
 		"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
 		...staticDefines,
 	},
-	plugins: [clientPlugin, SveltePlugin()],
+	plugins: [clientPlugin, ...userClientBunPlugins, SveltePlugin()],
 });
 
 const serverPromise = Bun.build({
@@ -115,7 +145,7 @@ const serverPromise = Bun.build({
 	naming: { entry: "index.[ext]", chunk: "[name]-[hash].[ext]" },
 	minify: isProduction,
 	external: ["elysia"],
-	plugins: [serverPlugin, SveltePlugin()],
+	plugins: [serverPlugin, ...userServerBunPlugins, SveltePlugin()],
 });
 
 const [tailwindExitCode, clientResult, serverResult] = await Promise.all([
@@ -174,10 +204,19 @@ writeFileSync("./dist/manifest.json", JSON.stringify(distManifest, null, 2));
 console.log(`✅ Client bundle: ${jsFiles.join(", ")}`);
 console.log(`✅ Server entry:  dist/server/${serverEntry}`);
 
+// 8b. Persist route manifest for runtime plugins (backend.after consumers like OpenAPI).
+writeFileSync("./dist/route-manifest.json", JSON.stringify(manifest, null, 2));
+
 // 9. Prerender static routes
 await prerenderStaticRoutes(manifest);
 
 // 10. Generate static site output (HTML + client assets + public → dist/static/)
 generateStaticSite();
+
+for (const p of userPlugins) {
+	if (p.build?.postBuild) {
+		await p.build.postBuild(buildCtx);
+	}
+}
 
 console.log(`\n🎉 Build complete in ${Math.round(performance.now() - buildStart)}ms!`);

@@ -15,6 +15,32 @@ import {
 	isDev,
 } from "./html.ts";
 import type { Metadata } from "./hooks.ts";
+import { loadPlugins } from "./config.ts";
+import type { BosiaPlugin, RenderContext } from "./types/plugin.ts";
+
+// Plugins are loaded once per process at module init via top-level await elsewhere
+// (server.ts), but renderer is also reachable from build/prerender contexts where
+// loadPlugins() may not have been called yet. The function is cached, so awaiting
+// per request is cheap (Map hit on second call).
+async function pluginRenderFragments(
+	hook: "head" | "bodyEnd",
+	ctx: RenderContext,
+): Promise<string[]> {
+	const plugins = await loadPlugins();
+	const out: string[] = [];
+	for (const p of plugins as BosiaPlugin[]) {
+		const fn = p.render?.[hook];
+		if (!fn) continue;
+		try {
+			const fragment = await fn(ctx);
+			if (fragment) out.push(fragment);
+		} catch (err) {
+			if (isDev) console.error(`Plugin "${p.name}" render.${hook} failed:`, err);
+			else console.error(`Plugin "${p.name}" render.${hook} failed:`, (err as Error).message);
+		}
+	}
+	return out;
+}
 
 // ─── Timeout Helpers ─────────────────────────────────────
 
@@ -326,6 +352,16 @@ export async function renderSSRStream(
 	if (!data) return renderErrorPage(404, "Not Found", url, req);
 
 	const enc = new TextEncoder();
+	const renderCtx: RenderContext = {
+		request: req,
+		url,
+		route: { pattern: route.pattern },
+		metadata,
+	};
+	const [headExtras, bodyEndExtras] = await Promise.all([
+		pluginRenderFragments("head", renderCtx),
+		pluginRenderFragments("bodyEnd", renderCtx),
+	]);
 
 	// ssr=false → no render() needed; ship shell + hydration as a single response.
 	// ssr=false && csr=false is meaningless (nothing renders) — force csr=true.
@@ -337,8 +373,8 @@ export async function renderSSRStream(
 		}
 		const html =
 			buildHtmlShellOpen(metadata?.lang) +
-			buildMetadataChunk(metadata) +
-			buildHtmlTail("", "", data.pageData, data.layoutData, true, null, false);
+			buildMetadataChunk(metadata, headExtras) +
+			buildHtmlTail("", "", data.pageData, data.layoutData, true, null, false, bodyEndExtras);
 		return new Response(html, {
 			headers: { "Content-Type": "text/html; charset=utf-8" },
 		});
@@ -376,8 +412,19 @@ export async function renderSSRStream(
 	// Pre-compute all chunks; pull-based stream gives Bun native backpressure.
 	const chunks: Uint8Array[] = [
 		enc.encode(buildHtmlShellOpen(metadata?.lang)),
-		enc.encode(buildMetadataChunk(metadata)),
-		enc.encode(buildHtmlTail(body, head, data.pageData, data.layoutData, data.csr)),
+		enc.encode(buildMetadataChunk(metadata, headExtras)),
+		enc.encode(
+			buildHtmlTail(
+				body,
+				head,
+				data.pageData,
+				data.layoutData,
+				data.csr,
+				null,
+				true,
+				bodyEndExtras,
+			),
+		),
 	];
 
 	let i = 0;

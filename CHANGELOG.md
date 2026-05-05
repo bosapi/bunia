@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.0] - 2026-05-05
+
+### Added
+
+- Plugin system. Drop a `bosia.config.ts` at the project root and pass plugins to extend Bosia at the HTTP layer (Elysia before/after), build pipeline (preBuild, postScan, bunPlugins, postBuild), and SSR render pipeline (head and bodyEnd fragments). Empty config or no config means zero overhead.
+- New first-party plugin `bosia/plugins/server-timing`. Adds a `Server-Timing` header to every response so you can see how long the framework spent on each request in browser DevTools.
+- `defineConfig` helper exported from `bosia` for type-safe `bosia.config.ts` files. New types: `BosiaPlugin`, `BosiaConfig`, `BuildContext`, `DevContext`, `RenderContext`.
+- Demo app now ships an example `bosia.config.ts` wired with the server-timing plugin.
+- New docs page: Plugins guide.
+
+### Changed
+
+- `server-timing` plugin's default metric name changed from `total` to `handler`. The previous label was misleading: streaming SSR responses flush headers before the body finishes, so the value never represented full end-to-end time — only the handler chain. The new name reflects what's actually measured. Pass `serverTiming({ metric: "..." })` to override.
+
+### Fixed
+
+- `bosia.config.ts` loader now writes its compiled output inside the project's `.bosia/` directory instead of `/tmp`, so bare-specifier imports like `bosia/plugins/server-timing` resolve correctly via the project's `node_modules`.
+
+---
+
 ## [0.3.4] - 2026-05-04
 
 ### Added
