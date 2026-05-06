@@ -72,7 +72,8 @@ export async function loadBosiaConfig(cwd: string = process.cwd()): Promise<Bosi
 		);
 	}
 
-	const plugins = Array.isArray(config.plugins) ? config.plugins : [];
+	const rawPlugins = Array.isArray(config.plugins) ? config.plugins : [];
+	const plugins = rawPlugins.filter((p): p is BosiaPlugin => Boolean(p));
 	const normalized: BosiaConfig = { plugins };
 
 	cached = normalized;
@@ -89,5 +90,5 @@ export function resetConfigCache(): void {
 /** Convenience: load and return only the plugin list. */
 export async function loadPlugins(cwd?: string): Promise<BosiaPlugin[]> {
 	const config = await loadBosiaConfig(cwd);
-	return config.plugins ?? [];
+	return (config.plugins ?? []).filter((p): p is BosiaPlugin => Boolean(p));
 }

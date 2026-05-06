@@ -72,7 +72,7 @@ export interface BosiaPlugin {
 }
 
 export interface BosiaConfig {
-	plugins?: BosiaPlugin[];
+	plugins?: (BosiaPlugin | false | null | undefined)[];
 }
 
 /** Identity helper for type inference in `bosia.config.ts`. */

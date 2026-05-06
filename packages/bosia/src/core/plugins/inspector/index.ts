@@ -22,8 +22,8 @@ function buildEditorArgs(editor: string, file: string, line: number, col: number
  * to its source in your editor, or open a comment form that hands off to an
  * AI agent. Dev-only: production builds inject nothing and mount no endpoint.
  */
-export function inspector(options: InspectorOptions = {}): BosiaPlugin {
-	const isDev = process.env.NODE_ENV !== "production";
+export function inspector(options: InspectorOptions = {}): BosiaPlugin | false {
+	if (process.env.NODE_ENV === "production") return false;
 	const editor = options.editor ?? "code";
 	const endpoint = options.endpoint ?? "/__bosia/locate";
 	const aiEndpoint = options.aiEndpoint;
@@ -32,15 +32,13 @@ export function inspector(options: InspectorOptions = {}): BosiaPlugin {
 		name: "inspector",
 
 		build: {
-			bunPlugins: (target) => {
-				if (!isDev) return [];
-				return [createInspectorBunPlugin({ cwd: process.cwd(), target, dev: true })];
-			},
+			bunPlugins: (target) => [
+				createInspectorBunPlugin({ cwd: process.cwd(), target, dev: true }),
+			],
 		},
 
 		backend: {
 			before(app) {
-				if (!isDev) return app;
 				return app.post(endpoint, async ({ body }: { body: unknown }) => {
 					const data = (body ?? {}) as {
 						file?: string;
@@ -116,7 +114,7 @@ export function inspector(options: InspectorOptions = {}): BosiaPlugin {
 		},
 
 		render: {
-			bodyEnd: () => (isDev ? getOverlayScript({ aiEndpoint, endpoint }) : ""),
+			bodyEnd: () => getOverlayScript({ aiEndpoint, endpoint }),
 		},
 	};
 }
