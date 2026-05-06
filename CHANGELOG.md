@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.1] - 2026-05-06
+
+### Added
+
+- New first-party plugin `bosia/plugins/inspector`. While running `bun run dev`, hold the Option (Alt) key and any element on the page lights up showing where in your code it lives. Click an element and the right `.svelte` file opens in your editor at the exact line — no more hunting through folders. Optionally, point it at an AI endpoint and the click opens a small comment box so you can describe a fix and hand the location plus your note off to your coding agent. Production builds are completely untouched: no attributes baked in, no overlay script, no extra endpoint.
+
+---
+
 ## [0.4.0] - 2026-05-05
 
 ### Added

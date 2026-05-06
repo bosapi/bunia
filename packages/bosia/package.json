@@ -1,6 +1,6 @@
 {
 	"name": "bosia",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"type": "module",
 	"description": "A fast, batteries-included fullstack framework — SSR · Svelte 5 Runes · Bun · ElysiaJS. File-based routing inspired by SvelteKit. No Node.js, no Vite, no adapters.",
 	"keywords": [
@@ -33,7 +33,8 @@
 	"exports": {
 		".": "./src/lib/index.ts",
 		"./client": "./src/lib/client.ts",
-		"./plugins/server-timing": "./src/core/plugins/server-timing.ts"
+		"./plugins/server-timing": "./src/core/plugins/server-timing.ts",
+		"./plugins/inspector": "./src/core/plugins/inspector/index.ts"
 	},
 	"bin": {
 		"bosia": "src/cli/index.ts"
@@ -52,6 +53,7 @@
 		"@tailwindcss/cli": "^4.2.1",
 		"bun-plugin-svelte": "^0.0.6",
 		"elysia": "^1.4.26",
+		"magic-string": "^0.30.0",
 		"svelte": "^5.53.6",
 		"tailwind-merge": "^3.5.0",
 		"tailwindcss": "^4.2.1"

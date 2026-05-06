@@ -380,28 +380,28 @@
 
 ---
 
-## v0.4.3 — Inspector Plugin
+## v0.4.1 — Inspector Plugin ✅ (shipped 2026-05-06)
 
 > Click element in browser → open exact source file:line in editor / hand off to AI agent. No Vite, no React-style fiber tree — does it via compile-time attribute injection.
 
 ### Compile-Time
 
-- [ ] 🟠 `bosia/plugins/inspector` first-party plugin (dev-only)
-- [ ] 🟠 Contributes Bun plugin via `build.bunPlugins("browser")` — runs before `SveltePlugin()` in `build.ts:107`
-- [ ] 🟠 Parses `.svelte` source with `svelte/compiler` `parse()`, walks `RegularElement` nodes, injects `data-bosia-loc="<relpath>:<line>:<col>"` via `magic-string` (preserves source maps)
-- [ ] 🟡 Skips `<svelte:*>` and component (capitalized) tags
-- [ ] 🟡 Strips attribute from production builds (no-op when not dev)
+- [x] 🟠 `bosia/plugins/inspector` first-party plugin (dev-only)
+- [x] 🟠 Contributes Bun plugin via `build.bunPlugins()` — runs before `SveltePlugin()` and replaces its `.svelte` `onLoad` with an injecting variant
+- [x] 🟠 Parses `.svelte` source with `svelte/compiler` `parse()`, walks `RegularElement` nodes, injects `data-bosia-loc="<relpath>:<line>:<col>"` via `magic-string` (preserves source maps)
+- [x] 🟡 Skips `<svelte:*>` and component (capitalized) tags
+- [x] 🟡 Strips attribute from production builds (no-op when not dev)
 
 ### Runtime Overlay
 
-- [ ] 🟠 Dev-only client overlay injected via `render.bodyEnd` — alt+hover highlights element, alt+click captures `data-bosia-loc`
-- [ ] 🟠 `POST /__bosia/locate` endpoint (mounted via `backend.before`) — receives `{ file, line, col }`, copies to clipboard or opens editor
-- [ ] 🟡 Editor integration — `code -g file:line` (configurable via `inspector({ editor: "code" | "cursor" | "zed" })`)
-- [ ] 🟡 Toast feedback — overlay shows "copied <file>:<line>" on click
+- [x] 🟠 Dev-only client overlay injected via `render.bodyEnd` — alt+hover highlights element, alt+click captures `data-bosia-loc`
+- [x] 🟠 `POST /__bosia/locate` endpoint (mounted via `backend.before`) — receives `{ file, line, col }`, opens editor (or POSTs to `aiEndpoint` with comment)
+- [x] 🟡 Editor integration — `code -g file:line` (configurable via `inspector({ editor: "code" | "cursor" | "zed" })`)
+- [x] 🟡 Toast feedback — overlay shows "opened <file>:<line>" on click
 
 ### Docs
 
-- [ ] 🟡 `docs/src/content/docs/inspector.md` — usage + AI-agent workflow
+- [x] 🟡 `docs/content/docs/guides/inspector.md` — usage + AI-agent workflow
 
 ---
 
