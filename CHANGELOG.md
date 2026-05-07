@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.2] - 2026-05-07
+
+### Fixed
+
+- Newly created projects (`bun x bosia@latest create`) now ship with a working `.gitignore`. npm strips files named `.gitignore` from published packages, so the template was arriving without one — meaning `node_modules`, `dist`, `.bosia`, and your local `.env` were not ignored out of the box. The template now ships the file as `_gitignore` and the create command restores the proper dotfile name when scaffolding.
+- `bun run check` now passes on a freshly created project. The generated Tailwind output (`public/bosia-tw.css`) was being picked up by Prettier and reported as a formatting issue. It is now ignored by both Prettier and Git as a build artifact.
+
+---
+
 ## [0.4.1] - 2026-05-06
 
 ### Added

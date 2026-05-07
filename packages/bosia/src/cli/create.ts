@@ -148,7 +148,10 @@ function copyDir(src: string, dest: string, projectName: string, isLocal: boolea
 	mkdirSync(dest, { recursive: true });
 	for (const entry of readdirSync(src, { withFileTypes: true })) {
 		const srcPath = join(src, entry.name);
-		const destPath = join(dest, entry.name);
+		// npm pack strips `.gitignore` from published packages, so templates ship
+		// it as `_gitignore` and we restore the dotfile name on copy.
+		const destName = entry.name === "_gitignore" ? ".gitignore" : entry.name;
+		const destPath = join(dest, destName);
 
 		// Do not copy instructions.txt or template.json to the final project
 		if (entry.name === "instructions.txt" || entry.name === "template.json") continue;

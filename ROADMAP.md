@@ -1,7 +1,7 @@
 # Bosia — Roadmap
 
 > Track what's done, what's next, and where we're headed.
-> Current version: **0.4.0**
+> Current version: **0.4.2**
 
 ---
 
@@ -402,6 +402,15 @@
 ### Docs
 
 - [x] 🟡 `docs/content/docs/guides/inspector.md` — usage + AI-agent workflow
+
+---
+
+## v0.4.2 — Template fixes ✅ (shipped 2026-05-07)
+
+> Make a freshly scaffolded project pass `bun run check` out of the box.
+
+- [x] 🟠 Ship `.gitignore` with `bun x bosia create` — npm pack strips `.gitignore`, so templates store it as `_gitignore` and `copyDir` restores the dotfile name on copy
+- [x] 🟡 Ignore generated Tailwind output `public/bosia-tw.css` in template `.prettierignore` and `.gitignore` (default, demo, todo) so `bun run check` succeeds on a clean scaffold
 
 ---
 
