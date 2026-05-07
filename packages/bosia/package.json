@@ -41,6 +41,7 @@
 	},
 	"scripts": {
 		"check": "tsc --noEmit && prettier --check .",
+		"check:templates": "bun scripts/check-templates.ts",
 		"test": "bun test",
 		"test:watch": "bun test --watch"
 	},
